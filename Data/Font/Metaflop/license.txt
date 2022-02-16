@@ -1,3 +1,11 @@
+dtchessfont.otf, dtchessfont.ttf, and dtchessfont.woff are licensed under the SIL Open Font License, Version 1.1.
+Dtsudo created this font as a modified version of Fetamont.
+
+Fetamont.otf, Fetamont.ttf, and Fetamont.woff are licensed under the SIL Open Font License, Version 1.1.
+The copyright and license text for Fetamont is below.
+
+-----------------------------------------------------------
+
 Copyright (c), Metaflop (http://www.metaflop.com),
 Copyright (c), Simon Egli,
 Copyright (c), Marco Mueller,

@@ -13,6 +13,11 @@ namespace ChessCompStompWithHacksLibrary
 		Gear,
 		GearHover,
 		GearSelected,
+		Cross,
+		CrossHover,
+		CrossSelected,
+		Down,
+		Up,
 
 		BlackPawn,
 		BlackRook,
@@ -83,6 +88,13 @@ namespace ChessCompStompWithHacksLibrary
 				case ChessImage.Gear: return "Kenney/Gear.png";
 				case ChessImage.GearHover: return "Kenney/Gear_Hover.png";
 				case ChessImage.GearSelected: return "Kenney/Gear_Selected.png";
+
+				case ChessImage.Cross: return "Kenney/cross.png";
+				case ChessImage.CrossHover: return "Kenney/cross_Hover.png";
+				case ChessImage.CrossSelected: return "Kenney/cross_Selected.png";
+
+				case ChessImage.Down: return "Kenney/down.png";
+				case ChessImage.Up: return "Kenney/up.png";
 
 				case ChessImage.BlackPawn: return "Cburnett/BlackPawn.png";
 				case ChessImage.BlackRook: return "Cburnett/BlackRook.png";

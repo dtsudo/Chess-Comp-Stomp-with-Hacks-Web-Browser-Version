@@ -6,6 +6,21 @@ namespace ChessCompStompWithHacksEngine
 
 	public class CheckKingUnderAttack
 	{
+		public static ChessSquare FindLocationOfKing(ChessSquarePieceArray board, bool findWhiteKing)
+		{
+			for (int i = 0; i < 8; i++)
+			{
+				for (int j = 0; j < 8; j++)
+				{
+					ChessSquarePiece piece = board.GetPiece(file: i, rank: j);
+					if (piece != ChessSquarePiece.Empty && piece.IsKing() && piece.IsWhite() == findWhiteKing)
+						return new ChessSquare(file: i, rank: j);
+				}
+			}
+
+			throw new Exception();
+		}
+
 		/// <summary>
 		/// Note that this method is used (in part) to determine whether a move is legal.
 		/// So the board input may represent an invalid board position; e.g. maybe both

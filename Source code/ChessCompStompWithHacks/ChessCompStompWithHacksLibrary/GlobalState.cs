@@ -13,10 +13,11 @@ namespace ChessCompStompWithHacksLibrary
 			GuidGenerator guidGenerator,
 			IDTLogger logger,
 			ITimer timer,
+			IFileIO fileIO,
 			bool isWebBrowserVersion,
 			bool debugMode,
-			int? initialMusicVolume,
-			bool showSoundAndMusicVolumePicker)
+			bool useDebugAI,
+			int? initialMusicVolume)
 		{
 			this.Fps = fps;
 			this.Rng = rng;
@@ -33,7 +34,9 @@ namespace ChessCompStompWithHacksLibrary
 			this.MusicPlayer = new MusicPlayer(elapsedMicrosPerFrame: elapsedMicrosPerFrame);
 			this.ElapsedMicrosPerFrame = elapsedMicrosPerFrame;
 
-			this.ShowSoundAndMusicVolumePicker = showSoundAndMusicVolumePicker;
+			this.saveAndLoadData = new SaveAndLoadData(fileIO: fileIO);
+
+			this.UseDebugAI = useDebugAI;
 		}
 
 		public int Fps { get; private set; }
@@ -43,7 +46,10 @@ namespace ChessCompStompWithHacksLibrary
 		public ITimer Timer { get; private set; }
 		public bool IsWebBrowserVersion { get; private set; }
 		public bool DebugMode { get; private set; }
-		public bool ShowSoundAndMusicVolumePicker { get; private set; }
+
+		private SaveAndLoadData saveAndLoadData;
+
+		public bool UseDebugAI { get; set; }
 
 		private int desiredMusicVolume;
 		private int currentMusicVolume;
@@ -69,6 +75,29 @@ namespace ChessCompStompWithHacksLibrary
 		public void RenderMusic(IMusicOutput<ChessMusic> musicOutput)
 		{
 			this.MusicPlayer.RenderMusic(musicOutput: musicOutput, userVolume: this.currentMusicVolume);
+		}
+
+		public void SaveData(SessionState sessionState, int soundVolume)
+		{
+			this.saveAndLoadData.SaveData(sessionState: sessionState, soundVolume: soundVolume, musicVolume: this.desiredMusicVolume);
+		}
+
+		public void LoadSessionState(SessionState sessionState)
+		{
+			this.saveAndLoadData.LoadSessionState(sessionState: sessionState);
+		}
+
+		public int? LoadSoundVolume()
+		{
+			return this.saveAndLoadData.LoadSoundVolume();
+		}
+
+		public void LoadMusicVolume()
+		{
+			int? musicVolume = this.saveAndLoadData.LoadMusicVolume();
+
+			if (musicVolume.HasValue)
+				this.desiredMusicVolume = musicVolume.Value;
 		}
 	}
 }

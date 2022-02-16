@@ -22,6 +22,8 @@ namespace ChessCompStompWithHacksLibrary
 		private bool isHover;
 		private bool isClicked;
 
+		private IMouse previousMouseInput;
+
 		public Button(
 			int x,
 			int y,
@@ -49,6 +51,8 @@ namespace ChessCompStompWithHacksLibrary
 
 			this.isHover = false;
 			this.isClicked = false;
+
+			this.previousMouseInput = null;
 		}
 
 		public bool IsHover(IMouse mouseInput)
@@ -65,6 +69,11 @@ namespace ChessCompStompWithHacksLibrary
 			IMouse mouseInput,
 			IMouse previousMouseInput)
 		{
+			if (this.previousMouseInput != null)
+				previousMouseInput = this.previousMouseInput;
+
+			this.previousMouseInput = new CopiedMouse(mouse: mouseInput);
+
 			bool inRange = this.IsHover(mouseInput);
 
 			this.isHover = inRange;

@@ -53,6 +53,8 @@ namespace ChessCompStompWithHacksLibrary
 		private ChessSquare nukeCenter;
 		private DTImmutableList<ChessSquare> nukedSquares;
 
+		private ColorTheme colorTheme;
+
 		private const int NUKE_BEGIN_LANDING_MICROSECONDS = 1000 * 1000;
 		private const int NUKE_IMPACT_MICROSECONDS = 1300 * 1000;
 		private const int NUKE_EXPLOSION_FINISHED_MICROSECONDS = 1600 * 1000;
@@ -70,7 +72,8 @@ namespace ChessCompStompWithHacksLibrary
 			bool renderFromWhitePerspective,
 			int? nukeAnimationMicroseconds,
 			ChessSquare nukeCenter,
-			DTImmutableList<ChessSquare> nukedSquares)
+			DTImmutableList<ChessSquare> nukedSquares,
+			ColorTheme colorTheme)
 		{
 			this.pieces = pieces;
 			this.kingInDangerSquare = kingInDangerSquare;
@@ -84,13 +87,15 @@ namespace ChessCompStompWithHacksLibrary
 			this.nukeAnimationMicroseconds = nukeAnimationMicroseconds;
 			this.nukeCenter = nukeCenter;
 			this.nukedSquares = nukedSquares;
+			this.colorTheme = colorTheme;
 		}
 
 		public static ChessPiecesRenderer GetChessPiecesRenderer(
 			ChessSquarePieceArray pieces,
 			ChessSquare kingInDangerSquare,
 			DTImmutableList<ChessSquare> previousMoveSquares,
-			bool renderFromWhitePerspective)
+			bool renderFromWhitePerspective,
+			ColorTheme colorTheme)
 		{
 			return new ChessPiecesRenderer(
 				pieces: pieces,
@@ -104,7 +109,8 @@ namespace ChessCompStompWithHacksLibrary
 				renderFromWhitePerspective: renderFromWhitePerspective,
 				nukeAnimationMicroseconds: null,
 				nukeCenter: null,
-				nukedSquares: null);
+				nukedSquares: null,
+				colorTheme: colorTheme);
 		}
 
 		public ChessPiecesRenderer LandNuke(ChessSquare nukeCenter)
@@ -123,7 +129,8 @@ namespace ChessCompStompWithHacksLibrary
 				renderFromWhitePerspective: this.renderFromWhitePerspective,
 				nukeAnimationMicroseconds: 0,
 				nukeCenter: nukeCenter,
-				nukedSquares: new DTImmutableList<ChessSquare>(nukedSquares));
+				nukedSquares: new DTImmutableList<ChessSquare>(nukedSquares),
+				colorTheme: this.colorTheme);
 		}
 		
 		public ChessPiecesRenderer ProcessFrame(
@@ -158,7 +165,8 @@ namespace ChessCompStompWithHacksLibrary
 				renderFromWhitePerspective: this.renderFromWhitePerspective,
 				nukeAnimationMicroseconds: newNukeAnimationMicroseconds,
 				nukeCenter: this.nukeCenter,
-				nukedSquares: this.nukedSquares);
+				nukedSquares: this.nukedSquares,
+				colorTheme: this.colorTheme);
 		}
 
 		public bool HasNukeLanded()
@@ -212,10 +220,52 @@ namespace ChessCompStompWithHacksLibrary
 			return GetRenderSquare(i: square.File, j: square.Rank, renderFromWhitePerspective: renderFromWhitePerspective);
 		}
 
-		public void Render(IDisplayOutput<ChessImage, ChessFont> displayOutput)
+		public static DTColor GetDarkSquareColor(ColorTheme colorTheme)
+		{
+			switch (colorTheme)
+			{
+				case ColorTheme.Initial: return new DTColor(140, 89, 11);
+				case ColorTheme.Progress1: return new DTColor(140, 80, 11);
+				case ColorTheme.Progress2: return new DTColor(140, 71, 11);
+				case ColorTheme.Progress3: return new DTColor(140, 63, 11);
+				case ColorTheme.Final: return new DTColor(140, 54, 11);
+				default: throw new Exception();
+			}
+		}
+
+		public static DTColor GetLightSquareColor(ColorTheme colorTheme)
+		{
+			switch (colorTheme)
+			{
+				case ColorTheme.Initial: return new DTColor(194, 146, 74);
+				case ColorTheme.Progress1: return new DTColor(194, 138, 74);
+				case ColorTheme.Progress2: return new DTColor(194, 130, 74);
+				case ColorTheme.Progress3: return new DTColor(194, 122, 74);
+				case ColorTheme.Final: return new DTColor(194, 114, 74);
+				default: throw new Exception();
+			}
+		}
+
+		private static DTColor GetPossibleMoveSquareColor(ColorTheme colorTheme)
+		{
+			switch (colorTheme)
+			{
+				case ColorTheme.Initial: return new DTColor(0, 128, 0);
+				case ColorTheme.Progress1: return new DTColor(0, 128, 0);
+				case ColorTheme.Progress2: return new DTColor(226, 255, 94);
+				case ColorTheme.Progress3: return new DTColor(226, 255, 94);
+				case ColorTheme.Final: return new DTColor(226, 255, 94);
+				default: throw new Exception();
+			}
+		}
+
+		public void Render(IDisplayOutput<ChessImage, ChessFont> displayOutput, ChessPiecesRendererPieceAnimation chessPiecesRendererPieceAnimation)
 		{
 			int width = displayOutput.GetWidth(ChessImage.WhitePawn) * ChessImageUtil.ChessPieceScalingFactor / 128;
 			int height = displayOutput.GetHeight(ChessImage.WhitePawn) * ChessImageUtil.ChessPieceScalingFactor / 128;
+
+			DTColor darkSquareColor = GetDarkSquareColor(colorTheme: this.colorTheme);
+			DTColor lightSquareColor = GetLightSquareColor(colorTheme: this.colorTheme);
 
 			for (int i = 0; i < 8; i++)
 			{
@@ -228,7 +278,7 @@ namespace ChessCompStompWithHacksLibrary
 						y: renderSquare.Rank * height,
 						width: width,
 						height: height,
-						color: (i + j) % 2 == 0 ? new DTColor(140, 89, 11) : new DTColor(194, 146, 74),
+						color: (i + j) % 2 == 0 ? darkSquareColor : lightSquareColor,
 						fill: true);
 				}
 			}
@@ -242,10 +292,10 @@ namespace ChessCompStompWithHacksLibrary
 					y: renderSquare.Rank * height,
 					width: width,
 					height: height,
-					color: new DTColor(128, 128, 128, 128),
+					color: (previousMoveSquare.File + previousMoveSquare.Rank) % 2 == 0 ? new DTColor(134, 109, 70) : new DTColor(161, 137, 101),
 					fill: true);
 			}
-
+			
 			if (this.kingInDangerSquare != null)
 			{
 				ChessSquare renderSquare = GetRenderSquare(square: this.kingInDangerSquare, renderFromWhitePerspective: this.renderFromWhitePerspective);
@@ -254,18 +304,25 @@ namespace ChessCompStompWithHacksLibrary
 					y: renderSquare.Rank * height,
 					width: width,
 					height: height,
-					color: new DTColor(255, 0, 0, 128),
+					color: (this.kingInDangerSquare.File + this.kingInDangerSquare.Rank) % 2 == 0 ? new DTColor(198, 44, 5) : new DTColor(225, 73, 37),
 					fill: true);
 			}
-			
+
+			ChessPiecesRendererPieceAnimation.PieceAnimation[][] pieceAnimations = chessPiecesRendererPieceAnimation.GetPieceAnimations();
+
 			for (int i = 0; i < 8; i++)
 			{
 				for (int j = 0; j < 8; j++)
 				{
+					if (pieceAnimations[i][j] != null)
+					{
+						continue;
+					}
+
 					ChessSquarePiece square = this.pieces.GetPiece(i, j);
 
 					ChessSquare renderSquare = GetRenderSquare(i: i, j: j, renderFromWhitePerspective: this.renderFromWhitePerspective);
-					
+
 					if (square == ChessSquarePiece.Empty)
 						continue;
 
@@ -277,7 +334,37 @@ namespace ChessCompStompWithHacksLibrary
 						scalingFactorScaled: ChessImageUtil.ChessPieceScalingFactor);
 				}
 			}
-			
+
+			for (int i = 0; i < 8; i++)
+			{
+				for (int j = 0; j < 8; j++)
+				{
+					if (pieceAnimations[i][j] == null)
+					{
+						continue;
+					}
+
+					ChessSquare originRenderSquare = GetRenderSquare(square: pieceAnimations[i][j].OriginSquare, renderFromWhitePerspective: this.renderFromWhitePerspective);
+					ChessSquare destinationRenderSquare = GetRenderSquare(i: i, j: j, renderFromWhitePerspective: this.renderFromWhitePerspective);
+
+					long originX = originRenderSquare.File * width;
+					long originY = originRenderSquare.Rank * height;
+
+					long destinationX = destinationRenderSquare.File * width;
+					long destinationY = destinationRenderSquare.Rank * height;
+
+					int renderX = (int) (originX + (destinationX - originX) * ((long)pieceAnimations[i][j].ElapsedMicros) / ((long)ChessPiecesRendererPieceAnimation.PieceAnimation.ANIMATION_DURATION_MICROS));
+					int renderY = (int) (originY + (destinationY - originY) * ((long)pieceAnimations[i][j].ElapsedMicros) / ((long)ChessPiecesRendererPieceAnimation.PieceAnimation.ANIMATION_DURATION_MICROS));
+
+					displayOutput.DrawImageRotatedClockwise(
+						image: ChessImageUtil.GetImage(piece: pieceAnimations[i][j].Piece),
+						x: renderX,
+						y: renderY,
+						degreesScaled: 0,
+						scalingFactorScaled: ChessImageUtil.ChessPieceScalingFactor);
+				}
+			}
+
 			if (this.selectedPieceSquare != null)
 			{
 				ChessSquare renderSquare = GetRenderSquare(square: this.selectedPieceSquare, renderFromWhitePerspective: this.renderFromWhitePerspective);
@@ -290,18 +377,25 @@ namespace ChessCompStompWithHacksLibrary
 					fill: true);
 			}
 
+			DTColor possibleMoveSquareColor = GetPossibleMoveSquareColor(colorTheme: this.colorTheme);
 			for (int i = 0; i < this.possibleMoveSquares.Count; i++)
 			{
 				ChessSquare possibleMoveSquare = this.possibleMoveSquares[i];
 				ChessSquare renderSquare = GetRenderSquare(square: possibleMoveSquare, renderFromWhitePerspective: this.renderFromWhitePerspective);
-				displayOutput.DrawThickRectangle(
-					x: renderSquare.File * width,
-					y: renderSquare.Rank * height,
-					width: width,
-					height: height,
-					additionalThickness: 1,
-					color: new DTColor(0, 128, 0, 128),
-					fill: false);
+				for (int x = 0; x < 7; x++)
+				{
+					int rectangleWidth = width + 1 - 2 * x;
+					int rectangleHeight = height + 1 - 2 * x;
+
+					if (rectangleWidth > 0 && rectangleHeight > 0)
+						displayOutput.DrawRectangle(
+							x: renderSquare.File * width + x,
+							y: renderSquare.Rank * height + x,
+							width: rectangleWidth,
+							height: rectangleHeight,
+							color: new DTColor(possibleMoveSquareColor.R, possibleMoveSquareColor.G, possibleMoveSquareColor.B, 128 - 20 * x),
+							fill: false);
+				}
 			}
 
 			if (this.hoverSquare != null)

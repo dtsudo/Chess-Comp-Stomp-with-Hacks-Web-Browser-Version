@@ -71,12 +71,12 @@ namespace ChessCompStompWithHacksLibrary
 				width: buttonWidth,
 				height: 40,
 				backgroundColor: new DTColor(200, 200, 200),
-				hoverColor: new DTColor(250, 249, 200),
-				clickColor: new DTColor(252, 251, 154),
+				hoverColor: ColorThemeUtil.GetHoverColor(colorTheme: sessionState.GetColorTheme()),
+				clickColor: ColorThemeUtil.GetClickColor(colorTheme: sessionState.GetColorTheme()),
 				text: "OK",
 				textXOffset: 57,
 				textYOffset: 8,
-				font: ChessFont.Fetamont20Pt);
+				font: ChessFont.ChessFont20Pt);
 		}
 
 		public void ProcessExtraTime(int milliseconds)
@@ -92,12 +92,18 @@ namespace ChessCompStompWithHacksLibrary
 			ISoundOutput<ChessSound> soundOutput,
 			IMusicProcessing musicProcessing)
 		{
+			ChessMusic music = ChessMusicUtil.GetChessMusic(colorTheme: this.sessionState.GetColorTheme());
+			this.globalState.MusicPlayer.SetMusic(music: music, volume: 100);
+
 			bool isConfirmClicked = this.confirmButton.ProcessFrame(
 				mouseInput: mouseInput,
 				previousMouseInput: previousMouseInput);
-			
+
 			if (isConfirmClicked)
+			{
+				soundOutput.PlaySound(sound: ChessSound.Click);
 				return this.underlyingFrame;
+			}
 			
 			return this;
 		}
@@ -139,14 +145,14 @@ namespace ChessCompStompWithHacksLibrary
 				x: PANEL_X + 104,
 				y: PANEL_Y + 172,
 				text: "Message from the AI",
-				font: ChessFont.Fetamont20Pt,
+				font: ChessFont.ChessFont20Pt,
 				color: DTColor.Black());
 
 			displayOutput.DrawText(
 				x: PANEL_X + this.messageXOffset,
 				y: PANEL_Y + this.messageYOffset,
 				text: this.message,
-				font: ChessFont.Fetamont14Pt,
+				font: ChessFont.ChessFont14Pt,
 				color: DTColor.Black());
 
 			this.confirmButton.Render(displayOutput: displayOutput);

@@ -50,19 +50,24 @@ namespace ChessCompStompWithHacksLibrary
 		private MoveTracker moveTracker;
 		private List<HoverInfo> hoverInfos;
 
+		private ColorTheme colorTheme;
+
 		private const int HOVER_HIGHLIGHT_DURATION_MICROS = 1000 * 1000;
 
 		private MoveTrackerRenderer(
 			MoveTracker moveTracker,
-			List<HoverInfo> hoverInfos)
+			List<HoverInfo> hoverInfos,
+			ColorTheme colorTheme)
 		{
 			this.moveTracker = moveTracker;
 			this.hoverInfos = new List<HoverInfo>(hoverInfos);
+
+			this.colorTheme = colorTheme;
 		}
 
-		public static MoveTrackerRenderer GetMoveTrackerRenderer(MoveTracker moveTracker)
+		public static MoveTrackerRenderer GetMoveTrackerRenderer(MoveTracker moveTracker, ColorTheme colorTheme)
 		{
-			return new MoveTrackerRenderer(moveTracker: moveTracker, hoverInfos: new List<HoverInfo>());
+			return new MoveTrackerRenderer(moveTracker: moveTracker, hoverInfos: new List<HoverInfo>(), colorTheme: colorTheme);
 		}
 
 		public MoveTrackerRenderer ProcessFrame(
@@ -86,7 +91,8 @@ namespace ChessCompStompWithHacksLibrary
 
 			return new MoveTrackerRenderer(
 				moveTracker: moveTracker,
-				hoverInfos: newHoverInfos);
+				hoverInfos: newHoverInfos,
+				colorTheme: this.colorTheme);
 		}
 
 		/// <summary>
@@ -207,7 +213,7 @@ namespace ChessCompStompWithHacksLibrary
 					y: moveDisplay.Y,
 					width: MoveDisplay.WIDTH - 1,
 					height: MoveDisplay.HEIGHT - 1,
-					color: new DTColor(255, 245, 171),
+					color: ColorThemeUtil.GetTextBackgroundColor(colorTheme: this.colorTheme),
 					fill: true);
 				displayOutput.DrawRectangle(
 					x: moveDisplay.X,
@@ -241,7 +247,7 @@ namespace ChessCompStompWithHacksLibrary
 						x: moveDisplay.X + 2,
 						y: moveDisplay.Y + 28,
 						text: moveInfo.MoveName,
-						font: ChessFont.Fetamont14Pt,
+						font: ChessFont.ChessFont14Pt,
 						color: DTColor.Black());
 			}
 		}

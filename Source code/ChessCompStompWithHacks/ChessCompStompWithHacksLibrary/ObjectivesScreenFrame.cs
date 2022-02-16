@@ -10,8 +10,7 @@ namespace ChessCompStompWithHacksLibrary
 	{
 		private GlobalState globalState;
 		private SessionState sessionState;
-
-		private HashSet<Objective> completedObjectives;
+		
 		private bool hasUnlockedFinalObjective;
 
 		private SettingsIcon settingsIcon;
@@ -21,13 +20,18 @@ namespace ChessCompStompWithHacksLibrary
 		private Button startFinalBattleButton;
 		private Button startNonFinalBattleButton;
 
+		private ObjectivesScreenDisplay objectivesScreenDisplay;
+
 		public ObjectivesScreenFrame(GlobalState globalState, SessionState sessionState)
 		{
+			ObjectiveDisplay objectiveDisplay = new ObjectiveDisplay();
+
+			this.objectivesScreenDisplay = new ObjectivesScreenDisplay(sessionState: sessionState);
+
 			this.globalState = globalState;
 			this.sessionState = sessionState;
 			HashSet<Objective> completedObjectives = sessionState.GetCompletedObjectives();
-			this.completedObjectives = completedObjectives;
-			this.hasUnlockedFinalObjective = ObjectiveDisplay.HasUnlockedFinalObjective(completedObjectives: completedObjectives);
+			this.hasUnlockedFinalObjective = objectiveDisplay.HasUnlockedFinalObjective(completedObjectives: completedObjectives);
 
 			this.settingsIcon = new SettingsIcon();
 
@@ -37,12 +41,12 @@ namespace ChessCompStompWithHacksLibrary
 				width: 100,
 				height: 40,
 				backgroundColor: new DTColor(200, 200, 200),
-				hoverColor: new DTColor(250, 249, 200),
-				clickColor: new DTColor(252, 251, 154),
+				hoverColor: ColorThemeUtil.GetHoverColor(colorTheme: sessionState.GetColorTheme()),
+				clickColor: ColorThemeUtil.GetClickColor(colorTheme: sessionState.GetColorTheme()),
 				text: "Back",
 				textXOffset: 22,
 				textYOffset: 9,
-				font: ChessFont.Fetamont16Pt);
+				font: ChessFont.ChessFont16Pt);
 
 			this.startNextGameButton_finalBattleNotUnlocked = new Button(
 				x: 300,
@@ -50,12 +54,12 @@ namespace ChessCompStompWithHacksLibrary
 				width: 400,
 				height: 80,
 				backgroundColor: new DTColor(235, 235, 235),
-				hoverColor: new DTColor(250, 249, 200),
-				clickColor: new DTColor(252, 251, 154),
+				hoverColor: ColorThemeUtil.GetHoverColor(colorTheme: sessionState.GetColorTheme()),
+				clickColor: ColorThemeUtil.GetClickColor(colorTheme: sessionState.GetColorTheme()),
 				text: "Start next round",
 				textXOffset: 84,
 				textYOffset: 27,
-				font: ChessFont.Fetamont20Pt);
+				font: ChessFont.ChessFont20Pt);
 
 			this.startFinalBattleButton = new Button(
 				x: 300,
@@ -63,12 +67,12 @@ namespace ChessCompStompWithHacksLibrary
 				width: 400,
 				height: 80,
 				backgroundColor: new DTColor(235, 235, 235),
-				hoverColor: new DTColor(250, 249, 200),
-				clickColor: new DTColor(252, 251, 154),
+				hoverColor: ColorThemeUtil.GetHoverColor(colorTheme: sessionState.GetColorTheme()),
+				clickColor: ColorThemeUtil.GetClickColor(colorTheme: sessionState.GetColorTheme()),
 				text: "Start the Final Battle!",
 				textXOffset: 46,
 				textYOffset: 27,
-				font: ChessFont.Fetamont20Pt);
+				font: ChessFont.ChessFont20Pt);
 
 			this.startNonFinalBattleButton = new Button(
 				x: 300,
@@ -76,12 +80,12 @@ namespace ChessCompStompWithHacksLibrary
 				width: 400,
 				height: 31,
 				backgroundColor: new DTColor(200, 200, 200),
-				hoverColor: new DTColor(250, 249, 200),
-				clickColor: new DTColor(252, 251, 154),
+				hoverColor: ColorThemeUtil.GetHoverColor(colorTheme: sessionState.GetColorTheme()),
+				clickColor: ColorThemeUtil.GetClickColor(colorTheme: sessionState.GetColorTheme()),
 				text: "Start a regular game",
 				textXOffset: 83,
 				textYOffset: 7,
-				font: ChessFont.Fetamont16Pt);
+				font: ChessFont.ChessFont16Pt);
 		}
 
 		public void ProcessExtraTime(int milliseconds)
@@ -97,32 +101,50 @@ namespace ChessCompStompWithHacksLibrary
 			ISoundOutput<ChessSound> soundOutput,
 			IMusicProcessing musicProcessing)
 		{
-			bool clickedSettingsIcon = this.settingsIcon.ProcessFrame(mouseInput: mouseInput, previousMouseInput: previousMouseInput, ignoreMouse: false, displayProcessing: displayProcessing);
+			bool clickedSettingsIcon = this.settingsIcon.ProcessFrame(mouseInput: mouseInput, previousMouseInput: previousMouseInput, ignoreMouse: false, displayProcessing: displayProcessing).HasClicked;
 			if (clickedSettingsIcon)
+			{
+				soundOutput.PlaySound(ChessSound.Click);
 				return new SettingsMenuFrame(globalState: this.globalState, sessionState: this.sessionState, underlyingFrame: this, showPausedText: false);
-			
+			}
+
 			if (keyboardInput.IsPressed(Key.Esc) && !previousKeyboardInput.IsPressed(Key.Esc))
+			{
+				soundOutput.PlaySound(ChessSound.Click);
 				return new SettingsMenuFrame(globalState: this.globalState, sessionState: this.sessionState, underlyingFrame: this, showPausedText: false);
+			}
 
 			bool clickedBackButton = this.backToHackSelectionFrameButton.ProcessFrame(mouseInput: mouseInput, previousMouseInput: previousMouseInput);
 			if (clickedBackButton)
+			{
+				soundOutput.PlaySound(ChessSound.Click);
 				return new HackSelectionScreenFrame(globalState: this.globalState, sessionState: this.sessionState);
+			}
 
 			if (this.hasUnlockedFinalObjective)
 			{
 				bool clickedStartFinalBattleButton = this.startFinalBattleButton.ProcessFrame(mouseInput: mouseInput, previousMouseInput: previousMouseInput);
 				if (clickedStartFinalBattleButton)
+				{
+					soundOutput.PlaySound(ChessSound.Click);
 					return this.sessionState.StartGame(isFinalBattle: true, globalState: this.globalState);
+				}
 					
 				bool clickedStartNonFinalBattleButton = this.startNonFinalBattleButton.ProcessFrame(mouseInput: mouseInput, previousMouseInput: previousMouseInput);
 				if (clickedStartNonFinalBattleButton)
+				{
+					soundOutput.PlaySound(ChessSound.Click);
 					return this.sessionState.StartGame(isFinalBattle: false, globalState: this.globalState);
+				}
 			}
 			else
 			{
 				bool clickedStartGameButton = this.startNextGameButton_finalBattleNotUnlocked.ProcessFrame(mouseInput: mouseInput, previousMouseInput: previousMouseInput);
 				if (clickedStartGameButton)
+				{
+					soundOutput.PlaySound(ChessSound.Click);
 					return this.sessionState.StartGame(isFinalBattle: false, globalState: this.globalState);
+				}
 			}
 
 			return this;
@@ -143,13 +165,6 @@ namespace ChessCompStompWithHacksLibrary
 				color: new DTColor(223, 220, 217),
 				fill: true);
 
-			displayOutput.DrawText(
-				x: 389,
-				y: 675,
-				text: "Objectives",
-				font: ChessFont.Fetamont32Pt,
-				color: DTColor.Black());
-
 			this.settingsIcon.Render(displayOutput: displayOutput);
 
 			this.backToHackSelectionFrameButton.Render(displayOutput: displayOutput);
@@ -164,53 +179,7 @@ namespace ChessCompStompWithHacksLibrary
 				this.startNextGameButton_finalBattleNotUnlocked.Render(displayOutput: displayOutput);
 			}
 
-			ObjectiveDisplay.RenderNonFinalObjective(
-				x: 62,
-				y: 450,
-				objective: Objective.DefeatComputer,
-				completedObjectives: this.completedObjectives,
-				displayOutput: displayOutput);
-
-			ObjectiveDisplay.RenderNonFinalObjective(
-				x: 375,
-				y: 450,
-				objective: Objective.DefeatComputerByPlayingAtMost25Moves,
-				completedObjectives: this.completedObjectives,
-				displayOutput: displayOutput);
-
-			ObjectiveDisplay.RenderNonFinalObjective(
-				x: 687,
-				y: 450,
-				objective: Objective.DefeatComputerWith5QueensOnTheBoard,
-				completedObjectives: this.completedObjectives,
-				displayOutput: displayOutput);
-
-			ObjectiveDisplay.RenderNonFinalObjective(
-				x: 62,
-				y: 320,
-				objective: Objective.CheckmateUsingAKnight,
-				completedObjectives: this.completedObjectives,
-				displayOutput: displayOutput);
-
-			ObjectiveDisplay.RenderNonFinalObjective(
-				x: 375,
-				y: 320,
-				objective: Objective.PromoteAPieceToABishop,
-				completedObjectives: this.completedObjectives,
-				displayOutput: displayOutput);
-
-			ObjectiveDisplay.RenderNonFinalObjective(
-				x: 687,
-				y: 320,
-				objective: Objective.LaunchANuke,
-				completedObjectives: this.completedObjectives,
-				displayOutput: displayOutput);
-
-			ObjectiveDisplay.RenderFinalObjective(
-				x: 250,
-				y: 190,
-				completedObjectives: this.completedObjectives,
-				displayOutput: displayOutput);
+			this.objectivesScreenDisplay.Render(displayOutput: displayOutput);
 		}
 
 		public void RenderMusic(IMusicOutput<ChessMusic> musicOutput)

@@ -74,6 +74,16 @@ namespace ChessCompStompWithHacks
 				font: font,
 				color: color);
 		}
+
+		public override void TryDrawText(int x, int y, string text, ChessFont font, DTColor color)
+		{
+			this.bridgeDisplayFont.TryDrawText(
+				x: x,
+				y: y,
+				text: text,
+				font: font,
+				color: color);
+		}
 		
 		public override void DisposeImages()
 		{

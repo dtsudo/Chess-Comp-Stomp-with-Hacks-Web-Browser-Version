@@ -16,7 +16,7 @@ namespace ChessCompStompWithHacksEngine
 
 		public override bool Equals(object obj)
 		{
-			return Equals(obj as ChessSquare);
+			return this.Equals(obj as ChessSquare);
 		}
 
 		public bool Equals(ChessSquare other)
@@ -28,7 +28,7 @@ namespace ChessCompStompWithHacksEngine
 
 		public override int GetHashCode()
 		{
-			return (this.File << 3) + this.Rank;
+			return unchecked((this.File << 3) + this.Rank);
 		}
 	}
 }

@@ -9,6 +9,10 @@ namespace ChessCompStompWithHacksEngine
 		CheckmateUsingAKnight,
 		PromoteAPieceToABishop,
 		LaunchANuke,
-		WinFinalBattle
+		WinFinalBattle,
+
+		PlayAStupidOpening,
+		NukeYourOwnPieces,
+		WinByCastlingVeryLongAndPromotingRookToQueen
 	}
 }

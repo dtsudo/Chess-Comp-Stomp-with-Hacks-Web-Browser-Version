@@ -60,7 +60,7 @@ namespace ChessCompStompWithHacksLibrary
 					+ "\n" + "Line 2"
 					+ "\n" + "Line 3"
 					+ "\n" + "Line 4",
-				font: ChessFont.Fetamont32Pt,
+				font: ChessFont.ChessFont32Pt,
 				color: DTColor.Black());
 		}
 

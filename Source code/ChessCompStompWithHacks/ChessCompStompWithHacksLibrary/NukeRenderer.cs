@@ -15,6 +15,7 @@ namespace ChessCompStompWithHacksLibrary
 		private int turnCount;
 		private ITimer timer;
 		private int? nukeAnimationElapsedMicros;
+		private ColorTheme colorTheme;
 
 		private const int ELAPSED_MICROS_TO_FLY_OFF_SCREEN = 300 * 1000;
 
@@ -25,7 +26,8 @@ namespace ChessCompStompWithHacksLibrary
 			Tuple<int, int> isHoverOverNuke,
 			int turnCount,
 			ITimer timer,
-			int? nukeAnimationElapsedMicros)
+			int? nukeAnimationElapsedMicros,
+			ColorTheme colorTheme)
 		{
 			this.hasNukeAbility = hasNukeAbility;
 			this.hasUsedNuke = hasUsedNuke;
@@ -34,6 +36,7 @@ namespace ChessCompStompWithHacksLibrary
 			this.turnCount = turnCount;
 			this.timer = timer;
 			this.nukeAnimationElapsedMicros = nukeAnimationElapsedMicros;
+			this.colorTheme = colorTheme;
 		}
 
 		public static NukeRenderer GetNukeRenderer(
@@ -42,7 +45,8 @@ namespace ChessCompStompWithHacksLibrary
 			bool isNukeSelected,
 			Tuple<int, int> isHoverOverNuke,
 			int turnCount,
-			ITimer timer)
+			ITimer timer,
+			ColorTheme colorTheme)
 		{
 			return new NukeRenderer(
 				hasNukeAbility: hasNukeAbility,
@@ -51,7 +55,8 @@ namespace ChessCompStompWithHacksLibrary
 				isHoverOverNuke: isHoverOverNuke,
 				turnCount: turnCount,
 				timer: timer,
-				nukeAnimationElapsedMicros: null);
+				nukeAnimationElapsedMicros: null,
+				colorTheme: colorTheme);
 		}
 		
 		public NukeRenderer LaunchNuke()
@@ -63,7 +68,8 @@ namespace ChessCompStompWithHacksLibrary
 				isHoverOverNuke: this.isHoverOverNuke,
 				turnCount: this.turnCount,
 				timer: this.timer,
-				nukeAnimationElapsedMicros: 0);
+				nukeAnimationElapsedMicros: 0,
+				colorTheme: this.colorTheme);
 		}
 		
 		public NukeRenderer ProcessFrame(
@@ -89,7 +95,8 @@ namespace ChessCompStompWithHacksLibrary
 				isHoverOverNuke: isHoverOverNuke,
 				turnCount: turnCount,
 				timer: this.timer,
-				nukeAnimationElapsedMicros: newNukeAnimationElapsedMicros);
+				nukeAnimationElapsedMicros: newNukeAnimationElapsedMicros,
+				colorTheme: this.colorTheme);
 		}
 
 		public bool HasNukeFlownOffScreen()
@@ -173,7 +180,7 @@ namespace ChessCompStompWithHacksLibrary
 						y: this.isHoverOverNuke.Item2,
 						width: 335 + (numTurnsUntilNukeAvailable >= 10 ? 8 : 0),
 						height: 21,
-						color: new DTColor(255, 245, 171),
+						color: ColorThemeUtil.GetTextBackgroundColor(colorTheme: this.colorTheme),
 						fill: true);
 
 					string text = numTurnsUntilNukeAvailable > 1
@@ -184,7 +191,7 @@ namespace ChessCompStompWithHacksLibrary
 						x: this.isHoverOverNuke.Item1 + 5,
 						y: this.isHoverOverNuke.Item2 + 19,
 						text: text,
-						font: ChessFont.Fetamont14Pt,
+						font: ChessFont.ChessFont14Pt,
 						color: DTColor.Black());
 				}
 			}

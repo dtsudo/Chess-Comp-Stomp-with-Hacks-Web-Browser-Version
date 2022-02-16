@@ -58,14 +58,14 @@ namespace ChessCompStompWithHacksLibrary
 
 		private void DecreaseCurrentFadeInAndOutVolumeMillis()
 		{
-			this.currentFadeInAndOutVolumeMillis = this.currentFadeInAndOutVolumeMillis - this.elapsedMicrosPerFrame / 10;
+			this.currentFadeInAndOutVolumeMillis = this.currentFadeInAndOutVolumeMillis - this.elapsedMicrosPerFrame / 2;
 			if (this.currentFadeInAndOutVolumeMillis < 0)
 				this.currentFadeInAndOutVolumeMillis = 0;
 		}
 
 		private void IncreaseCurrentFadeInAndOutVolumeMillis()
 		{
-			this.currentFadeInAndOutVolumeMillis = this.currentFadeInAndOutVolumeMillis + this.elapsedMicrosPerFrame / 10;
+			this.currentFadeInAndOutVolumeMillis = this.currentFadeInAndOutVolumeMillis + this.elapsedMicrosPerFrame / 2;
 			if (this.currentFadeInAndOutVolumeMillis > 100 * 1024)
 				this.currentFadeInAndOutVolumeMillis = 100 * 1024;
 		}

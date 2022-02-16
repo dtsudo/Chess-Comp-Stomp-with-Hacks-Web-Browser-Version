@@ -45,8 +45,202 @@ namespace ChessCompStompWithHacksEngine
 
 			if (HasPlayerDeliveredCheckmateUsingAKnight(hasPlayerWon: hasPlayerWon, gameState: newGameState))
 				completedObjectives.Add(Objective.CheckmateUsingAKnight);
-			
+
+			if (PlayedAStupidOpening(originalGameState: originalGameState, move: move))
+				completedObjectives.Add(Objective.PlayAStupidOpening);
+
+			if (NukedOwnPieces(originalGameState: originalGameState, move: move))
+				completedObjectives.Add(Objective.NukeYourOwnPieces);
+
+			if (WonByCastlingVeryLongAndPromotingToQueen(originalGameState: originalGameState, move: move))
+				completedObjectives.Add(Objective.WinByCastlingVeryLongAndPromotingRookToQueen);
+
 			return completedObjectives;
+		}
+
+		private static bool WonByCastlingVeryLongAndPromotingToQueen(GameState originalGameState, Move move)
+		{
+			if (!originalGameState.IsPlayerTurn())
+				return false;
+
+			if (!move.IsCastlingOrSuperCastling(originalBoard: originalGameState.Board))
+				return false;
+
+			string requiredMoveName = GetNameOfCastlingVeryLongAndPromotingToQueenWithCheckmateMove();
+
+			string moveName = MoveNaming.GetNameOfMove(move: move, originalGameState: originalGameState);
+
+			return moveName == requiredMoveName;
+		}
+
+		public static string GetNameOfCastlingVeryLongAndPromotingToQueenWithCheckmateMove()
+		{
+			ChessSquarePiece[][] underlyingBoard = new ChessSquarePiece[8][];
+			for (int i = 0; i < 8; i++)
+			{
+				underlyingBoard[i] = new ChessSquarePiece[8];
+				for (int j = 0; j < 8; j++)
+					underlyingBoard[i][j] = ChessSquarePiece.Empty;
+			}
+
+			underlyingBoard[0][7] = ChessSquarePiece.WhiteKing;
+			underlyingBoard[7][7] = ChessSquarePiece.WhiteRook;
+			underlyingBoard[0][6] = ChessSquarePiece.WhiteRook;
+			underlyingBoard[2][6] = ChessSquarePiece.WhiteRook;
+			underlyingBoard[1][0] = ChessSquarePiece.BlackKing;
+
+			ChessSquarePieceArray board = new ChessSquarePieceArray(board: underlyingBoard);
+
+			bool[][] underlyingUnmovedPawns = new bool[8][];
+			for (int i = 0; i < 8; i++)
+			{
+				underlyingUnmovedPawns[i] = new bool[8];
+				for (int j = 0; j < 8; j++)
+					underlyingUnmovedPawns[i][j] = false;
+			}
+			UnmovedPawnsArray unmovedPawnsArray = new UnmovedPawnsArray(board: underlyingUnmovedPawns);
+
+			GameState gameState = new GameState(
+				board: board,
+				unmovedPawns: unmovedPawnsArray,
+				turnCount: 101,
+				hasUsedNuke: false,
+				isPlayerWhite: true,
+				isWhiteTurn: true,
+				previousPawnMoveFileForEnPassant: null,
+				castlingRights: new GameState.CastlingRights(
+					canWhiteCastleKingside: false,
+					canWhiteCastleQueenside: false,
+					canBlackCastleKingside: false,
+					canBlackCastleQueenside: false),
+				playerAbilities: new GameState.PlayerAbilities(
+					canPawnsMoveThreeSpacesInitially: false,
+					canSuperEnPassant: false,
+					canRooksMoveLikeBishops: false,
+					canSuperCastle: true,
+					canRooksCaptureLikeCannons: false,
+					canKnightsMakeLargeKnightsMove: false,
+					canQueensMoveLikeKnights: false,
+					hasTacticalNuke: false,
+					hasAnyPieceCanPromote: true,
+					hasStalemateIsVictory: false,
+					hasOpponentMustCaptureWhenPossible: false,
+					hasPawnsDestroyCapturingPiece: false));
+
+			List<Move> moves = ComputeMoves.GetMoves(gameState: gameState).Moves;
+
+			foreach (Move move in moves)
+			{
+				if (!move.IsNuke
+					&& move.StartingFile.Value == 0
+					&& move.StartingRank.Value == 7
+					&& move.EndingFile == 2
+					&& move.EndingRank == 7
+					&& move.Promotion.HasValue
+					&& move.Promotion.Value == Move.PromotionType.PromoteToQueen)
+				{
+					return MoveNaming.GetNameOfMove(move: move, originalGameState: gameState);
+				}
+			}
+
+			throw new Exception();
+		}
+
+		private static bool NukedOwnPieces(GameState originalGameState, Move move)
+		{
+			if (!originalGameState.IsPlayerTurn())
+				return false;
+
+			if (!move.IsNuke)
+				return false;
+
+			int numPlayerPiecesNuked = 0;
+			int numOpponentPiecesNuked = 0;
+
+			int playerPieceValueNuked = 0;
+			int opponentPieceValueNuked = 0;
+
+			List<ChessSquare> nukedSquares = TacticalNukeUtil.GetNukedSquares(file: move.EndingFile, rank: move.EndingRank);
+
+			foreach (ChessSquare nukedSquare in nukedSquares)
+			{
+				ChessSquarePiece piece = originalGameState.Board.GetPiece(nukedSquare);
+
+				if (piece == ChessSquarePiece.Empty)
+					continue;
+
+				bool isPlayerPiece = piece.IsWhite() == originalGameState.IsPlayerWhite;
+
+				int pieceValue;
+				if (piece.IsPawn())
+					pieceValue = 1;
+				else if (piece.IsBishop() || piece.IsKnight())
+					pieceValue = 3;
+				else if (piece.IsRook())
+					pieceValue = 5;
+				else if (piece.IsQueen())
+					pieceValue = 9;
+				else
+					throw new Exception();
+
+				if (isPlayerPiece)
+				{
+					numPlayerPiecesNuked++;
+					playerPieceValueNuked += pieceValue;
+				}
+				else
+				{
+					numOpponentPiecesNuked++;
+					opponentPieceValueNuked += pieceValue;
+				}
+			}
+			
+			if (numPlayerPiecesNuked < 4)
+				return false;
+			
+			if (numPlayerPiecesNuked <= numOpponentPiecesNuked)
+				return false;
+			if (numPlayerPiecesNuked - numOpponentPiecesNuked < 2)
+				return false;
+			
+			if (playerPieceValueNuked <= opponentPieceValueNuked)
+				return false;
+			if (playerPieceValueNuked - opponentPieceValueNuked < 4)
+				return false;
+
+			ChessSquare kingSquare = CheckKingUnderAttack.FindLocationOfKing(board: originalGameState.Board, findWhiteKing: originalGameState.IsPlayerWhite);
+
+			bool wasPlayerInCheck = CheckKingUnderAttack.IsKingUnderThreat(
+				board: originalGameState.Board,
+				playerAbilities: originalGameState.Abilities,
+				checkWhiteKingUnderAttack: originalGameState.IsPlayerWhite,
+				isPlayerWhite: originalGameState.IsPlayerWhite,
+				kingFile: kingSquare.File,
+				kingRank: kingSquare.Rank);
+
+			if (wasPlayerInCheck)
+				return false;
+
+			return true;
+		}
+
+		private static bool PlayedAStupidOpening(GameState originalGameState, Move move)
+		{
+			if (!originalGameState.IsPlayerTurn())
+				return false;
+
+			if (originalGameState.TurnCount != 3 && originalGameState.TurnCount != 4)
+				return false;
+
+			if (move.IsNuke)
+				return false;
+
+			ChessSquarePiece pieceBeingMoved = originalGameState.Board.GetPiece(file: move.StartingFile.Value, rank: move.StartingRank.Value);
+
+			if (!pieceBeingMoved.IsKing())
+				return false;
+
+			return move.StartingFile.Value == move.EndingFile && move.StartingRank.Value != move.EndingRank;
 		}
 
 		private static bool AtLeast5QueensOnTheBoard(ChessSquarePieceArray board)

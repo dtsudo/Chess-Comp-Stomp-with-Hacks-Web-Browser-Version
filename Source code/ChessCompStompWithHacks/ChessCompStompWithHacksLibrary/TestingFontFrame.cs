@@ -60,7 +60,7 @@ namespace ChessCompStompWithHacksLibrary
 					+ "\n" + "Line 2"
 					+ "\n" + "Line 3"
 					+ "\n" + "Line 4",
-				font: ChessFont.Fetamont12Pt,
+				font: ChessFont.ChessFont12Pt,
 				color: DTColor.Black());
 
 			displayOutput.DrawRectangle(
@@ -78,7 +78,7 @@ namespace ChessCompStompWithHacksLibrary
 					+ "\n" + "Line 2"
 					+ "\n" + "Line 3"
 					+ "\n" + "Line 4",
-				font: ChessFont.Fetamont14Pt,
+				font: ChessFont.ChessFont14Pt,
 				color: DTColor.Black());
 
 			displayOutput.DrawRectangle(
@@ -96,7 +96,7 @@ namespace ChessCompStompWithHacksLibrary
 					+ "\n" + "Line 2"
 					+ "\n" + "Line 3"
 					+ "\n" + "Line 4",
-				font: ChessFont.Fetamont16Pt,
+				font: ChessFont.ChessFont16Pt,
 				color: DTColor.Black());
 
 			displayOutput.DrawRectangle(
@@ -114,7 +114,7 @@ namespace ChessCompStompWithHacksLibrary
 					+ "\n" + "Line 2"
 					+ "\n" + "Line 3"
 					+ "\n" + "Line 4",
-				font: ChessFont.Fetamont18Pt,
+				font: ChessFont.ChessFont18Pt,
 				color: DTColor.Black());
 
 			displayOutput.DrawRectangle(
@@ -132,7 +132,7 @@ namespace ChessCompStompWithHacksLibrary
 					+ "\n" + "Line 2"
 					+ "\n" + "Line 3"
 					+ "\n" + "Line 4",
-				font: ChessFont.Fetamont20Pt,
+				font: ChessFont.ChessFont20Pt,
 				color: DTColor.Black());
 		}
 

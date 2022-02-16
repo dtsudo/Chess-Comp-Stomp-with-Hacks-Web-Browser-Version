@@ -4,7 +4,6 @@ namespace ChessCompStompWithHacksLibrary
 	using ChessCompStompWithHacksEngine;
 	using DTLibrary;
 	using System;
-	using System.Collections.Generic;
 
 	public class HackDisplay
 	{
@@ -14,37 +13,72 @@ namespace ChessCompStompWithHacksLibrary
 		private SessionState sessionState;
 
 		private bool isHover;
-		private bool isClick;
+		private bool isLeftClick;
+		private bool isRightClick;
 
 		private int mouseX;
 		private int mouseY;
 
-		private const int WIDTH = 190;
+		private IMouse previousMouseInput;
+
+		private bool allowResearchingHacks;
+
+		public enum Theme
+		{
+			Blue,
+			Green,
+			Purple
+		}
+
+		private Theme theme;
+
+		private const int WIDTH = 155;
 		private const int HEIGHT = 100;
 
 		public HackDisplay(
 			Hack hack,
 			int x,
 			int y,
-			SessionState sessionState)
+			bool allowResearchingHacks,
+			SessionState sessionState,
+			Theme theme)
 		{
 			this.hack = hack;
 			this.x = x;
 			this.y = y;
+			this.allowResearchingHacks = allowResearchingHacks;
 			this.sessionState = sessionState;
+			this.theme = theme;
 
 			this.mouseX = 0;
 			this.mouseY = 0;
 
 			this.isHover = false;
-			this.isClick = false;
+			this.isLeftClick = false;
+			this.isRightClick = false;
+
+			this.previousMouseInput = null;
 		}
 
-		public void ProcessFrame(
+		public Hack GetHack()
+		{
+			return this.hack;
+		}
+
+		/// <summary>
+		/// Returns true iff the player right-clicked the hack
+		/// </summary>
+		public bool ProcessFrame(
 			IMouse mouseInput,
 			IMouse previousMouseInput,
+			ISoundOutput<ChessSound> soundOutput,
 			IDisplayProcessing<ChessImage> displayProcessing)
 		{
+			if (this.previousMouseInput != null)
+				previousMouseInput = this.previousMouseInput;
+
+			this.previousMouseInput = new CopiedMouse(mouse: mouseInput);
+
 			int mouseX = mouseInput.GetX();
 			int mouseY = mouseInput.GetY();
 
@@ -55,15 +89,39 @@ namespace ChessCompStompWithHacksLibrary
 
 			this.isHover = isHover;
 			if (mouseInput.IsLeftMouseButtonPressed() && !previousMouseInput.IsLeftMouseButtonPressed() && isHover)
-				this.isClick = true;
+				this.isLeftClick = true;
 
-			if (this.isClick && !mouseInput.IsLeftMouseButtonPressed() && previousMouseInput.IsLeftMouseButtonPressed())
+			if (mouseInput.IsRightMouseButtonPressed() && !previousMouseInput.IsRightMouseButtonPressed() && isHover)
+				this.isRightClick = true;
+
+			if (this.isLeftClick && !mouseInput.IsLeftMouseButtonPressed() && previousMouseInput.IsLeftMouseButtonPressed())
 			{
-				this.isClick = false;
+				this.isLeftClick = false;
 
-				if (isHover && this.CanAffordHack())
-					this.sessionState.AddResearchedHack(this.hack);
+				if (this.allowResearchingHacks)
+				{
+					if (isHover)
+						soundOutput.PlaySound(ChessSound.Click);
+
+					if (isHover && this.CanAffordHack())
+						this.sessionState.AddResearchedHack(this.hack);
+				}
 			}
+
+			bool returnValue = false;
+
+			if (this.isRightClick && !mouseInput.IsRightMouseButtonPressed() && previousMouseInput.IsRightMouseButtonPressed())
+			{
+				this.isRightClick = false;
+
+				if (isHover)
+				{
+					soundOutput.PlaySound(ChessSound.Click);
+					returnValue = true;
+				}
+			}
+
+			return returnValue;
 		}
 
 		private bool CanAffordHack()
@@ -76,7 +134,7 @@ namespace ChessCompStompWithHacksLibrary
 			if (this.isHover)
 			{
 				HackUtil.HackDescription hackDescription = this.hack.GetHackDescriptionForHackSelectionScreen();
-				string text = hackDescription.Description;
+				string text = hackDescription.Description + "\n\n" + "Right click for more details";
 
 				int numberOfNewLines = 0;
 				for (int i = 0; i < text.Length; i++)
@@ -85,7 +143,7 @@ namespace ChessCompStompWithHacksLibrary
 						numberOfNewLines++;
 				}
 
-				int width = hackDescription.Width;
+				int width = Math.Max(hackDescription.Width, 320);
 				int height = 19 * (numberOfNewLines + 1) + 20;
 
 				int x;
@@ -105,7 +163,7 @@ namespace ChessCompStompWithHacksLibrary
 					y: y,
 					width: width - 1,
 					height: height - 1,
-					color: new DTColor(255, 245, 171),
+					color: ColorThemeUtil.GetTextBackgroundColor(colorTheme: this.sessionState.GetColorTheme()),
 					fill: true);
 				displayOutput.DrawRectangle(
 					x: x,
@@ -119,8 +177,19 @@ namespace ChessCompStompWithHacksLibrary
 					x: x + 25,
 					y: y + height - 10,
 					text: text,
-					font: ChessFont.Fetamont14Pt,
+					font: ChessFont.ChessFont14Pt,
 					color: DTColor.Black());
+			}
+		}
+
+		private static DTColor GetResearchedHackBackgroundColor(Theme theme)
+		{
+			switch (theme)
+			{
+				case Theme.Blue: return new DTColor(196, 234, 255);
+				case Theme.Green: return new DTColor(201, 255, 196);
+				case Theme.Purple: return new DTColor(202, 196, 255);
+				default: throw new Exception();
 			}
 		}
 
@@ -132,12 +201,12 @@ namespace ChessCompStompWithHacksLibrary
 			bool canAffordHack = this.CanAffordHack();
 
 			if (hasResearchedHack)
-				backgroundColor = new DTColor(201, 255, 196);
-			else if (canAffordHack && this.isClick)
-				backgroundColor = new DTColor(252, 251, 154);
-			else if (canAffordHack && this.isHover)
-				backgroundColor = new DTColor(250, 249, 200);
-			else if (canAffordHack)
+				backgroundColor = GetResearchedHackBackgroundColor(theme: this.theme);
+			else if (canAffordHack && this.isLeftClick && this.allowResearchingHacks)
+				backgroundColor = ColorThemeUtil.GetClickColor(colorTheme: this.sessionState.GetColorTheme());
+			else if (canAffordHack && this.isHover && this.allowResearchingHacks)
+				backgroundColor = ColorThemeUtil.GetHoverColor(colorTheme: this.sessionState.GetColorTheme());
+			else if (canAffordHack && this.allowResearchingHacks)
 				backgroundColor = new DTColor(235, 235, 235);
 			else
 				backgroundColor = new DTColor(200, 200, 200);
@@ -159,26 +228,26 @@ namespace ChessCompStompWithHacksLibrary
 				fill: false);
 
 			displayOutput.DrawText(
-				x: this.x + 10,
+				x: this.x + 3,
 				y: this.y + 90,
 				text: this.hack.GetHackNameForHackSelectionScreen(),
-				font: ChessFont.Fetamont16Pt,
+				font: ChessFont.ChessFont16Pt,
 				color: DTColor.Black());
 
 			displayOutput.DrawText(
-				x: this.x + 10,
+				x: this.x + 3,
 				y: this.y + 39,
-				text: "Cost: " + this.hack.GetHackCost().ToStringCultureInvariant() + " hack points",
-				font: ChessFont.Fetamont12Pt,
+				text: "Cost: " + this.hack.GetHackCost().ToStringCultureInvariant() + " points",
+				font: ChessFont.ChessFont12Pt,
 				color: new DTColor(128, 128, 128));
 
 			if (hasResearchedHack)
 			{
 				displayOutput.DrawText(
-					x: this.x + 10,
+					x: this.x + 3,
 					y: this.y + 20,
 					text: "Hack implemented",
-					font: ChessFont.Fetamont12Pt,
+					font: ChessFont.ChessFont12Pt,
 					color: new DTColor(128, 128, 128));
 			}
 		}

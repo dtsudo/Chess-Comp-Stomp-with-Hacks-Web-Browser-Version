@@ -14,9 +14,10 @@ namespace ChessCompStompWithHacksLibrary
 		private int y;
 		private Move.PromotionType? hoverSquare;
 		private Move.PromotionType? selectedSquare;
+		private ColorTheme colorTheme;
 
-		private const int PROMOTION_PANEL_WIDTH = 293;
-		private const int PROMOTION_PANEL_HEIGHT = 100;
+		public const int PROMOTION_PANEL_WIDTH = 293;
+		public const int PROMOTION_PANEL_HEIGHT = 100;
 
 		private const int QUEEN_OFFSET_X = 10;
 		private const int ROOK_OFFSET_X = 10 + 70;
@@ -30,7 +31,8 @@ namespace ChessCompStompWithHacksLibrary
 			int x,
 			int y,
 			Move.PromotionType? hoverSquare,
-			Move.PromotionType? selectedSquare)
+			Move.PromotionType? selectedSquare,
+			ColorTheme colorTheme)
 		{
 			this.isWhite = isWhite;
 			this.isOpen = isOpen;
@@ -38,9 +40,10 @@ namespace ChessCompStompWithHacksLibrary
 			this.y = y;
 			this.hoverSquare = hoverSquare;
 			this.selectedSquare = selectedSquare;
+			this.colorTheme = colorTheme;
 		}
 
-		public static PromotionPanel GetPromotionPanel(bool isWhite)
+		public static PromotionPanel GetPromotionPanel(bool isWhite, ColorTheme colorTheme)
 		{
 			return new PromotionPanel(
 				isWhite: isWhite,
@@ -48,7 +51,8 @@ namespace ChessCompStompWithHacksLibrary
 				x: 0,
 				y: 0,
 				hoverSquare: null,
-				selectedSquare: null);
+				selectedSquare: null,
+				colorTheme: colorTheme);
 		}
 
 		public PromotionPanel ProcessFrame(
@@ -64,7 +68,8 @@ namespace ChessCompStompWithHacksLibrary
 				x: x,
 				y: y,
 				hoverSquare: hoverSquare,
-				selectedSquare: selectedSquare);
+				selectedSquare: selectedSquare,
+				colorTheme: this.colorTheme);
 		}
 
 		/// <summary>
@@ -149,14 +154,14 @@ namespace ChessCompStompWithHacksLibrary
 				y: this.y - PROMOTION_PANEL_HEIGHT,
 				width: PROMOTION_PANEL_WIDTH,
 				height: PROMOTION_PANEL_HEIGHT,
-				color: new DTColor(255, 245, 171),
+				color: ColorThemeUtil.GetTextBackgroundColor(colorTheme: this.colorTheme),
 				fill: true);
 
 			displayOutput.DrawText(
 				x: this.x + 90,
 				y: this.y - 10,
 				text: "Promote to:",
-				font: ChessFont.Fetamont14Pt,
+				font: ChessFont.ChessFont14Pt,
 				color: DTColor.Black());
 
 			displayOutput.DrawImageRotatedClockwise(

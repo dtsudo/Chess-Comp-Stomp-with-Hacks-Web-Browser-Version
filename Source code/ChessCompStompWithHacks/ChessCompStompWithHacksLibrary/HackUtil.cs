@@ -4,6 +4,7 @@ namespace ChessCompStompWithHacksLibrary
 	using ChessCompStompWithHacksEngine;
 	using DTLibrary;
 	using System;
+	using System.Collections.Generic;
 
 	public static class HackUtil
 	{
@@ -38,27 +39,130 @@ namespace ChessCompStompWithHacksLibrary
 			}
 		}
 
-		public static string GetHackNameForHackSelectionScreen(this Hack hack)
+		private static List<Tuple<Hack, int>> GetHackIdMapping()
 		{
+			List<Tuple<Hack, int>> list = new List<Tuple<Hack, int>>();
+
+			list.Add(new Tuple<Hack, int>(Hack.ExtraPawnFirst, 1));
+			list.Add(new Tuple<Hack, int>(Hack.ExtraPawnSecond, 2));
+			list.Add(new Tuple<Hack, int>(Hack.ExtraQueen, 3));
+			list.Add(new Tuple<Hack, int>(Hack.PawnsCanMoveThreeSpacesInitially, 4));
+			list.Add(new Tuple<Hack, int>(Hack.SuperEnPassant, 5));
+			list.Add(new Tuple<Hack, int>(Hack.RooksCanMoveLikeBishops, 6));
+			list.Add(new Tuple<Hack, int>(Hack.SuperCastling, 7));
+			list.Add(new Tuple<Hack, int>(Hack.RooksCanCaptureLikeCannons, 8));
+			list.Add(new Tuple<Hack, int>(Hack.KnightsCanMakeLargeKnightsMove, 9));
+			list.Add(new Tuple<Hack, int>(Hack.QueensCanMoveLikeKnights, 10));
+			list.Add(new Tuple<Hack, int>(Hack.TacticalNuke, 11));
+			list.Add(new Tuple<Hack, int>(Hack.AnyPieceCanPromote, 12));
+			list.Add(new Tuple<Hack, int>(Hack.StalemateIsVictory, 13));
+			list.Add(new Tuple<Hack, int>(Hack.OpponentMustCaptureWhenPossible, 14));
+			list.Add(new Tuple<Hack, int>(Hack.PawnsDestroyCapturingPiece, 15));
+
+			return list;
+		}
+
+		/// <summary>
+		/// Returns null if the hackId isn't valid
+		/// </summary>
+		public static Hack? GetHackFromHackId(int hackId)
+		{
+			List<Tuple<Hack, int>> mapping = GetHackIdMapping();
+
+			foreach (Tuple<Hack, int> tuple in mapping)
+			{
+				if (tuple.Item2 == hackId)
+					return tuple.Item1;
+			}
+
+			return null;
+		}
+
+		/// <summary>
+		/// Maps a hack to an integer identifier (in a consistent but arbitrary way)
+		/// </summary>
+		public static int GetHackId(this Hack hack)
+		{
+			List<Tuple<Hack, int>> mapping = GetHackIdMapping();
+
+			foreach (Tuple<Hack, int> tuple in mapping)
+			{
+				if (tuple.Item1 == hack)
+					return tuple.Item2;
+			}
+
+			throw new Exception();
+		}
+
+		private class HackNameInfo
+		{
+			public HackNameInfo(string hackNameForHackSelectionScreen, string hackNameForHackExplanationPanel)
+			{
+				this.HackNameForHackSelectionScreen = hackNameForHackSelectionScreen;
+				this.HackNameForHackExplanationPanel = hackNameForHackExplanationPanel;
+			}
+
+			public string HackNameForHackSelectionScreen { get; private set; }
+			public string HackNameForHackExplanationPanel { get; private set; }
+		}
+
+		private static HackNameInfo GetHackName(Hack hack)
+		{
+			string hackNameForHackSelectionScreen;
+
 			switch (hack)
 			{
-				case Hack.ExtraPawnFirst: return "Extra pawn";
-				case Hack.ExtraPawnSecond: return "Another extra" + "\n" + "pawn";
-				case Hack.ExtraQueen: return "Extra queen";
-				case Hack.PawnsCanMoveThreeSpacesInitially: return "Pawn boost";
-				case Hack.SuperEnPassant: return "Super" + "\n" + "en passant";
-				case Hack.RooksCanMoveLikeBishops: return "Diagonal rooks";
-				case Hack.SuperCastling: return "Super castling";
-				case Hack.RooksCanCaptureLikeCannons: return "Cannoning";
-				case Hack.KnightsCanMakeLargeKnightsMove: return "Upgraded" + "\n" + "knights";
-				case Hack.QueensCanMoveLikeKnights: return "Upgraded queen";
-				case Hack.TacticalNuke: return "Tactical nuke";
-				case Hack.AnyPieceCanPromote: return "Equitable" + "\n" + "promotions";
-				case Hack.StalemateIsVictory: return "Anti-stalemate";
-				case Hack.OpponentMustCaptureWhenPossible: return "Mandatory" + "\n" + "captures";
-				case Hack.PawnsDestroyCapturingPiece: return "Sacrificial" + "\n" + "pawns";
+				case Hack.ExtraPawnFirst: hackNameForHackSelectionScreen = "Extra pawn"; break;
+				case Hack.ExtraPawnSecond: hackNameForHackSelectionScreen = "Another" + "\n" + "extra pawn"; break;
+				case Hack.ExtraQueen: hackNameForHackSelectionScreen = "Extra queen"; break;
+				case Hack.PawnsCanMoveThreeSpacesInitially: hackNameForHackSelectionScreen = "Pawn boost"; break;
+				case Hack.SuperEnPassant: hackNameForHackSelectionScreen = "Super" + "\n" + "en passant"; break;
+				case Hack.RooksCanMoveLikeBishops: hackNameForHackSelectionScreen = "Diagonal" + "\n" + "rooks"; break;
+				case Hack.SuperCastling: hackNameForHackSelectionScreen = "Super" + "\n" + "castling"; break;
+				case Hack.RooksCanCaptureLikeCannons: hackNameForHackSelectionScreen = "Cannoning"; break;
+				case Hack.KnightsCanMakeLargeKnightsMove: hackNameForHackSelectionScreen = "Upgraded" + "\n" + "knights"; break;
+				case Hack.QueensCanMoveLikeKnights: hackNameForHackSelectionScreen = "Upgraded" + "\n" + "queen"; break;
+				case Hack.TacticalNuke: hackNameForHackSelectionScreen = "Tactical nuke"; break;
+				case Hack.AnyPieceCanPromote: hackNameForHackSelectionScreen = "Equitable" + "\n" + "promotions"; break;
+				case Hack.StalemateIsVictory: hackNameForHackSelectionScreen = "Anti" + "\n" + "stalemate"; break;
+				case Hack.OpponentMustCaptureWhenPossible: hackNameForHackSelectionScreen = "Mandatory" + "\n" + "captures"; break;
+				case Hack.PawnsDestroyCapturingPiece: hackNameForHackSelectionScreen = "Sacrificial" + "\n" + "pawns"; break;
 				default: throw new Exception();
 			}
+
+			string hackNameForHackExplanationPanel;
+
+			switch (hack)
+			{
+				case Hack.ExtraPawnFirst: hackNameForHackExplanationPanel = "Extra pawn"; break;
+				case Hack.ExtraPawnSecond: hackNameForHackExplanationPanel = "Another extra pawn"; break;
+				case Hack.ExtraQueen: hackNameForHackExplanationPanel = "Extra queen"; break;
+				case Hack.PawnsCanMoveThreeSpacesInitially: hackNameForHackExplanationPanel = "Pawn boost"; break;
+				case Hack.SuperEnPassant: hackNameForHackExplanationPanel = "Super en passant"; break;
+				case Hack.RooksCanMoveLikeBishops: hackNameForHackExplanationPanel = "Diagonal rooks"; break;
+				case Hack.SuperCastling: hackNameForHackExplanationPanel = "Super castling"; break;
+				case Hack.RooksCanCaptureLikeCannons: hackNameForHackExplanationPanel = "Cannoning"; break;
+				case Hack.KnightsCanMakeLargeKnightsMove: hackNameForHackExplanationPanel = "Upgraded knights"; break;
+				case Hack.QueensCanMoveLikeKnights: hackNameForHackExplanationPanel = "Upgraded queen"; break;
+				case Hack.TacticalNuke: hackNameForHackExplanationPanel = "Tactical nuke"; break;
+				case Hack.AnyPieceCanPromote: hackNameForHackExplanationPanel = "Equitable promotions"; break;
+				case Hack.StalemateIsVictory: hackNameForHackExplanationPanel = "Anti stalemate"; break;
+				case Hack.OpponentMustCaptureWhenPossible: hackNameForHackExplanationPanel = "Mandatory captures"; break;
+				case Hack.PawnsDestroyCapturingPiece: hackNameForHackExplanationPanel = "Sacrificial pawns"; break;
+				default: throw new Exception();
+			}
+
+			return new HackNameInfo(hackNameForHackSelectionScreen: hackNameForHackSelectionScreen, hackNameForHackExplanationPanel: hackNameForHackExplanationPanel);
+		}
+
+		public static string GetHackNameForHackSelectionScreen(this Hack hack)
+		{
+			return GetHackName(hack: hack).HackNameForHackSelectionScreen;
+		}
+
+		public static string GetHackNameForHackExplanationPanel(this Hack hack)
+		{
+			return GetHackName(hack: hack).HackNameForHackExplanationPanel;
 		}
 
 		public class HackDescription
@@ -126,7 +230,8 @@ namespace ChessCompStompWithHacksLibrary
 						+ "it is operational.",
 						380);
 				case Hack.AnyPieceCanPromote:
-					return new HackDescription("Your rooks, knights, bishops, and queen may" + "\n"
+					return new HackDescription(
+						"Your rooks, knights, bishops, and queen may" + "\n"
 						+ "promote upon reaching the last rank.",
 						476);
 				case Hack.StalemateIsVictory:

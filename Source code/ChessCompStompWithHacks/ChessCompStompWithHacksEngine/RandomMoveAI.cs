@@ -10,7 +10,9 @@ namespace ChessCompStompWithHacksEngine
 
 		private Move bestMove;
 
-		public RandomMoveAI(GameState gameState, ITimer timer, IDTRandom random)
+		private IDTLogger logger;
+
+		public RandomMoveAI(GameState gameState, ITimer timer, IDTRandom random, IDTLogger logger)
 		{
 			this.startTimeMicroSeconds = timer.GetNumberOfMicroSeconds();
 
@@ -20,6 +22,8 @@ namespace ChessCompStompWithHacksEngine
 				this.bestMove = result.Moves[random.NextInt(result.Moves.Count)];
 			else
 				this.bestMove = null;
+
+			this.logger = logger;
 		}
 
 		public long GetStartTimeMicroSeconds()
@@ -32,6 +36,7 @@ namespace ChessCompStompWithHacksEngine
 			if (this.bestMove == null)
 				throw new Exception();
 
+			this.logger.WriteLine("Found randomly chosen move.");
 			return this.bestMove;
 		}
 

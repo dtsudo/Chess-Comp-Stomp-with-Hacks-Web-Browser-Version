@@ -18,6 +18,9 @@ namespace ChessCompStompWithHacksLibrary
 
 		private Button resignButton;
 
+		private Button viewObjectivesButton;
+		private Button viewHacksButton;
+
 		private const int GAME_LOGIC_X_OFFSET = 0;
 		private const int GAME_LOGIC_Y_OFFSET = 50;
 
@@ -37,12 +40,38 @@ namespace ChessCompStompWithHacksLibrary
 				width: 100,
 				height: 40,
 				backgroundColor: new DTColor(200, 200, 200),
-				hoverColor: new DTColor(250, 249, 200),
-				clickColor: new DTColor(252, 251, 154),
+				hoverColor: ColorThemeUtil.GetHoverColor(colorTheme: sessionState.GetColorTheme()),
+				clickColor: ColorThemeUtil.GetClickColor(colorTheme: sessionState.GetColorTheme()),
 				text: "Resign",
 				textXOffset: 14,
 				textYOffset: 9,
-				font: ChessFont.Fetamont16Pt);
+				font: ChessFont.ChessFont16Pt);
+
+			this.viewObjectivesButton = new Button(
+				x: 770,
+				y: 30,
+				width: 199,
+				height: 40,
+				backgroundColor: new DTColor(200, 200, 200),
+				hoverColor: ColorThemeUtil.GetHoverColor(colorTheme: sessionState.GetColorTheme()),
+				clickColor: ColorThemeUtil.GetClickColor(colorTheme: sessionState.GetColorTheme()),
+				text: "View objectives",
+				textXOffset: 16,
+				textYOffset: 9,
+				font: ChessFont.ChessFont16Pt);
+
+			this.viewHacksButton = new Button(
+				x: 621,
+				y: 30,
+				width: 150,
+				height: 40,
+				backgroundColor: new DTColor(200, 200, 200),
+				hoverColor: ColorThemeUtil.GetHoverColor(colorTheme: sessionState.GetColorTheme()),
+				clickColor: ColorThemeUtil.GetClickColor(colorTheme: sessionState.GetColorTheme()),
+				text: "View hacks",
+				textXOffset: 16,
+				textYOffset: 9,
+				font: ChessFont.ChessFont16Pt);
 		}
 
 		public void ProcessExtraTime(int milliseconds)
@@ -61,22 +90,38 @@ namespace ChessCompStompWithHacksLibrary
 			ISoundOutput<ChessSound> soundOutput,
 			IMusicProcessing musicProcessing)
 		{
+			if (this.finalBattleVictoryPanel == null)
+			{
+				ChessMusic music = ChessMusicUtil.GetChessMusic(colorTheme: this.sessionState.GetColorTheme());
+				this.globalState.MusicPlayer.SetMusic(music: music, volume: 100);
+			}
+
 			VictoryStalemateOrDefeatPanel.Result victoryStalemateOrDefeatPanelResult = null;
 
 			if (this.victoryStalemateOrDefeatPanel != null)
 			{
-				victoryStalemateOrDefeatPanelResult = this.victoryStalemateOrDefeatPanel.ProcessFrame(mouseInput, previousMouseInput);
+				victoryStalemateOrDefeatPanelResult = this.victoryStalemateOrDefeatPanel.ProcessFrame(mouseInput: mouseInput, previousMouseInput: previousMouseInput, elapsedMicrosPerFrame: this.globalState.ElapsedMicrosPerFrame);
 				if (victoryStalemateOrDefeatPanelResult.HasClickedContinueButton)
+				{
+					this.globalState.SaveData(sessionState: this.sessionState, soundVolume: soundOutput.GetSoundVolume());
+					soundOutput.PlaySound(ChessSound.Click);
 					return new HackSelectionScreenFrame(globalState: this.globalState, sessionState: this.sessionState);
+				}
 			}
 
 			FinalBattleVictoryPanel.Result finalBattleVictoryPanelResult = null;
 
 			if (this.finalBattleVictoryPanel != null)
 			{
-				finalBattleVictoryPanelResult = this.finalBattleVictoryPanel.ProcessFrame(mouseInput, previousMouseInput);
+				this.globalState.MusicPlayer.SetMusic(music: ChessMusic.Ending, volume: 100);
+
+				finalBattleVictoryPanelResult = this.finalBattleVictoryPanel.ProcessFrame(mouseInput: mouseInput, previousMouseInput: previousMouseInput);
 				if (finalBattleVictoryPanelResult.HasClickedContinueButton)
+				{
+					this.globalState.SaveData(sessionState: this.sessionState, soundVolume: soundOutput.GetSoundVolume());
+					soundOutput.PlaySound(ChessSound.Click);
 					return new TitleScreenFrame(globalState: this.globalState, sessionState: this.sessionState);
+				}
 			}
 
 			bool isHoverOverPanel = victoryStalemateOrDefeatPanelResult != null && victoryStalemateOrDefeatPanelResult.IsHoverOverPanel
@@ -97,7 +142,10 @@ namespace ChessCompStompWithHacksLibrary
 				soundOutput: soundOutput,
 				elapsedMicrosPerFrame: this.globalState.ElapsedMicrosPerFrame);
 
-			this.sessionState.AddCompletedObjectives(new HashSet<Objective>(result.CompletedObjectives));
+			bool hasCompletedANewObjective = this.sessionState.AddCompletedObjectives(new HashSet<Objective>(result.CompletedObjectives));
+
+			if (hasCompletedANewObjective)
+				this.globalState.SaveData(sessionState: this.sessionState, soundVolume: soundOutput.GetSoundVolume());
 
 			bool didPlayerWin = result.GameStatus == ComputeMoves.GameStatus.WhiteVictory && result.IsPlayerWhite
 				|| result.GameStatus == ComputeMoves.GameStatus.BlackVictory && !result.IsPlayerWhite;
@@ -108,6 +156,7 @@ namespace ChessCompStompWithHacksLibrary
 				{
 					this.sessionState.CompleteGame(didPlayerWin: didPlayerWin);
 					this.delayBeforeShowingPanel = 0;
+					this.globalState.SaveData(sessionState: this.sessionState, soundVolume: soundOutput.GetSoundVolume());
 				}
 			}
 
@@ -117,15 +166,20 @@ namespace ChessCompStompWithHacksLibrary
 
 				if (this.delayBeforeShowingPanel.Value >= 1000 * 1000)
 				{
+					soundOutput.PlaySound(sound: didPlayerWin ? ChessSound.Win : ChessSound.StalemateOrDefeat);
+
 					if (didPlayerWin && result.IsFinalBattle && !this.sessionState.HasShownFinalBattleVictoryPanel())
 					{
 						this.sessionState.SetShownFinalBattleVictoryPanel();
-						this.finalBattleVictoryPanel = new FinalBattleVictoryPanel();
+						this.finalBattleVictoryPanel = new FinalBattleVictoryPanel(colorTheme: this.sessionState.GetColorTheme());
 					}
 					else
 						this.victoryStalemateOrDefeatPanel = new VictoryStalemateOrDefeatPanel(
 							gameStatus: result.GameStatus,
-							isPlayerWhite: result.IsPlayerWhite);
+							isPlayerWhite: result.IsPlayerWhite,
+							completedObjectives: this.sessionState.GetCompletedObjectives(),
+							objectivesThatWereAlreadyCompletedPriorToThisGame: this.sessionState.GetObjectivesThatWereAlreadyCompletedPriorToCurrentGame(),
+							colorTheme: this.sessionState.GetColorTheme());
 				}
 			}
 
@@ -135,21 +189,54 @@ namespace ChessCompStompWithHacksLibrary
 				&& this.finalBattleVictoryPanel == null;
 
 			if (keyboardInput.IsPressed(Key.Esc) && !previousKeyboardInput.IsPressed(Key.Esc) && !isWaitingForFinalBattleVictoryPanel)
+			{
+				this.globalState.SaveData(sessionState: this.sessionState, soundVolume: soundOutput.GetSoundVolume());
+				soundOutput.PlaySound(ChessSound.Click);
 				return new SettingsMenuFrame(globalState: this.globalState, sessionState: this.sessionState, underlyingFrame: this, showPausedText: true);
+			}
 
 			if (this.delayBeforeShowingPanel == null)
 			{
 				bool hasClickedResignButton = this.resignButton.ProcessFrame(mouseInput: mouseInput, previousMouseInput: previousMouseInput);
 
 				if (hasClickedResignButton)
+				{
+					soundOutput.PlaySound(ChessSound.Click);
 					return new ResignConfirmationFrame(globalState: this.globalState, sessionState: this.sessionState, underlyingFrame: this);
+				}
+
+				bool hasClickedViewObjectivesButton = this.viewObjectivesButton.ProcessFrame(mouseInput: mouseInput, previousMouseInput: previousMouseInput);
+				if (hasClickedViewObjectivesButton)
+				{
+					this.globalState.SaveData(sessionState: this.sessionState, soundVolume: soundOutput.GetSoundVolume());
+					soundOutput.PlaySound(ChessSound.Click);
+					return new ViewObjectivesFrame(globalState: this.globalState, sessionState: this.sessionState);
+				}
+
+				bool hasClickedViewHacksButton = this.viewHacksButton.ProcessFrame(mouseInput: mouseInput, previousMouseInput: previousMouseInput);
+				if (hasClickedViewHacksButton)
+				{
+					this.globalState.SaveData(sessionState: this.sessionState, soundVolume: soundOutput.GetSoundVolume());
+					soundOutput.PlaySound(ChessSound.Click);
+					return new ViewHacksFrame(globalState: this.globalState, sessionState: this.sessionState);
+				}
 			}
 			
-			bool hasClicked = this.settingsIcon.ProcessFrame(mouseInput: mouseInput, previousMouseInput: previousMouseInput, ignoreMouse: isHoverOverPanel, displayProcessing: displayProcessing);
+			bool hasClicked = this.settingsIcon.ProcessFrame(mouseInput: mouseInput, previousMouseInput: previousMouseInput, ignoreMouse: isHoverOverPanel, displayProcessing: displayProcessing).HasClicked;
 
 			if (hasClicked && !isWaitingForFinalBattleVictoryPanel)
+			{
+				this.globalState.SaveData(sessionState: this.sessionState, soundVolume: soundOutput.GetSoundVolume());
+				soundOutput.PlaySound(ChessSound.Click);
 				return new SettingsMenuFrame(globalState: this.globalState, sessionState: this.sessionState, underlyingFrame: this, showPausedText: true);
-			
+			}
+
+			if (this.globalState.DebugMode)
+			{
+				if (keyboardInput.IsPressed(Key.One) && !previousKeyboardInput.IsPressed(Key.One))
+					this.globalState.UseDebugAI = !this.globalState.UseDebugAI;
+			}
+
 			return this;
 		}
 
@@ -172,9 +259,13 @@ namespace ChessCompStompWithHacksLibrary
 			if (gameLogic == null)
 				gameLogic = this.sessionState.GetMostRecentGameLogic();
 			gameLogic.Render(displayOutput: new TranslatedDisplayOutput<ChessImage, ChessFont>(display: displayOutput, xOffsetInPixels: GAME_LOGIC_X_OFFSET, yOffsetInPixels: GAME_LOGIC_Y_OFFSET));
-			
+
 			if (this.delayBeforeShowingPanel == null)
+			{
 				this.resignButton.Render(displayOutput: displayOutput);
+				this.viewObjectivesButton.Render(displayOutput: displayOutput);
+				this.viewHacksButton.Render(displayOutput: displayOutput);
+			}
 
 			this.settingsIcon.Render(displayOutput: displayOutput);
 

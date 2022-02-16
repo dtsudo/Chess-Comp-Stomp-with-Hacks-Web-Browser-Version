@@ -35,12 +35,12 @@ namespace ChessCompStompWithHacksLibrary
 				width: buttonWidth,
 				height: buttonHeight,
 				backgroundColor: new DTColor(200, 200, 200),
-				hoverColor: new DTColor(250, 249, 200),
-				clickColor: new DTColor(252, 251, 154),
+				hoverColor: ColorThemeUtil.GetHoverColor(colorTheme: sessionState.GetColorTheme()),
+				clickColor: ColorThemeUtil.GetClickColor(colorTheme: sessionState.GetColorTheme()),
 				text: "Yes",
 				textXOffset: 47,
 				textYOffset: 8,
-				font: ChessFont.Fetamont20Pt);
+				font: ChessFont.ChessFont20Pt);
 
 			this.cancelButton = new Button(
 				x: PANEL_X + 250,
@@ -48,12 +48,12 @@ namespace ChessCompStompWithHacksLibrary
 				width: buttonWidth,
 				height: buttonHeight,
 				backgroundColor: new DTColor(200, 200, 200),
-				hoverColor: new DTColor(250, 249, 200),
-				clickColor: new DTColor(252, 251, 154),
+				hoverColor: ColorThemeUtil.GetHoverColor(colorTheme: sessionState.GetColorTheme()),
+				clickColor: ColorThemeUtil.GetClickColor(colorTheme: sessionState.GetColorTheme()),
 				text: "No",
 				textXOffset: 55,
 				textYOffset: 8,
-				font: ChessFont.Fetamont20Pt);
+				font: ChessFont.ChessFont20Pt);
 		}
 
 		public void ProcessExtraTime(int milliseconds)
@@ -70,8 +70,11 @@ namespace ChessCompStompWithHacksLibrary
 			IMusicProcessing musicProcessing)
 		{
 			if (keyboardInput.IsPressed(Key.Esc) && !previousKeyboardInput.IsPressed(Key.Esc))
-				return this.underlyingFrame;
-			
+			{
+				soundOutput.PlaySound(ChessSound.Click);
+				return new TitleScreenFrame(globalState: this.globalState, sessionState: this.sessionState);
+			}
+
 			bool isConfirmClicked = this.confirmButton.ProcessFrame(
 				mouseInput: mouseInput,
 				previousMouseInput: previousMouseInput);
@@ -83,11 +86,16 @@ namespace ChessCompStompWithHacksLibrary
 			if (isConfirmClicked)
 			{
 				this.sessionState.ClearData();
-				return this.underlyingFrame;
+				this.globalState.SaveData(sessionState: this.sessionState, soundVolume: soundOutput.GetSoundVolume());
+				soundOutput.PlaySound(ChessSound.Click);
+				return new TitleScreenFrame(globalState: this.globalState, sessionState: this.sessionState);
 			}
 
 			if (isCancelClicked)
-				return this.underlyingFrame;
+			{
+				soundOutput.PlaySound(ChessSound.Click);
+				return new TitleScreenFrame(globalState: this.globalState, sessionState: this.sessionState);
+			}
 
 			return this;
 		}
@@ -129,7 +137,7 @@ namespace ChessCompStompWithHacksLibrary
 				x: PANEL_X + 27,
 				y: PANEL_Y + 132,
 				text: "Are you sure you want to reset" + "\n" + "your progress?",
-				font: ChessFont.Fetamont20Pt,
+				font: ChessFont.ChessFont20Pt,
 				color: DTColor.Black());
 
 			this.confirmButton.Render(displayOutput: displayOutput);

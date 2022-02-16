@@ -52,6 +52,10 @@ namespace ChessCompStompWithHacksLibrary
 
 		private Button backButton;
 
+		private Credits_DesignAndCoding creditsDesignAndCoding;
+		private Credits_Images creditsImages;
+		private Credits_Font creditsFont;
+
 		public CreditsFrame(GlobalState globalState, SessionState sessionState)
 		{
 			this.globalState = globalState;
@@ -61,16 +65,16 @@ namespace ChessCompStompWithHacksLibrary
 			this.hoverTab = null;
 			this.clickTab = null;
 
+			this.creditsDesignAndCoding = new Credits_DesignAndCoding(colorTheme: sessionState.GetColorTheme(), height: 450, isWebBrowserVersion: globalState.IsWebBrowserVersion);
+			this.creditsImages = new Credits_Images(colorTheme: sessionState.GetColorTheme(), height: 450);
+			this.creditsFont = new Credits_Font(colorTheme: sessionState.GetColorTheme(), height: 450);
+
 			this.tabButtons = new List<TabButton>();
 			this.tabButtons.Add(new TabButton(x: 20, y: 569, width: 234, height: 40, tab: Tab.DesignAndCoding, tabName: "Design and coding"));
 			this.tabButtons.Add(new TabButton(x: 254, y: 569, width: 103, height: 40, tab: Tab.Images, tabName: "Images"));
 			this.tabButtons.Add(new TabButton(x: 357, y: 569, width: 82, height: 40, tab: Tab.Font, tabName: "Font"));
-
-			if (this.globalState.ShowSoundAndMusicVolumePicker)
-			{
-				this.tabButtons.Add(new TabButton(x: 439, y: 569, width: 96, height: 40, tab: Tab.Sound, tabName: "Sound"));
-				this.tabButtons.Add(new TabButton(x: 535, y: 569, width: 90, height: 40, tab: Tab.Music, tabName: "Music"));
-			}
+			this.tabButtons.Add(new TabButton(x: 439, y: 569, width: 96, height: 40, tab: Tab.Sound, tabName: "Sound"));
+			this.tabButtons.Add(new TabButton(x: 535, y: 569, width: 90, height: 40, tab: Tab.Music, tabName: "Music"));
 
 			this.backButton = new Button(
 				x: 780,
@@ -78,12 +82,12 @@ namespace ChessCompStompWithHacksLibrary
 				width: 200,
 				height: 80,
 				backgroundColor: new DTColor(235, 235, 235),
-				hoverColor: new DTColor(250, 249, 200),
-				clickColor: new DTColor(252, 251, 154),
+				hoverColor: ColorThemeUtil.GetHoverColor(colorTheme: sessionState.GetColorTheme()),
+				clickColor: ColorThemeUtil.GetClickColor(colorTheme: sessionState.GetColorTheme()),
 				text: "Back",
 				textXOffset: 67,
 				textYOffset: 28,
-				font: ChessFont.Fetamont20Pt);
+				font: ChessFont.ChessFont20Pt);
 		}
 
 		public IFrame<ChessImage, ChessFont, ChessSound, ChessMusic> GetNextFrame(
@@ -114,17 +118,83 @@ namespace ChessCompStompWithHacksLibrary
 			if (this.clickTab != null && !mouseInput.IsLeftMouseButtonPressed() && previousMouseInput.IsLeftMouseButtonPressed())
 			{
 				if (this.hoverTab.HasValue && this.hoverTab.Value == this.clickTab.Value)
+				{
+					soundOutput.PlaySound(ChessSound.Click);
 					this.selectedTab = this.clickTab.Value;
+				}
 
 				this.clickTab = null;
 			}
 
 			if (keyboardInput.IsPressed(Key.Esc) && !previousKeyboardInput.IsPressed(Key.Esc))
+			{
+				soundOutput.PlaySound(ChessSound.Click);
 				return new TitleScreenFrame(globalState: this.globalState, sessionState: this.sessionState);
+			}
 
 			bool clickedBackButton = this.backButton.ProcessFrame(mouseInput: mouseInput, previousMouseInput: previousMouseInput);
 			if (clickedBackButton)
+			{
+				soundOutput.PlaySound(ChessSound.Click);
 				return new TitleScreenFrame(globalState: this.globalState, sessionState: this.sessionState);
+			}
+
+			IMouse translatedMouse = new TranslatedMouse(mouse: mouseInput, xOffset: -20, yOffset: -120);
+			IMouse translatedPreviousMouse = new TranslatedMouse(mouse: previousMouseInput, xOffset: -20, yOffset: -120);
+
+			if (this.selectedTab == Tab.DesignAndCoding)
+			{
+				bool clickedViewLicenseButton = this.creditsDesignAndCoding.ProcessFrame(
+					mouseInput: translatedMouse, 
+					previousMouseInput: translatedPreviousMouse, 
+					soundOutput: soundOutput);
+
+				if (clickedViewLicenseButton)
+				{
+					soundOutput.PlaySound(ChessSound.Click);
+					return new ViewLicenseTextFrame(
+						globalState: this.globalState,
+						sessionState: this.sessionState,
+						text: Credits_DesignAndCoding_LicenseText.GetLicenseTextForBridge(),
+						underlyingFrame: this);
+				}
+			}
+
+			if (this.selectedTab == Tab.Images)
+			{
+				bool clickedViewLicenseButton = this.creditsImages.ProcessFrame(
+					mouseInput: translatedMouse, 
+					previousMouseInput: translatedPreviousMouse, 
+					soundOutput: soundOutput);
+
+				if (clickedViewLicenseButton)
+				{
+					soundOutput.PlaySound(ChessSound.Click);
+					return new ViewLicenseTextFrame(
+						globalState: this.globalState,
+						sessionState: this.sessionState,
+						text: Credits_Images_LicenseText.GetLicenseTextForChessPieceImages(),
+						underlyingFrame: this);
+				}
+			}
+
+			if (this.selectedTab == Tab.Font)
+			{
+				bool clickedViewLicenseButton = this.creditsFont.ProcessFrame(
+					mouseInput: translatedMouse, 
+					previousMouseInput: translatedPreviousMouse, 
+					soundOutput: soundOutput);
+
+				if (clickedViewLicenseButton)
+				{
+					soundOutput.PlaySound(ChessSound.Click);
+					return new ViewLicenseTextFrame(
+						globalState: this.globalState,
+						sessionState: this.sessionState,
+						text: Credits_Font_LicenseText.GetLicenseText(),
+						underlyingFrame: this);
+				}
+			}
 
 			return this;
 		}
@@ -152,7 +222,7 @@ namespace ChessCompStompWithHacksLibrary
 				x: 422,
 				y: 675,
 				text: "Credits",
-				font: ChessFont.Fetamont32Pt,
+				font: ChessFont.ChessFont32Pt,
 				color: DTColor.Black());
 			
 			displayOutput.DrawRectangle(
@@ -178,9 +248,9 @@ namespace ChessCompStompWithHacksLibrary
 				if (tabButton.Tab == this.selectedTab)
 					backgroundColor = DTColor.White();
 				else if (this.clickTab.HasValue && this.clickTab.Value == tabButton.Tab)
-					backgroundColor = new DTColor(252, 251, 154);
+					backgroundColor = ColorThemeUtil.GetClickColor(colorTheme: this.sessionState.GetColorTheme());
 				else if (this.hoverTab.HasValue && this.hoverTab.Value == tabButton.Tab)
-					backgroundColor = new DTColor(250, 249, 200);
+					backgroundColor = ColorThemeUtil.GetHoverColor(colorTheme: this.sessionState.GetColorTheme());
 				else
 					backgroundColor = new DTColor(200, 200, 200);
 
@@ -213,7 +283,7 @@ namespace ChessCompStompWithHacksLibrary
 					x: tabButton.X + 10,
 					y: tabButton.Y + tabButton.Height - 10,
 					text: tabButton.TabName,
-					font: ChessFont.Fetamont18Pt,
+					font: ChessFont.ChessFont18Pt,
 					color: DTColor.Black());
 			}
 
@@ -223,11 +293,11 @@ namespace ChessCompStompWithHacksLibrary
 				yOffsetInPixels: 120);
 
 			if (this.selectedTab == Tab.DesignAndCoding)
-				Credits_DesignAndCoding.Render(displayOutput: translatedDisplay, width: 960, height: 450, isWebBrowserVersion: this.globalState.IsWebBrowserVersion);
+				this.creditsDesignAndCoding.Render(displayOutput: translatedDisplay);
 			if (this.selectedTab == Tab.Images)
-				Credits_Images.Render(displayOutput: translatedDisplay, width: 960, height: 450);
+				this.creditsImages.Render(displayOutput: translatedDisplay);
 			if (this.selectedTab == Tab.Font)
-				Credits_Font.Render(displayOutput: translatedDisplay, width: 960, height: 450);
+				this.creditsFont.Render(displayOutput: translatedDisplay);
 			if (this.selectedTab == Tab.Sound)
 				Credits_Sound.Render(displayOutput: translatedDisplay, width: 960, height: 450);
 			if (this.selectedTab == Tab.Music)

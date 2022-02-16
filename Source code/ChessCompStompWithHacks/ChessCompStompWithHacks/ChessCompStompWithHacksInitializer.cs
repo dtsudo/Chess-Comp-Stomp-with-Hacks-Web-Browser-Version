@@ -16,6 +16,9 @@ namespace ChessCompStompWithHacks
 		private static ISoundOutput<ChessSound> soundOutput;
 		private static IMusic<ChessMusic> music;
 		
+		private static DisplayLogger displayLogger;
+		private static bool shouldRenderDisplayLogger;
+		
 		private static IFrame<ChessImage, ChessFont, ChessSound, ChessMusic> frame;
 		
 		private static bool hasInitializedClearCanvasJavascript;
@@ -64,11 +67,19 @@ namespace ChessCompStompWithHacks
 		{
 			hasInitializedClearCanvasJavascript = false;
 			
+			shouldRenderDisplayLogger = true;
+			
 			IDTLogger logger;
 			if (debugMode)
-				logger = new ConsoleLogger();
+			{
+				displayLogger = new DisplayLogger(x: 5, y: 95);
+				logger = displayLogger;
+			}
 			else
+			{
+				displayLogger = null;
 				logger = new EmptyLogger();
+			}
 
 			GlobalState globalState = new GlobalState(
 					fps: fps,
@@ -76,10 +87,11 @@ namespace ChessCompStompWithHacks
 					guidGenerator: new GuidGenerator(guidString: "94197619109494365160"),
 					logger: logger,
 					timer: new SimpleTimer(),
+					fileIO: new BridgeFileIO(),
 					isWebBrowserVersion: true,
 					debugMode: debugMode,
-					initialMusicVolume: null,
-					showSoundAndMusicVolumePicker: false);
+					useDebugAI: false,
+					initialMusicVolume: null);
 			
 			frame = ChessCompStompWithHacks.GetFirstFrame(globalState: globalState);
 
@@ -96,6 +108,8 @@ namespace ChessCompStompWithHacks
 			ClearCanvas();
 			frame.Render(display);
 			frame.RenderMusic(music);
+			if (displayLogger != null && shouldRenderDisplayLogger)
+				displayLogger.Render(displayOutput: display, font: ChessFont.ChessFont14Pt, color: DTColor.Black());
 		}
 		
 		public static void ProcessExtraTime(int milliseconds)
@@ -114,6 +128,11 @@ namespace ChessCompStompWithHacks
 			ClearCanvas();
 			frame.Render(display);
 			frame.RenderMusic(music);
+			if (displayLogger != null && shouldRenderDisplayLogger)
+				displayLogger.Render(displayOutput: display, font: ChessFont.ChessFont14Pt, color: DTColor.Black());
+			
+			if (currentKeyboard.IsPressed(Key.L) && !previousKeyboard.IsPressed(Key.L))
+				shouldRenderDisplayLogger = !shouldRenderDisplayLogger;
 			
 			previousKeyboard = new CopiedKeyboard(currentKeyboard);
 			previousMouse = new CopiedMouse(currentMouse);

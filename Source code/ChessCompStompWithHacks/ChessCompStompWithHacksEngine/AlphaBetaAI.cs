@@ -20,6 +20,7 @@ namespace ChessCompStompWithHacksEngine
 		private IEnumerator alphaBetaProcess;
 		private Move bestMoveFoundSoFar;
 		private int? depthOfBestMoveFoundSoFar;
+		private string bestMoveLogString;
 
 		private List<Move> topLevelMoves;
 
@@ -43,6 +44,7 @@ namespace ChessCompStompWithHacksEngine
 				this.alphaBetaProcess = null;
 				this.bestMoveFoundSoFar = result.Moves[random.NextInt(result.Moves.Count)];
 				this.depthOfBestMoveFoundSoFar = 0;
+				this.bestMoveLogString = "Found best move at depth 0.";
 
 				List<Move> moves = new List<Move>(result.Moves);
 				moves.Shuffle(random: random);
@@ -62,6 +64,7 @@ namespace ChessCompStompWithHacksEngine
 				this.alphaBetaProcess = null;
 				this.bestMoveFoundSoFar = null;
 				this.depthOfBestMoveFoundSoFar = null;
+				this.bestMoveLogString = null;
 
 				this.topLevelMoves = null;
 			}
@@ -76,6 +79,10 @@ namespace ChessCompStompWithHacksEngine
 		{
 			if (this.bestMoveFoundSoFar == null)
 				throw new Exception();
+			
+			if (this.bestMoveLogString != null)
+				this.logger.WriteLine(this.bestMoveLogString);
+
 			return this.bestMoveFoundSoFar;
 		}
 
@@ -176,8 +183,8 @@ namespace ChessCompStompWithHacksEngine
 
 			if (bestMove == null)
 				throw new Exception();
-
-			this.logger.WriteLine("Found best move at depth " + depth.ToStringCultureInvariant() + " with score: " + (gameState.IsWhiteTurn ? best.Value.ToStringCultureInvariant() : (-best.Value).ToStringCultureInvariant()));
+			
+			this.bestMoveLogString = "Found best move at depth " + depth.ToStringCultureInvariant() + " with score: " + (gameState.IsWhiteTurn ? best.Value.ToStringCultureInvariant() : (-best.Value).ToStringCultureInvariant());
 			yield return bestMove;
 			yield break;
 		}

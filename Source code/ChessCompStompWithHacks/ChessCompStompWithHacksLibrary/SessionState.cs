@@ -9,6 +9,8 @@ namespace ChessCompStompWithHacksLibrary
 	{
 		private class Data
 		{
+			public const int MAX_NUMBER_OF_WINS = 50000; // arbitrary
+
 			public Data()
 			{
 				this.ResearchedHacks = new HashSet<Hack>();
@@ -22,6 +24,10 @@ namespace ChessCompStompWithHacksLibrary
 
 				this.GameLogic = null;
 				this.MostRecentGameLogic = null;
+
+				this.ObjectivesThatWereAlreadyCompletedPriorToCurrentGame = new HashSet<Objective>();
+
+				this.ColorTheme = ColorTheme.Initial;
 			}
 
 			/// <summary>
@@ -38,9 +44,108 @@ namespace ChessCompStompWithHacksLibrary
 			public bool HasShownFinalBattleVictoryPanel;
 			public HashSet<Hack> ResearchedHacks;
 			public HashSet<Objective> CompletedObjectives;
+			public HashSet<Objective> ObjectivesThatWereAlreadyCompletedPriorToCurrentGame;
+
+			public ColorTheme ColorTheme;
 
 			public GameLogic GameLogic;
 			public GameLogic MostRecentGameLogic;
+
+			/// <summary>
+			/// Can possibly throw DTDeserializationException
+			/// </summary>
+			public static Data TryDeserializeEverythingExceptGameLogic(ByteList.Iterator iterator)
+			{
+				Data data = new Data();
+
+				data.StartTime = iterator.TryPopNullableLong();
+
+				data.NumberOfWins = iterator.TryPopInt();
+				
+				if (data.NumberOfWins < 0 || data.NumberOfWins > MAX_NUMBER_OF_WINS)
+					throw new DTDeserializationException();
+
+				data.WasPlayerWhiteInPreviousGame = iterator.TryPopNullableBool();
+
+				data.HasShownAIHackMessage = iterator.TryPopBool();
+
+				data.HasShownFinalBattleMessage = iterator.TryPopBool();
+				
+				data.HasShownFinalBattleVictoryPanel = iterator.TryPopBool();
+
+				HashSet<int> researchedHackIds = iterator.TryPopIntSet();
+
+				if (researchedHackIds == null)
+					throw new DTDeserializationException();
+
+				data.ResearchedHacks = new HashSet<Hack>();
+				foreach (int researchedHackId in researchedHackIds)
+				{
+					Hack? hack = HackUtil.GetHackFromHackId(hackId: researchedHackId);
+
+					if (hack == null)
+						throw new DTDeserializationException();
+
+					data.ResearchedHacks.Add(hack.Value);
+				}
+				
+				HashSet<int> completedObjectiveIds = iterator.TryPopIntSet();
+
+				if (completedObjectiveIds == null)
+					throw new DTDeserializationException();
+
+				data.CompletedObjectives = new HashSet<Objective>();
+				foreach (int completedObjectiveId in completedObjectiveIds)
+				{
+					Objective? objective = ObjectiveUtil.GetObjectiveFromObjectiveId(objectiveId: completedObjectiveId);
+
+					if (objective == null)
+						throw new DTDeserializationException();
+
+					data.CompletedObjectives.Add(objective.Value);
+				}
+
+				data.ObjectivesThatWereAlreadyCompletedPriorToCurrentGame = new HashSet<Objective>(data.CompletedObjectives);
+
+				ColorTheme? colorTheme = ColorThemeUtil.GetColorThemeFromColorThemeId(iterator.TryPopInt());
+				if (colorTheme == null)
+					throw new DTDeserializationException();
+
+				data.ColorTheme = colorTheme.Value;
+
+				return data;
+			}
+
+			public void SerializeEverythingExceptGameLogic(ByteList.Builder list)
+			{
+				list.AddNullableLong(this.StartTime);
+
+				list.AddInt(this.NumberOfWins);
+
+				list.AddNullableBool(this.WasPlayerWhiteInPreviousGame);
+
+				list.AddBool(this.HasShownAIHackMessage);
+
+				list.AddBool(this.HasShownFinalBattleMessage);
+
+				list.AddBool(this.HasShownFinalBattleVictoryPanel);
+				
+				HashSet<int> researchedHackIds = new HashSet<int>();
+				foreach (Hack researchedHack in this.ResearchedHacks)
+				{
+					researchedHackIds.Add(researchedHack.GetHackId());
+				}
+				list.AddIntSet(researchedHackIds);
+				
+				HashSet<int> completedObjectiveIds = new HashSet<int>();
+				foreach (Objective completedObjective in this.CompletedObjectives)
+				{
+					completedObjectiveIds.Add(completedObjective.GetObjectiveId());
+				}
+				list.AddIntSet(completedObjectiveIds);
+
+				list.AddInt(this.ColorTheme.GetColorThemeId());
+			}
 		}
 
 		public enum AIHackLevel
@@ -63,7 +168,21 @@ namespace ChessCompStompWithHacksLibrary
 			this.timer = timer;
 			this.data = new Data();
 		}
-		
+
+		public void SerializeEverythingExceptGameLogic(ByteList.Builder list)
+		{
+			this.data.SerializeEverythingExceptGameLogic(list: list);
+		}
+
+		/// <summary>
+		/// Can possibly throw DTDeserializationException
+		/// </summary>
+		public void TryDeserializeEverythingExceptGameLogic(ByteList.Iterator iterator)
+		{
+			Data data = Data.TryDeserializeEverythingExceptGameLogic(iterator: iterator);
+			this.data = data;
+		}
+
 		public void ClearData()
 		{
 			this.data = new Data();
@@ -71,7 +190,8 @@ namespace ChessCompStompWithHacksLibrary
 
 		public void Debug_AddWin()
 		{
-			this.data.NumberOfWins++;
+			if (this.data.NumberOfWins < Data.MAX_NUMBER_OF_WINS)
+				this.data.NumberOfWins++;
 		}
 
 		public GameLogic GetGameLogic()
@@ -84,20 +204,40 @@ namespace ChessCompStompWithHacksLibrary
 			return this.data.MostRecentGameLogic;
 		}
 
-		public void AddCompletedObjectives(HashSet<Objective> completedObjectives)
+		public ColorTheme GetColorTheme()
 		{
+			return this.data.ColorTheme;
+		}
+
+		/// <summary>
+		/// Returns true iff at least one objective was actually newly completed
+		/// </summary>
+		public bool AddCompletedObjectives(HashSet<Objective> completedObjectives)
+		{
+			bool hasCompletedANewObjective = false;
+
 			foreach (Objective completedObjective in completedObjectives)
 			{
-				this.data.CompletedObjectives.Add(completedObjective);
+				bool didAdd = this.data.CompletedObjectives.Add(completedObjective);
+
+				if (didAdd)
+					hasCompletedANewObjective = true;
 			}
+
+			return hasCompletedANewObjective;
 		}
 
 		public HashSet<Objective> GetCompletedObjectives()
 		{
 			return new HashSet<Objective>(this.data.CompletedObjectives);
 		}
-		
-		public void StartNewGame()
+
+		public HashSet<Objective> GetObjectivesThatWereAlreadyCompletedPriorToCurrentGame()
+		{
+			return new HashSet<Objective>(this.data.ObjectivesThatWereAlreadyCompletedPriorToCurrentGame);
+		}
+
+		public void StartNewSession()
 		{
 			this.data.StartTime = this.timer.GetNumberOfMicroSeconds();
 		}
@@ -166,7 +306,10 @@ namespace ChessCompStompWithHacksLibrary
 		public void CompleteGame(bool didPlayerWin)
 		{
 			if (didPlayerWin)
-				this.data.NumberOfWins++;
+			{
+				if (this.data.NumberOfWins < Data.MAX_NUMBER_OF_WINS)
+					this.data.NumberOfWins++;
+			}
 
 			this.data.MostRecentGameLogic = this.data.GameLogic;
 			this.data.GameLogic = null;
@@ -174,6 +317,8 @@ namespace ChessCompStompWithHacksLibrary
 
 		public IFrame<ChessImage, ChessFont, ChessSound, ChessMusic> StartGame(bool isFinalBattle, GlobalState globalState)
 		{
+			this.data.ObjectivesThatWereAlreadyCompletedPriorToCurrentGame = new HashSet<Objective>(this.data.CompletedObjectives);
+
 			bool isPlayerWhite;
 
 			if (this.data.WasPlayerWhiteInPreviousGame == null)
@@ -183,11 +328,14 @@ namespace ChessCompStompWithHacksLibrary
 
 			if (isFinalBattle)
 			{
+				this.data.ColorTheme = ColorTheme.Final;
+
 				this.data.GameLogic = new GameLogic(
 					globalState: globalState,
 					isPlayerWhite: isPlayerWhite,
 					researchedHacks: new DTImmutableList<Hack>(this.data.ResearchedHacks),
-					aiHackLevel: AIHackLevel.FinalBattle);
+					aiHackLevel: AIHackLevel.FinalBattle,
+					colorTheme: this.data.ColorTheme);
 				this.data.MostRecentGameLogic = this.data.GameLogic;
 
 				this.data.WasPlayerWhiteInPreviousGame = isPlayerWhite;
@@ -201,19 +349,34 @@ namespace ChessCompStompWithHacksLibrary
 			AIHackLevel aiHackLevel;
 
 			if (!this.data.HasShownAIHackMessage && this.data.ResearchedHacks.Count == 0 || this.data.NumberOfWins <= 1)
+			{
 				aiHackLevel = AIHackLevel.Initial;
+			}
 			else if (this.data.NumberOfWins <= 3)
+			{
 				aiHackLevel = AIHackLevel.UpgradedOnce;
+				if (this.data.ColorTheme == ColorTheme.Initial)
+					this.data.ColorTheme = ColorTheme.Progress1;
+			}
 			else if (this.data.NumberOfWins <= 5)
+			{
 				aiHackLevel = AIHackLevel.UpgradedTwice;
+				if (this.data.ColorTheme == ColorTheme.Initial || this.data.ColorTheme == ColorTheme.Progress1)
+					this.data.ColorTheme = ColorTheme.Progress2;
+			}
 			else
+			{
 				aiHackLevel = AIHackLevel.UpgradedThrice;
+				if (this.data.ColorTheme == ColorTheme.Initial || this.data.ColorTheme == ColorTheme.Progress1 || this.data.ColorTheme == ColorTheme.Progress2)
+					this.data.ColorTheme = ColorTheme.Progress3;
+			}
 
 			this.data.GameLogic = new GameLogic(
 				globalState: globalState,
 				isPlayerWhite: isPlayerWhite,
 				researchedHacks: new DTImmutableList<Hack>(this.data.ResearchedHacks),
-				aiHackLevel: aiHackLevel);
+				aiHackLevel: aiHackLevel,
+				colorTheme: this.data.ColorTheme);
 			this.data.MostRecentGameLogic = this.data.GameLogic;
 			
 			this.data.WasPlayerWhiteInPreviousGame = isPlayerWhite;

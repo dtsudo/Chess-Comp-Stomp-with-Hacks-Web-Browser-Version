@@ -22,6 +22,8 @@ namespace ChessCompStompWithHacks
 					var fontFamilyCount = 0;
 					var numberOfFontObjectsLoaded = 0;
 					
+					var finishedLoading = false;
+					
 					var loadFonts = function (fontNames) {
 						var fontNamesArray = fontNames.split(',');
 						
@@ -51,10 +53,11 @@ namespace ChessCompStompWithHacks
 							})(font));
 						}
 						
-						return numberOfFontObjects === numberOfFontObjectsLoaded;
+						finishedLoading = numberOfFontObjects === numberOfFontObjectsLoaded;
+						return finishedLoading;
 					};
 						
-					var drawText = function (x, y, str, fontName, javascriptFontSize, javascriptLineHeight, red, green, blue, alpha) {
+					var drawText = function (x, y, str, fontName, javascriptFontSize, lineHeight, red, green, blue, alpha) {
 						if (context === null) {
 							var canvas = document.getElementById('chessCompStompWithHacksCanvas');
 							
@@ -64,7 +67,7 @@ namespace ChessCompStompWithHacks
 							context = canvas.getContext('2d');
 						}
 						
-						javascriptLineHeight = parseFloat(javascriptLineHeight);
+						lineHeight = parseFloat(lineHeight);
 						
 						context.textBaseline = 'top';
 						context.fillStyle = 'rgba(' + red.toString() + ', ' + green.toString() + ', ' + blue.toString() + ', ' + (alpha / 255).toString() + ')';
@@ -76,13 +79,21 @@ namespace ChessCompStompWithHacks
 						
 						for (var i = 0; i < strArray.length; i++) {
 							context.fillText(strArray[i], x, Math.round(lineY));
-							lineY += javascriptLineHeight;
+							lineY += lineHeight;
 						}
+					};
+						
+					var tryDrawText = function (x, y, str, fontName, javascriptFontSize, lineHeight, red, green, blue, alpha) {
+						if (!finishedLoading)
+							return;
+						
+						drawText(x, y, str, fontName, javascriptFontSize, lineHeight, red, green, blue, alpha);
 					};
 						
 					return {
 						loadFonts: loadFonts,
-						drawText: drawText
+						drawText: drawText,
+						tryDrawText: tryDrawText
 					};
 				})());
 			");
@@ -131,7 +142,32 @@ namespace ChessCompStompWithHacks
 				text,
 				fontInfo.WoffFontFilename,
 				fontInfo.JavascriptFontSize,
-				fontInfo.JavascriptLineHeight,
+				fontInfo.LineHeight,
+				red,
+				green,
+				blue,
+				alpha);
+		}
+		
+		public void TryDrawText(int x, int y, string text, ChessFont font, DTColor color)
+		{
+			y = ChessCompStompWithHacks.WINDOW_HEIGHT - y - 1;
+
+			int red = color.R;
+			int green = color.G;
+			int blue = color.B;
+			int alpha = color.Alpha;
+			
+			ChessFontUtil.FontInfo fontInfo = font.GetFontInfo();
+			
+			Script.Call(
+				"window.ChessCompStompWithHacksBridgeDisplayFontJavascript.tryDrawText",
+				x,
+				y,
+				text,
+				fontInfo.WoffFontFilename,
+				fontInfo.JavascriptFontSize,
+				fontInfo.LineHeight,
 				red,
 				green,
 				blue,

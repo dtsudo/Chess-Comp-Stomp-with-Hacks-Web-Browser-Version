@@ -28,20 +28,20 @@ namespace ChessCompStompWithHacks
 						}
 						
 						var xPosition = (e.pageX !== null && e.pageX !== undefined ? e.pageX : e.clientX) - canvas.offsetLeft;
+												
+						if (xPosition < -5)
+							xPosition = -5;
 						
-						if (xPosition < 0)
-							xPosition = 0;
-						
-						if (xPosition > canvas.width)
-							xPosition = canvas.width;
+						if (xPosition > canvas.width + 5)
+							xPosition = canvas.width + 5;
 						
 						var yPosition = (e.pageY !== null && e.pageY !== undefined ? e.pageY : e.clientY) - canvas.offsetTop;
 						
-						if (yPosition < 0)
-							yPosition = 0;
+						if (yPosition < -5)
+							yPosition = -5;
 						
-						if (yPosition > canvas.height)
-							yPosition = canvas.height;
+						if (yPosition > canvas.height + 5)
+							yPosition = canvas.height + 5;
 						
 						mouseXPosition = xPosition;
 						mouseYPosition = canvas.height - yPosition - 1;
@@ -61,6 +61,21 @@ namespace ChessCompStompWithHacks
 						else
 							isRightMouseButtonPressed = false;
 					};
+										
+					var disableContextMenu;
+					disableContextMenu = function () {
+						if (canvas === null) {
+							canvas = document.getElementById('chessCompStompWithHacksCanvas');
+							
+							if (canvas === null) {
+								setTimeout(disableContextMenu, 50);
+								return;
+							}
+						}
+						
+						canvas.addEventListener('contextmenu', function (e) { e.preventDefault(); });
+					};
+					disableContextMenu();
 					
 					document.addEventListener('mousemove', function (e) { mouseMoveHandler(e); checkMouseButtonHandler(e); }, false);
 					document.addEventListener('mousedown', function (e) { checkMouseButtonHandler(e); }, false);

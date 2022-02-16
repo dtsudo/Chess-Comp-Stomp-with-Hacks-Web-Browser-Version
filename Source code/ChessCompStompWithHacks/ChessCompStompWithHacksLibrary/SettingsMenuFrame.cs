@@ -21,14 +21,10 @@ namespace ChessCompStompWithHacksLibrary
 		private const int PANEL_WIDTH = 300;
 		private const int PANEL_HEIGHT_WITH_PAUSE = 380;
 		private const int PANEL_HEIGHT_WITHOUT_PAUSE = 263;
-		private const int PANEL_HEIGHT_WITH_PAUSE_WITHOUT_VOLUME_CONTROL = 257;
-		private const int PANEL_HEIGHT_WITHOUT_PAUSE_WITHOUT_VOLUME_CONTROL = 140;
 
 		private const int PANEL_X = (ChessCompStompWithHacks.WINDOW_WIDTH - PANEL_WIDTH) / 2;
 		private const int PANEL_Y_WITH_PAUSE = (ChessCompStompWithHacks.WINDOW_HEIGHT - PANEL_HEIGHT_WITH_PAUSE) / 2;
 		private const int PANEL_Y_WITHOUT_PAUSE = (ChessCompStompWithHacks.WINDOW_HEIGHT - PANEL_HEIGHT_WITHOUT_PAUSE) / 2;
-		private const int PANEL_Y_WITH_PAUSE_WITHOUT_VOLUME_CONTROL = (ChessCompStompWithHacks.WINDOW_HEIGHT - PANEL_HEIGHT_WITH_PAUSE_WITHOUT_VOLUME_CONTROL) / 2;
-		private const int PANEL_Y_WITHOUT_PAUSE_WITHOUT_VOLUME_CONTROL = (ChessCompStompWithHacks.WINDOW_HEIGHT - PANEL_HEIGHT_WITHOUT_PAUSE_WITHOUT_VOLUME_CONTROL) / 2;
 
 		private const int BUTTON_WIDTH = 240;
 		private const int BUTTON_HEIGHT = 40;
@@ -45,17 +41,9 @@ namespace ChessCompStompWithHacksLibrary
 			this.underlyingFrame = underlyingFrame;
 
 			this.showPausedText = showPausedText;
-
-			if (globalState.ShowSoundAndMusicVolumePicker)
-			{
-				this.panelY = showPausedText ? PANEL_Y_WITH_PAUSE : PANEL_Y_WITHOUT_PAUSE;
-				this.panelHeight = showPausedText ? PANEL_HEIGHT_WITH_PAUSE : PANEL_HEIGHT_WITHOUT_PAUSE;
-			}
-			else
-			{
-				this.panelY = showPausedText ? PANEL_Y_WITH_PAUSE_WITHOUT_VOLUME_CONTROL : PANEL_Y_WITHOUT_PAUSE_WITHOUT_VOLUME_CONTROL;
-				this.panelHeight = showPausedText ? PANEL_HEIGHT_WITH_PAUSE_WITHOUT_VOLUME_CONTROL : PANEL_HEIGHT_WITHOUT_PAUSE_WITHOUT_VOLUME_CONTROL;
-			}
+			
+			this.panelY = showPausedText ? PANEL_Y_WITH_PAUSE : PANEL_Y_WITHOUT_PAUSE;
+			this.panelHeight = showPausedText ? PANEL_HEIGHT_WITH_PAUSE : PANEL_HEIGHT_WITHOUT_PAUSE;
 
 			this.continueButton = new Button(
 				x: PANEL_X + (PANEL_WIDTH - BUTTON_WIDTH) / 2,
@@ -63,12 +51,12 @@ namespace ChessCompStompWithHacksLibrary
 				width: BUTTON_WIDTH,
 				height: BUTTON_HEIGHT,
 				backgroundColor: new DTColor(200, 200, 200),
-				hoverColor: new DTColor(250, 249, 200),
-				clickColor: new DTColor(252, 251, 154),
+				hoverColor: ColorThemeUtil.GetHoverColor(colorTheme: sessionState.GetColorTheme()),
+				clickColor: ColorThemeUtil.GetClickColor(colorTheme: sessionState.GetColorTheme()),
 				text: "Continue",
 				textXOffset: 76,
 				textYOffset: 12,
-				font: ChessFont.Fetamont14Pt);
+				font: ChessFont.ChessFont14Pt);
 
 			this.backToTitleScreenButton = new Button(
 				x: PANEL_X + (PANEL_WIDTH - BUTTON_WIDTH) / 2,
@@ -76,16 +64,17 @@ namespace ChessCompStompWithHacksLibrary
 				width: BUTTON_WIDTH,
 				height: BUTTON_HEIGHT,
 				backgroundColor: new DTColor(200, 200, 200),
-				hoverColor: new DTColor(250, 249, 200),
-				clickColor: new DTColor(252, 251, 154),
+				hoverColor: ColorThemeUtil.GetHoverColor(colorTheme: sessionState.GetColorTheme()),
+				clickColor: ColorThemeUtil.GetClickColor(colorTheme: sessionState.GetColorTheme()),
 				text: "Return to title screen",
 				textXOffset: 11,
 				textYOffset: 12,
-				font: ChessFont.Fetamont14Pt);
+				font: ChessFont.ChessFont14Pt);
 		}
 
 		public void ProcessExtraTime(int milliseconds)
 		{
+			this.underlyingFrame.ProcessExtraTime(milliseconds: milliseconds);
 		}
 
 		public IFrame<ChessImage, ChessFont, ChessSound, ChessMusic> GetNextFrame(
@@ -104,28 +93,35 @@ namespace ChessCompStompWithHacksLibrary
 					initialSoundVolume: soundOutput.GetSoundVolume(),
 					initialMusicVolume: this.globalState.MusicVolume,
 					elapsedMicrosPerFrame: this.globalState.ElapsedMicrosPerFrame);
-
-			if (this.globalState.ShowSoundAndMusicVolumePicker)
-			{
-				this.soundAndMusicVolumePicker.ProcessFrame(mouseInput: mouseInput, previousMouseInput: previousMouseInput);
-				soundOutput.SetSoundVolume(this.soundAndMusicVolumePicker.GetCurrentSoundVolume());
-				this.globalState.MusicVolume = this.soundAndMusicVolumePicker.GetCurrentMusicVolume();
-			}
+			
+			this.soundAndMusicVolumePicker.ProcessFrame(mouseInput: mouseInput, previousMouseInput: previousMouseInput);
+			soundOutput.SetSoundVolume(this.soundAndMusicVolumePicker.GetCurrentSoundVolume());
+			this.globalState.MusicVolume = this.soundAndMusicVolumePicker.GetCurrentMusicVolume();
 
 			if (keyboardInput.IsPressed(Key.Esc) && !previousKeyboardInput.IsPressed(Key.Esc))
 			{
+				this.globalState.SaveData(sessionState: this.sessionState, soundVolume: soundOutput.GetSoundVolume());
+				soundOutput.PlaySound(ChessSound.Click);
 				return this.underlyingFrame;
 			}
 
 			bool clickedContinueButton = this.continueButton.ProcessFrame(mouseInput: mouseInput, previousMouseInput: previousMouseInput);
 
 			if (clickedContinueButton)
+			{
+				this.globalState.SaveData(sessionState: this.sessionState, soundVolume: soundOutput.GetSoundVolume());
+				soundOutput.PlaySound(ChessSound.Click);
 				return this.underlyingFrame;
+			}
 
 			bool clickedBackToTitleScreenButton = this.backToTitleScreenButton.ProcessFrame(mouseInput: mouseInput, previousMouseInput: previousMouseInput);
 
 			if (clickedBackToTitleScreenButton)
+			{
+				this.globalState.SaveData(sessionState: this.sessionState, soundVolume: soundOutput.GetSoundVolume());
+				soundOutput.PlaySound(ChessSound.Click);
 				return new TitleScreenFrame(globalState: this.globalState, sessionState: this.sessionState);
+			}
 
 			if (mouseInput.IsLeftMouseButtonPressed() && !previousMouseInput.IsLeftMouseButtonPressed())
 			{
@@ -133,7 +129,11 @@ namespace ChessCompStompWithHacksLibrary
 				int mouseY = mouseInput.GetY();
 
 				if (mouseX < PANEL_X || mouseX > PANEL_X + PANEL_WIDTH || mouseY < this.panelY || mouseY > this.panelY + this.panelHeight)
+				{
+					this.globalState.SaveData(sessionState: this.sessionState, soundVolume: soundOutput.GetSoundVolume());
+					soundOutput.PlaySound(ChessSound.Click);
 					return this.underlyingFrame;
+				}
 			}
 
 			return this;
@@ -173,17 +173,14 @@ namespace ChessCompStompWithHacksLibrary
 				fill: false);
 
 			if (this.soundAndMusicVolumePicker != null)
-			{
-				if (this.globalState.ShowSoundAndMusicVolumePicker)
-					this.soundAndMusicVolumePicker.Render(displayOutput: displayOutput);
-			}
+				this.soundAndMusicVolumePicker.Render(displayOutput: displayOutput);
 			
 			if (this.showPausedText)
 				displayOutput.DrawText(
 					x: PANEL_X + 72,
-					y: this.panelY + (this.globalState.ShowSoundAndMusicVolumePicker ? 362 : 239),
+					y: this.panelY + 362,
 					text: "Paused",
-					font: ChessFont.Fetamont32Pt,
+					font: ChessFont.ChessFont32Pt,
 					color: DTColor.Black());
 
 			this.continueButton.Render(displayOutput: displayOutput);

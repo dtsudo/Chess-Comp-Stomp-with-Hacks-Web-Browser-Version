@@ -12,6 +12,7 @@ namespace DTLibrary
 	{
 		void DrawRectangle(int x, int y, int width, int height, DTColor color, bool fill);
 		void DrawText(int x, int y, string text, FontEnum font, DTColor color);
+		void TryDrawText(int x, int y, string text, FontEnum font, DTColor color);
 		void DrawInitialLoadingScreen();
 		void DrawImage(ImageEnum image, int x, int y);
 		void DrawImageRotatedClockwise(ImageEnum image, int x, int y, int degreesScaled);
@@ -37,6 +38,13 @@ namespace DTLibrary
 		public abstract void DrawRectangle(int x, int y, int width, int height, DTColor color, bool fill);
 
 		public abstract void DrawText(int x, int y, string text, FontEnum font, DTColor color);
+
+		/// <summary>
+		/// Does the same thing as DrawText, except that:
+		/// * TryDrawText can be invoked even before LoadImages() returns true
+		/// * TryDrawText might or might not actually render the text
+		/// </summary>
+		public abstract void TryDrawText(int x, int y, string text, FontEnum font, DTColor color);
 
 		/// <summary>
 		/// Once this.DisposeImages() is invoked, this function can no longer be called.

@@ -38,6 +38,16 @@ namespace DTLibrary
 				color: color);
 		}
 
+		public void TryDrawText(int x, int y, string text, FontEnum font, DTColor color)
+		{
+			this.display.TryDrawText(
+				x: x + this.xOffsetInPixels,
+				y: y + this.yOffsetInPixels,
+				text: text,
+				font: font,
+				color: color);
+		}
+
 		public void DrawInitialLoadingScreen()
 		{
 			this.display.DrawInitialLoadingScreen();

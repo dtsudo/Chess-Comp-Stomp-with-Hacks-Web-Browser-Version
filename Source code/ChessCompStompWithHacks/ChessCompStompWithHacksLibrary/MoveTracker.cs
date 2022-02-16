@@ -36,17 +36,19 @@ namespace ChessCompStompWithHacksLibrary
 		}
 		
 		private List<MoveInfo> moves;
+		private ColorTheme colorTheme;
 
-		public MoveTracker()
+		public MoveTracker(ColorTheme colorTheme)
 		{
 			this.moves = new List<MoveInfo>();
+			this.colorTheme = colorTheme;
 		}
 
 		public MoveTracker AddMove(GameState originalGameState, Move move, ITimer timer)
 		{
 			GameState newGameState = MoveImplementation.ApplyMove(gameState: originalGameState, move: move);
 
-			MoveTracker newTracker = new MoveTracker();
+			MoveTracker newTracker = new MoveTracker(colorTheme: this.colorTheme);
 
 			newTracker.moves = new List<MoveInfo>(this.moves);
 
@@ -54,7 +56,8 @@ namespace ChessCompStompWithHacksLibrary
 				pieces: newGameState.Board,
 				kingInDangerSquare: ChessPiecesRendererUtil.GetKingInDangerSquare(gameState: newGameState),
 				previousMoveSquares: ChessPiecesRendererUtil.GetPreviousMoveSquares(originalGameState: originalGameState, move: move),
-				renderFromWhitePerspective: newGameState.IsPlayerWhite);
+				renderFromWhitePerspective: newGameState.IsPlayerWhite,
+				colorTheme: this.colorTheme);
 
 			NukeRenderer newGameStateNukeRenderer = NukeRenderer.GetNukeRenderer(
 				hasNukeAbility: newGameState.Abilities.HasTacticalNuke,
@@ -62,7 +65,8 @@ namespace ChessCompStompWithHacksLibrary
 				isNukeSelected: false,
 				isHoverOverNuke: null,
 				turnCount: newGameState.TurnCount,
-				timer: timer);
+				timer: timer,
+				colorTheme: this.colorTheme);
 
 			newTracker.moves.Add(new MoveInfo(originalGameState: originalGameState, newGameState: newGameState, newGameStateChessPiecesRenderer: newGameStateChessPiecesRenderer, newGameStateNukeRenderer: newGameStateNukeRenderer, move: move));
 

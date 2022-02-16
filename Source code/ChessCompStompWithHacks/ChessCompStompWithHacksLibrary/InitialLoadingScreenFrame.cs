@@ -2,6 +2,7 @@
 namespace ChessCompStompWithHacksLibrary
 {
 	using DTLibrary;
+	using System.Collections.Generic;
 
 	public class InitialLoadingScreenFrame : IFrame<ChessImage, ChessFont, ChessSound, ChessMusic>
 	{
@@ -54,8 +55,21 @@ namespace ChessCompStompWithHacksLibrary
 
 			if (!isDoneLoadingMusic)
 				return null;
+
+			SessionState sessionState = new SessionState(timer: this.globalState.Timer);
+
+			this.globalState.LoadSessionState(sessionState: sessionState);
+
+			int? soundVolume = this.globalState.LoadSoundVolume();
+			if (soundVolume.HasValue)
+				soundOutput.SetSoundVolume(soundVolume.Value);
+
+			this.globalState.LoadMusicVolume();
 			
-			return new TitleScreenFrame(globalState: this.globalState, sessionState: new SessionState(timer: this.globalState.Timer));
+			ChessMusic music = ChessMusic.TitleScreen;
+			this.globalState.MusicPlayer.SetMusic(music: music, volume: 100);
+
+			return new TitleScreenFrame(globalState: this.globalState, sessionState: sessionState);
 		}
 
 		public void ProcessMusic()

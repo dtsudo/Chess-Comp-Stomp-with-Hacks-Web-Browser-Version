@@ -9,16 +9,24 @@ namespace ChessCompStompWithHacksEngine
 		
 		private IChessAI underlyingAI;
 
-		public CompositeAI(GameState gameState, ITimer timer, IDTRandom random, IDTLogger logger)
+		public CompositeAI(GameState gameState, ITimer timer, IDTRandom random, IDTLogger logger, bool useDebugAI)
 		{
 			this.startTimeMicroSeconds = timer.GetNumberOfMicroSeconds();
-			
-			if (gameState.TurnCount <= 4)
-				this.underlyingAI = new RandomMoveAI(gameState: gameState, timer: timer, random: random);
-			else if (gameState.TurnCount <= 20)
-				this.underlyingAI = new EarlyGameAI(gameState: gameState, timer: timer, random: random, logger: logger);
+
+			ComputeMoves.Result result = ComputeMoves.GetMoves(gameState: gameState);
+			if (result.GameStatus == ComputeMoves.GameStatus.InProgress && result.Moves.Count == 1)
+				this.underlyingAI = new OnlyPossibleMoveAI(move: result.Moves[0], timer: timer, logger: logger);
+			else if (useDebugAI)
+				this.underlyingAI = new RandomMoveAI(gameState: gameState, timer: timer, random: random, logger: logger);
 			else
-				this.underlyingAI = new AlphaBetaAI(gameState: gameState, timer: timer, random: random, logger: logger);
+			{
+				if (gameState.TurnCount <= 4)
+					this.underlyingAI = new RandomMoveAI(gameState: gameState, timer: timer, random: random, logger: logger);
+				else if (gameState.TurnCount <= 20)
+					this.underlyingAI = new EarlyGameAI(gameState: gameState, timer: timer, random: random, logger: logger);
+				else
+					this.underlyingAI = new AlphaBetaAI(gameState: gameState, timer: timer, random: random, logger: logger);
+			}
 		}
 
 		public long GetStartTimeMicroSeconds()

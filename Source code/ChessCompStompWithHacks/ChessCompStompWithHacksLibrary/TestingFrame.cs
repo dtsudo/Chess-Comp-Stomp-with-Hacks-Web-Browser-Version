@@ -40,6 +40,12 @@ namespace ChessCompStompWithHacksLibrary
 			if (keyboardInput.IsPressed(Key.Three) && !previousKeyboardInput.IsPressed(Key.Three))
 				return new TestingFontFrame(globalState: this.globalState, sessionState: this.sessionState);
 
+			if (keyboardInput.IsPressed(Key.Four) && !previousKeyboardInput.IsPressed(Key.Four))
+				return new TestingSoundFrame(globalState: this.globalState, sessionState: this.sessionState);
+
+			if (keyboardInput.IsPressed(Key.Five) && !previousKeyboardInput.IsPressed(Key.Five))
+				return new TestingMusicFrame(globalState: this.globalState, sessionState: this.sessionState);
+
 			return this;
 		}
 		
@@ -55,8 +61,10 @@ namespace ChessCompStompWithHacksLibrary
 				y: ChessCompStompWithHacks.WINDOW_HEIGHT - 50,
 				text: "1) Test keyboard"
 					+ "\n" + "2) Test mouse"
-					+ "\n" + "3) Test font",
-				font: ChessFont.Fetamont16Pt,
+					+ "\n" + "3) Test font"
+					+ "\n" + "4) Test sound"
+					+ "\n" + "5) Test music",
+				font: ChessFont.ChessFont16Pt,
 				color: DTColor.Black());
 		}
 

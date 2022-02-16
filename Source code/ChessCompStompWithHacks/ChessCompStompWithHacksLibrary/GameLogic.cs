@@ -115,11 +115,14 @@ namespace ChessCompStompWithHacksLibrary
 		private int? moveTrackerRendererPositionIndex;
 
 		private ChessPiecesRenderer chessPiecesRenderer;
+		private ChessPiecesRendererPieceAnimation chessPiecesRendererPieceAnimation;
 		private PromotionPanel promotionPanel;
 		private int promotionPanelX;
 		private int promotionPanelY;
 		private NukeRenderer nukeRenderer;
 		private List<DisplayMove> promotionMoves;
+
+		private int nukeLaunchSoundCooldown;
 
 		// player clicked on a square (containing a player piece)
 		// -> should show locations that the piece can move to
@@ -141,6 +144,7 @@ namespace ChessCompStompWithHacksLibrary
 		private bool isPromotionPanelOpen;
 
 		private IChessAI chessAI;
+		private AIPondering aiPondering;
 
 		private ComputeMoves.GameStatus gameStatus;
 		private List<DisplayMove> possibleMoves;
@@ -158,23 +162,26 @@ namespace ChessCompStompWithHacksLibrary
 			GlobalState globalState,
 			bool isPlayerWhite,
 			DTImmutableList<Hack> researchedHacks,
-			SessionState.AIHackLevel aiHackLevel)
+			SessionState.AIHackLevel aiHackLevel,
+			ColorTheme colorTheme)
 		{
 			this.globalState = globalState;
 			this.gameState = NewGameCreation.CreateNewGame(
 				isPlayerWhite: isPlayerWhite,
 				researchedHacks: researchedHacks,
 				aiHackLevel: aiHackLevel);
-			this.moveTracker = new MoveTracker();
-			this.moveTrackerRenderer = MoveTrackerRenderer.GetMoveTrackerRenderer(moveTracker: this.moveTracker);
+			this.moveTracker = new MoveTracker(colorTheme: colorTheme);
+			this.moveTrackerRenderer = MoveTrackerRenderer.GetMoveTrackerRenderer(moveTracker: this.moveTracker, colorTheme: colorTheme);
 			this.moveTrackerRendererPositionIndex = null;
 
 			this.chessPiecesRenderer = ChessPiecesRenderer.GetChessPiecesRenderer(
 				pieces: this.gameState.Board,
 				kingInDangerSquare: null,
 				previousMoveSquares: DTImmutableList<ChessSquare>.EmptyList(),
-				renderFromWhitePerspective: this.gameState.IsPlayerWhite);
-			this.promotionPanel = PromotionPanel.GetPromotionPanel(isWhite: this.gameState.IsPlayerWhite);
+				renderFromWhitePerspective: this.gameState.IsPlayerWhite,
+				colorTheme: colorTheme);
+			this.chessPiecesRendererPieceAnimation = ChessPiecesRendererPieceAnimation.GetChessPiecesRendererPieceAnimation();
+			this.promotionPanel = PromotionPanel.GetPromotionPanel(isWhite: this.gameState.IsPlayerWhite, colorTheme: colorTheme);
 			this.promotionPanelX = 0;
 			this.promotionPanelY = 0;
 			this.nukeRenderer = NukeRenderer.GetNukeRenderer(
@@ -183,7 +190,8 @@ namespace ChessCompStompWithHacksLibrary
 				isNukeSelected: false,
 				isHoverOverNuke: null,
 				turnCount: this.gameState.TurnCount,
-				timer: globalState.Timer);
+				timer: globalState.Timer,
+				colorTheme: colorTheme);
 			this.promotionMoves = null;
 
 			this.clickedSquare = null;
@@ -200,6 +208,7 @@ namespace ChessCompStompWithHacksLibrary
 			this.isPromotionPanelOpen = false;
 
 			this.chessAI = null;
+			this.aiPondering = null;
 
 			ComputeMoves.Result result = ComputeMoves.GetMoves(gameState: this.gameState);
 			this.gameStatus = result.GameStatus;
@@ -212,6 +221,8 @@ namespace ChessCompStompWithHacksLibrary
 			this.isFinalBattle = aiHackLevel == SessionState.AIHackLevel.FinalBattle;
 
 			this.previousMouseInput = new EmptyMouse();
+
+			this.nukeLaunchSoundCooldown = 0;
 		}
 
 		public class Result
@@ -238,9 +249,25 @@ namespace ChessCompStompWithHacksLibrary
 		{
 			if (this.chessAI != null)
 				this.chessAI.CalculateBestMove(millisecondsToThink: milliseconds);
+			else if (this.aiPondering != null)
+				this.aiPondering.CalculateBestMove(millisecondsToThink: milliseconds);
 		}
 
-		private static DisplayMove GetPlayerMove(
+		private class PlayerMoveInfo
+		{
+			public PlayerMoveInfo(
+				DisplayMove displayMove,
+				bool shouldMoveBeInstant)
+			{
+				this.DisplayMove = displayMove;
+				this.ShouldMoveBeInstant = shouldMoveBeInstant;
+			}
+
+			public DisplayMove DisplayMove { get; private set; }
+			public bool ShouldMoveBeInstant { get; private set; }
+		}
+
+		private static PlayerMoveInfo GetPlayerMove(
 			IMouse mouseInput,
 			IMouse previousMouseInput,
 			bool isPromotionPanelOpen,
@@ -263,7 +290,7 @@ namespace ChessCompStompWithHacksLibrary
 				displayProcessing: displayProcessing);
 
 			if (isNukeInFlight)
-				return null;
+				return new PlayerMoveInfo(displayMove: null, shouldMoveBeInstant: false);
 
 			if (isPromotionPanelOpen)
 			{
@@ -278,10 +305,10 @@ namespace ChessCompStompWithHacksLibrary
 							displayProcessing: displayProcessing);
 
 						if (hoverOverSquare != null && clickedPromotionPiece.Value == hoverOverSquare.Value)
-							return promotionMoves.Single(x => x.Promotion.Value == hoverOverSquare.Value);
+							return new PlayerMoveInfo(displayMove: promotionMoves.Single(x => x.Promotion.Value == hoverOverSquare.Value), shouldMoveBeInstant: false);
 					}
 				}
-				return null;
+				return new PlayerMoveInfo(displayMove: null, shouldMoveBeInstant: false);
 			}
 			
 			if (!mouseInput.IsLeftMouseButtonPressed() && previousMouseInput.IsLeftMouseButtonPressed())
@@ -295,7 +322,7 @@ namespace ChessCompStompWithHacksLibrary
 						&& x.EndingRank == hoverSquare.Rank).ToList();
 
 					if (moves.Count == 1)
-						return moves[0];
+						return new PlayerMoveInfo(displayMove: moves[0], shouldMoveBeInstant: true);
 				}
 
 				if (clickedSquare != null && clickedAndHeldSquare != null && hoverSquare != null && hoverSquare.Equals(clickedAndHeldSquare))
@@ -307,7 +334,7 @@ namespace ChessCompStompWithHacksLibrary
 						&& x.EndingRank == hoverSquare.Rank).ToList();
 
 					if (moves.Count == 1)
-						return moves[0];
+						return new PlayerMoveInfo(displayMove: moves[0], shouldMoveBeInstant: false);
 				}
 
 				if (clickedSquare != null && clickedAndHeldSquare != null && hoverSquare != null && clickedSquare.Equals(clickedAndHeldSquare))
@@ -319,25 +346,25 @@ namespace ChessCompStompWithHacksLibrary
 						&& x.EndingRank == hoverSquare.Rank).ToList();
 
 					if (moves.Count == 1)
-						return moves[0];
+						return new PlayerMoveInfo(displayMove: moves[0], shouldMoveBeInstant: true);
 				}
 
 				if (hasClickedOnNuke && clickedAndHeldSquare != null && hoverSquare != null && hoverSquare.Equals(clickedAndHeldSquare))
 				{
 					List<DisplayMove> moves = possibleMoves.Where(x => x.IsNuke && x.EndingFile == hoverSquare.File && x.EndingRank == hoverSquare.Rank).ToList();
 					if (moves.Count == 1)
-						return moves[0];
+						return new PlayerMoveInfo(displayMove: moves[0], shouldMoveBeInstant: false);
 				}
 
 				if (hasClickedAndHeldOnNuke && hoverSquare != null)
 				{
 					List<DisplayMove> moves = possibleMoves.Where(x => x.IsNuke && x.EndingFile == hoverSquare.File && x.EndingRank == hoverSquare.Rank).ToList();
 					if (moves.Count == 1)
-						return moves[0];
+						return new PlayerMoveInfo(displayMove: moves[0], shouldMoveBeInstant: false);
 				}
 			}
 
-			return null;
+			return new PlayerMoveInfo(displayMove: null, shouldMoveBeInstant: false);
 		}
 
 		private static ChessSquare GetClickedSquare(
@@ -472,6 +499,16 @@ namespace ChessCompStompWithHacksLibrary
 			public List<DisplayMove> PromotionMoves { get; private set; }
 		}
 
+		private static int GetPromotionPanelX(int mouseX)
+		{
+			int renderOnRightSideOfMouse = mouseX;
+			int renderOnLeftSideOfMouse = mouseX - PromotionPanel.PROMOTION_PANEL_WIDTH;
+
+			if (mouseX + PromotionPanel.PROMOTION_PANEL_WIDTH >= MOVE_TRACKER_RENDERER_X && renderOnLeftSideOfMouse >= 0)
+				return renderOnLeftSideOfMouse;
+			return renderOnRightSideOfMouse;
+		}
+
 		private static PromotionPanelInfo GetPromotionPanelInfo(
 			bool isPromotionPanelOpen,
 			int promotionPanelX,
@@ -516,7 +553,7 @@ namespace ChessCompStompWithHacksLibrary
 						&& x.EndingRank == hoverSquare.Rank).ToList();
 
 					if (moves.Count > 0 && moves[0].Promotion != null)
-						return new PromotionPanelInfo(isPromotionPanelOpen: true, promotionPanelX: mouseInput.GetX(), promotionPanelY: mouseInput.GetY(), promotionMoves: moves);
+						return new PromotionPanelInfo(isPromotionPanelOpen: true, promotionPanelX: GetPromotionPanelX(mouseInput.GetX()), promotionPanelY: mouseInput.GetY(), promotionMoves: moves);
 				}
 				else if (clickedSquare != null && clickedAndHeldSquare != null && hoverSquare != null && hoverSquare.Equals(clickedAndHeldSquare)
 					&& !clickedSquare.Equals(hoverSquare))
@@ -528,7 +565,7 @@ namespace ChessCompStompWithHacksLibrary
 						&& x.EndingRank == hoverSquare.Rank).ToList();
 
 					if (moves.Count > 0 && moves[0].Promotion != null)
-						return new PromotionPanelInfo(isPromotionPanelOpen: true, promotionPanelX: mouseInput.GetX(), promotionPanelY: mouseInput.GetY(), promotionMoves: moves);
+						return new PromotionPanelInfo(isPromotionPanelOpen: true, promotionPanelX: GetPromotionPanelX(mouseInput.GetX()), promotionPanelY: mouseInput.GetY(), promotionMoves: moves);
 				}
 				else if (clickedSquare != null && clickedAndHeldSquare != null && hoverSquare != null && clickedSquare.Equals(clickedAndHeldSquare))
 				{
@@ -539,7 +576,7 @@ namespace ChessCompStompWithHacksLibrary
 						&& x.EndingRank == hoverSquare.Rank).ToList();
 
 					if (moves.Count > 0 && moves[0].Promotion != null)
-						return new PromotionPanelInfo(isPromotionPanelOpen: true, promotionPanelX: mouseInput.GetX(), promotionPanelY: mouseInput.GetY(), promotionMoves: moves);
+						return new PromotionPanelInfo(isPromotionPanelOpen: true, promotionPanelX: GetPromotionPanelX(mouseInput.GetX()), promotionPanelY: mouseInput.GetY(), promotionMoves: moves);
 				}
 			}
 
@@ -700,16 +737,30 @@ namespace ChessCompStompWithHacksLibrary
 					hasClickedAndHeldOnNuke: false,
 					isNukeInFlight: this.isNukeInFlight,
 					turnCount: this.gameState.TurnCount);
-				
+
+				this.chessPiecesRendererPieceAnimation = this.chessPiecesRendererPieceAnimation.ProcessFrame(elapsedMicrosPerFrame: elapsedMicrosPerFrame);
+
 				this.nukeRenderer = this.nukeRenderer.ProcessFrame(
 					hasUsedNuke: this.gameState.HasUsedNuke,
 					isNukeSelected: false,
 					isHoverOverNuke: null,
 					turnCount: this.gameState.TurnCount,
 					elapsedMicrosPerFrame: elapsedMicrosPerFrame);
-				
+
+				int? originalMoveTrackerRendererPositionIndex = this.moveTrackerRendererPositionIndex;
+
 				this.moveTrackerRendererPositionIndex = MoveTrackerRenderer.GetHoverOverMove(mouseInput: new MoveTrackerRendererMouse(mouseInput));
 				this.moveTrackerRenderer = this.moveTrackerRenderer.ProcessFrame(moveTracker: this.moveTracker, hoverPositionIndex: this.moveTrackerRendererPositionIndex, elapsedMicrosPerFrame: elapsedMicrosPerFrame);
+				
+				if (this.moveTrackerRendererPositionIndex.HasValue)
+				{
+					if (originalMoveTrackerRendererPositionIndex == null || this.moveTrackerRendererPositionIndex.Value != originalMoveTrackerRendererPositionIndex.Value)
+					{
+						MoveTracker.MoveInfo moveTrackerMoveInfo = MoveTrackerRenderer.GetMoveInfoForHover(positionIndex: this.moveTrackerRendererPositionIndex.Value, moveTracker: this.moveTracker);
+						if (moveTrackerMoveInfo != null)
+							soundOutput.PlaySound(sound: ChessSound.Woosh);
+					}
+				}
 				
 				return new Result(
 					gameStatus: this.gameStatus,
@@ -717,6 +768,9 @@ namespace ChessCompStompWithHacksLibrary
 					isPlayerWhite: this.gameState.IsPlayerWhite,
 					isFinalBattle: this.isFinalBattle);
 			}
+
+			if (this.aiPondering != null)
+				this.aiPondering.CalculateBestMove(millisecondsToThink: 5);
 						
 			bool hasPlayerJustMoved = false;
 
@@ -730,6 +784,20 @@ namespace ChessCompStompWithHacksLibrary
 
 			if (this.isNukeInFlight)
 			{
+				if (this.isNukeLiftingOff)
+				{
+					this.nukeLaunchSoundCooldown -= elapsedMicrosPerFrame;
+
+					if (this.nukeLaunchSoundCooldown <= 0)
+					{
+						this.nukeLaunchSoundCooldown += 200 * 1000;
+						if (this.nukeLaunchSoundCooldown <= 0)
+							this.nukeLaunchSoundCooldown = 0;
+
+						soundOutput.PlaySound(sound: ChessSound.NukeLaunch);
+					}
+				}
+
 				if (this.isNukeLiftingOff && this.nukeRenderer.HasNukeFlownOffScreen())
 				{
 					this.isNukeLiftingOff = false;
@@ -745,11 +813,14 @@ namespace ChessCompStompWithHacksLibrary
 					HashSet<Objective> newlyCompletedObjectives = ObjectiveChecker.GetCompletedObjectives(originalGameState: this.gameState, move: this.nukeMove.Move, isFinalBattle: this.isFinalBattle);
 					foreach (Objective objective in newlyCompletedObjectives)
 						completedObjectives.Add(objective);
+					this.chessPiecesRendererPieceAnimation = this.chessPiecesRendererPieceAnimation.AddMove(originalGameState: this.gameState, displayMove: this.nukeMove, shouldMoveBeInstant: true);
 					this.gameState = MoveImplementation.ApplyMove(gameState: this.gameState, move: this.nukeMove.Move);
 					ComputeMoves.Result result = ComputeMoves.GetMoves(gameState: this.gameState);
 					this.gameStatus = result.GameStatus;
 					this.possibleMoves = DisplayMove.GetDisplayMoves(moves: result.Moves, gameState: this.gameState);
 					this.nukeMove = null;
+
+					soundOutput.PlaySound(sound: ChessSound.NukeExplosion);
 
 					if (this.clickedSquare != null)
 					{
@@ -765,7 +836,11 @@ namespace ChessCompStompWithHacksLibrary
 				{
 					if (this.chessAI == null)
 					{
-						this.chessAI = new CompositeAI(gameState: this.gameState, timer: this.globalState.Timer, random: this.globalState.Rng, logger: this.globalState.Logger);
+						if (this.aiPondering != null)
+							this.chessAI = this.aiPondering.GetAIForGameState(newGameState: this.gameState);
+						else
+							this.chessAI = new CompositeAI(gameState: this.gameState, timer: this.globalState.Timer, random: this.globalState.Rng, logger: this.globalState.Logger, useDebugAI: this.globalState.UseDebugAI);
+						this.aiPondering = null;
 						this.aiElapsedTimeThinking = 0;
 					}
 
@@ -776,17 +851,26 @@ namespace ChessCompStompWithHacksLibrary
 					if (!this.chessAI.HasFinishedCalculation() && this.chessAI.GetDepthOfBestMoveFoundSoFar() < 4 && amountOfTimeElapsedMillis > 250)
 						this.chessAI.CalculateBestMove(millisecondsToThink: 10);
 
-					if (this.chessAI.HasFinishedCalculation() && amountOfTimeElapsedMillis > 500 || amountOfTimeElapsedMillis > 1500)
+					bool shouldAIMove;
+					if (this.globalState.UseDebugAI)
+						shouldAIMove = this.chessAI.HasFinishedCalculation() && amountOfTimeElapsedMillis > 10 || amountOfTimeElapsedMillis > 1500;
+					else
+						shouldAIMove = this.chessAI.HasFinishedCalculation() && amountOfTimeElapsedMillis > 500 || amountOfTimeElapsedMillis > 1500;
+
+					if (shouldAIMove)
 					{
 						Move move = this.chessAI.GetBestMoveFoundSoFar();
 						this.moveTracker = this.moveTracker.AddMove(originalGameState: this.gameState, move: move, timer: this.globalState.Timer);
 						HashSet<Objective> newlyCompletedObjectives = ObjectiveChecker.GetCompletedObjectives(originalGameState: this.gameState, move: move, isFinalBattle: this.isFinalBattle);
 						foreach (Objective objective in newlyCompletedObjectives)
 							completedObjectives.Add(objective);
+						this.chessPiecesRendererPieceAnimation = this.chessPiecesRendererPieceAnimation.AddMove(originalGameState: this.gameState, move: move, shouldMoveBeInstant: false);
 						this.gameState = MoveImplementation.ApplyMove(gameState: this.gameState, move: move);
 						ComputeMoves.Result result = ComputeMoves.GetMoves(gameState: this.gameState);
 						this.gameStatus = result.GameStatus;
 						this.possibleMoves = DisplayMove.GetDisplayMoves(moves: result.Moves, gameState: this.gameState);
+
+						soundOutput.PlaySound(sound: ChessSound.AIMove);
 
 						if (this.clickedSquare != null)
 						{
@@ -796,12 +880,13 @@ namespace ChessCompStompWithHacksLibrary
 						}
 						
 						this.chessAI = null;
+						this.aiPondering = new AIPondering(gameState: this.gameState, timer: this.globalState.Timer, random: this.globalState.Rng, logger: this.globalState.Logger, useDebugAI: this.globalState.UseDebugAI);
 					}
 				}
 			}
 			else
 			{
-				DisplayMove playerMove = GetPlayerMove(
+				PlayerMoveInfo playerMoveInfo = GetPlayerMove(
 					mouseInput: mouseInput,
 					previousMouseInput: previousMouseInput,
 					isPromotionPanelOpen: this.isPromotionPanelOpen,
@@ -817,6 +902,8 @@ namespace ChessCompStompWithHacksLibrary
 					hasClickedOnNuke: this.hasClickedOnNuke,
 					hasClickedAndHeldOnNuke: this.hasClickedAndHeldOnNuke,
 					displayProcessing: displayProcessing);
+
+				DisplayMove playerMove = playerMoveInfo.DisplayMove;
 
 				if (playerMove != null)
 				{
@@ -834,6 +921,7 @@ namespace ChessCompStompWithHacksLibrary
 						HashSet<Objective> newlyCompletedObjectives = ObjectiveChecker.GetCompletedObjectives(originalGameState: this.gameState, move: playerMove.Move, isFinalBattle: this.isFinalBattle);
 						foreach (Objective objective in newlyCompletedObjectives)
 							completedObjectives.Add(objective);
+						this.chessPiecesRendererPieceAnimation = this.chessPiecesRendererPieceAnimation.AddMove(originalGameState: this.gameState, displayMove: playerMove, shouldMoveBeInstant: playerMoveInfo.ShouldMoveBeInstant);
 						this.gameState = MoveImplementation.ApplyMove(gameState: this.gameState, displayMove: playerMove);
 						ComputeMoves.Result result = ComputeMoves.GetMoves(gameState: this.gameState);
 						this.gameStatus = result.GameStatus;
@@ -851,6 +939,8 @@ namespace ChessCompStompWithHacksLibrary
 						this.clickedPromotionPiece = null;
 						this.promotionMoves = null;
 						this.chessAI = null;
+
+						soundOutput.PlaySound(sound: ChessSound.PlayerMove);
 					}
 				}
 			}
@@ -962,6 +1052,8 @@ namespace ChessCompStompWithHacksLibrary
 				isNukeInFlight: this.isNukeInFlight,
 				turnCount: this.gameState.TurnCount);
 
+			this.chessPiecesRendererPieceAnimation = this.chessPiecesRendererPieceAnimation.ProcessFrame(elapsedMicrosPerFrame: elapsedMicrosPerFrame);
+
 			Move.PromotionType? promotionPanelHoverSquare = PromotionPanel.IsHoverOverSquare(
 				promotionPanelX: this.promotionPanelX,
 				promotionPanelY: this.promotionPanelY,
@@ -987,10 +1079,22 @@ namespace ChessCompStompWithHacksLibrary
 				promotionPanelX: this.promotionPanelX,
 				promotionPanelY: this.promotionPanelY,
 				mouse: mouseInput);
-			
+
+			int? oldMoveTrackerRendererPositionIndex = this.moveTrackerRendererPositionIndex;
+
 			this.moveTrackerRendererPositionIndex = isHoverOverPromotionPanel ? null : MoveTrackerRenderer.GetHoverOverMove(mouseInput: new MoveTrackerRendererMouse(mouse: mouseInput));
 			this.moveTrackerRenderer = this.moveTrackerRenderer.ProcessFrame(moveTracker: this.moveTracker, hoverPositionIndex: this.moveTrackerRendererPositionIndex, elapsedMicrosPerFrame: elapsedMicrosPerFrame);
-			
+
+			if (this.moveTrackerRendererPositionIndex.HasValue)
+			{
+				if (oldMoveTrackerRendererPositionIndex == null || this.moveTrackerRendererPositionIndex.Value != oldMoveTrackerRendererPositionIndex.Value)
+				{
+					MoveTracker.MoveInfo moveTrackerMoveInfo = MoveTrackerRenderer.GetMoveInfoForHover(positionIndex: this.moveTrackerRendererPositionIndex.Value, moveTracker: this.moveTracker);
+					if (moveTrackerMoveInfo != null)
+						soundOutput.PlaySound(sound: ChessSound.Woosh);
+				}
+			}
+
 			return new Result(
 				gameStatus: this.gameStatus,
 				completedObjectives: new List<Objective>(completedObjectives),
@@ -1118,13 +1222,13 @@ namespace ChessCompStompWithHacksLibrary
 
 			if (moveInfo == null || moveInfo.NewGameState.TurnCount == this.gameState.TurnCount)
 			{
-				this.chessPiecesRenderer.Render(displayOutput: new TranslatedDisplayOutput<ChessImage, ChessFont>(displayOutput, CHESS_PIECES_RENDERER_X, CHESS_PIECES_RENDERER_Y));
+				this.chessPiecesRenderer.Render(displayOutput: new TranslatedDisplayOutput<ChessImage, ChessFont>(displayOutput, CHESS_PIECES_RENDERER_X, CHESS_PIECES_RENDERER_Y), chessPiecesRendererPieceAnimation: this.chessPiecesRendererPieceAnimation);
 				this.nukeRenderer.Render(displayOutput: new TranslatedDisplayOutput<ChessImage, ChessFont>(displayOutput, NUKE_RENDERER_X, NUKE_RENDERER_Y));
 				this.promotionPanel.Render(displayOutput: displayOutput); // must render after moveTrackerRenderer to ensure panel is on top
 			}
 			else
 			{
-				moveInfo.NewStateChessPiecesRenderer.Render(displayOutput: new TranslatedDisplayOutput<ChessImage, ChessFont>(displayOutput, CHESS_PIECES_RENDERER_X, CHESS_PIECES_RENDERER_Y));
+				moveInfo.NewStateChessPiecesRenderer.Render(displayOutput: new TranslatedDisplayOutput<ChessImage, ChessFont>(displayOutput, CHESS_PIECES_RENDERER_X, CHESS_PIECES_RENDERER_Y), chessPiecesRendererPieceAnimation: ChessPiecesRendererPieceAnimation.EmptyChessPiecesRendererPieceAnimation());
 				moveInfo.NewStateNukeRenderer.Render(displayOutput: new TranslatedDisplayOutput<ChessImage, ChessFont>(displayOutput, NUKE_RENDERER_X, NUKE_RENDERER_Y));
 			}
 		}

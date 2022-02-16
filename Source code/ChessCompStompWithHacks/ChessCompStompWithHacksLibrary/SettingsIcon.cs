@@ -15,11 +15,20 @@ namespace ChessCompStompWithHacksLibrary
 			this.isHover = false;
 			this.isClicked = false;
 		}
-		
-		/// <summary>
-		/// Returns whether or not the user has clicked the settings icon
-		/// </summary>
-		public bool ProcessFrame(
+
+		public class SettingsIconStatus
+		{
+			public SettingsIconStatus(bool hasClicked, bool isHover)
+			{
+				this.HasClicked = hasClicked;
+				this.IsHover = isHover;
+			}
+
+			public bool HasClicked { get; private set; }
+			public bool IsHover { get; private set; }
+		}
+
+		public SettingsIconStatus ProcessFrame(
 			IMouse mouseInput,
 			IMouse previousMouseInput,
 			bool ignoreMouse,
@@ -49,10 +58,10 @@ namespace ChessCompStompWithHacksLibrary
 				this.isClicked = false;
 
 				if (isHover && !ignoreMouse)
-					return true;
+					return new SettingsIconStatus(hasClicked: true, isHover: this.isHover);
 			}
 
-			return false;
+			return new SettingsIconStatus(hasClicked: false, isHover: this.isHover);
 		}
 
 		public void Render(IDisplayOutput<ChessImage, ChessFont> displayOutput)

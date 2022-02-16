@@ -92,7 +92,9 @@ namespace ChessCompStompWithHacks
 					isFirst = false;
 				else
 					soundNames = soundNames + ",";
-				soundNames = soundNames + chessSound.GetSoundFilename();
+				
+				string soundFilename = chessSound.GetSoundFilename().DefaultFilename;
+				soundNames = soundNames + soundFilename;
 			}
 			
 			if (soundNames == "")
@@ -139,7 +141,10 @@ namespace ChessCompStompWithHacks
 				finalVolume = 0.0;
 			
 			if (finalVolume > 0.0)
-				Script.Call("window.ChessCompStompWithHacksBridgeSoundOutputJavascript.playSound", sound.GetSoundFilename(), finalVolume);
+			{
+				string soundFilename = sound.GetSoundFilename().DefaultFilename;
+				Script.Call("window.ChessCompStompWithHacksBridgeSoundOutputJavascript.playSound", soundFilename, finalVolume);
+			}
 		}
 		
 		public void DisposeSounds()

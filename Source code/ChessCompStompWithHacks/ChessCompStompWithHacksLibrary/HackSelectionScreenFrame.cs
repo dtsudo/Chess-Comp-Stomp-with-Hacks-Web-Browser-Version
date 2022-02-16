@@ -12,69 +12,21 @@ namespace ChessCompStompWithHacksLibrary
 		private SessionState sessionState;
 
 		private SettingsIcon settingsIcon;
-
-		private List<HackDisplay> hackDisplays;
-
-		private Button resetHacksButton;
+		
 		private Button continueButton;
+
+		private HackSelectionScreenDisplay hackSelectionScreenDisplay;
+
+		private int numberOfHacksResearchedInPreviousFrame;
 
 		public HackSelectionScreenFrame(GlobalState globalState, SessionState sessionState)
 		{
 			this.globalState = globalState;
 			this.sessionState = sessionState;
 
+			this.hackSelectionScreenDisplay = new HackSelectionScreenDisplay(sessionState: sessionState, allowResearchingHacks: true);
+
 			this.settingsIcon = new SettingsIcon();
-
-			List<Hack> hacks = new List<Hack>()
-			{
-				Hack.ExtraPawnFirst,
-				Hack.ExtraPawnSecond,
-				Hack.PawnsCanMoveThreeSpacesInitially,
-				Hack.SuperCastling,
-				Hack.StalemateIsVictory,
-
-				Hack.KnightsCanMakeLargeKnightsMove,
-				Hack.RooksCanMoveLikeBishops,
-				Hack.RooksCanCaptureLikeCannons,
-				Hack.ExtraQueen,
-				Hack.QueensCanMoveLikeKnights,
-
-				Hack.SuperEnPassant,
-				Hack.AnyPieceCanPromote,
-				Hack.OpponentMustCaptureWhenPossible,
-				Hack.PawnsDestroyCapturingPiece,
-				Hack.TacticalNuke
-			};
-			
-			this.hackDisplays = new List<HackDisplay>();
-
-			for (int i = 0; i < 3; i++)
-			{
-				for (int j = 0; j < 5; j++)
-				{
-					Hack hack = hacks[0];
-					hacks.RemoveAt(0);
-
-					this.hackDisplays.Add(new HackDisplay(
-						hack: hack,
-						x: 198 * j + 8,
-						y: 450 - 115 * i,
-						sessionState: this.sessionState));
-				}
-			}
-
-			this.resetHacksButton = new Button(
-				x: 8,
-				y: 70,
-				width: 170,
-				height: 40,
-				backgroundColor: new DTColor(200, 200, 200),
-				hoverColor: new DTColor(250, 249, 200),
-				clickColor: new DTColor(252, 251, 154),
-				text: "Reset hacks",
-				textXOffset: 18,
-				textYOffset: 9,
-				font: ChessFont.Fetamont16Pt);
 			
 			this.continueButton = new Button(
 				x: 700,
@@ -82,12 +34,14 @@ namespace ChessCompStompWithHacksLibrary
 				width: 200,
 				height: 80,
 				backgroundColor: new DTColor(235, 235, 235),
-				hoverColor: new DTColor(250, 249, 200),
-				clickColor: new DTColor(252, 251, 154),
+				hoverColor: ColorThemeUtil.GetHoverColor(colorTheme: sessionState.GetColorTheme()),
+				clickColor: ColorThemeUtil.GetClickColor(colorTheme: sessionState.GetColorTheme()),
 				text: "Continue",
 				textXOffset: 40,
 				textYOffset: 27,
-				font: ChessFont.Fetamont20Pt);
+				font: ChessFont.ChessFont20Pt);
+
+			this.numberOfHacksResearchedInPreviousFrame = sessionState.GetResearchedHacks().Count;
 		}
 
 		public void ProcessExtraTime(int milliseconds)
@@ -109,6 +63,7 @@ namespace ChessCompStompWithHacksLibrary
 				{
 					this.sessionState.AddCompletedObjectives(new HashSet<Objective>() { Objective.DefeatComputer });
 					this.sessionState.Debug_AddWin();
+					this.globalState.SaveData(sessionState: this.sessionState, soundVolume: soundOutput.GetSoundVolume());
 				}
 
 				if (keyboardInput.IsPressed(Key.Two) && !previousKeyboardInput.IsPressed(Key.Two))
@@ -122,26 +77,51 @@ namespace ChessCompStompWithHacksLibrary
 							Objective.PromoteAPieceToABishop,
 							Objective.LaunchANuke
 						});
+					this.globalState.SaveData(sessionState: this.sessionState, soundVolume: soundOutput.GetSoundVolume());
 				}
 			}
 
-			foreach (HackDisplay hackDisplay in this.hackDisplays)
-				hackDisplay.ProcessFrame(mouseInput: mouseInput, previousMouseInput: previousMouseInput, displayProcessing: displayProcessing);
+			Hack? rightClickedHack = this.hackSelectionScreenDisplay.ProcessFrame(
+				mouseInput: mouseInput,
+				previousMouseInput: previousMouseInput,
+				displayProcessing: displayProcessing,
+				soundOutput: soundOutput);
+			
+			if (rightClickedHack != null)
+			{
+				return new HackExplanationFrame(globalState: this.globalState, sessionState: this.sessionState, hack: rightClickedHack.Value, underlyingFrame: this);
+			}
 
 			bool clickedContinueButton = this.continueButton.ProcessFrame(mouseInput: mouseInput, previousMouseInput: previousMouseInput);
 			if (clickedContinueButton)
+			{
+				this.globalState.SaveData(sessionState: this.sessionState, soundVolume: soundOutput.GetSoundVolume());
+				soundOutput.PlaySound(ChessSound.Click);
 				return new ObjectivesScreenFrame(globalState: this.globalState, sessionState: this.sessionState);
+			}
 
-			bool clickedSettingsIcon = this.settingsIcon.ProcessFrame(mouseInput: mouseInput, previousMouseInput: previousMouseInput, ignoreMouse: false, displayProcessing: displayProcessing);
-			if (clickedSettingsIcon)
-				return new SettingsMenuFrame(globalState: this.globalState, sessionState: this.sessionState, underlyingFrame: this, showPausedText: false);
+			SettingsIcon.SettingsIconStatus settingsIconStatus = this.settingsIcon.ProcessFrame(mouseInput: mouseInput, previousMouseInput: previousMouseInput, ignoreMouse: false, displayProcessing: displayProcessing);
 			
-			if (keyboardInput.IsPressed(Key.Esc) && !previousKeyboardInput.IsPressed(Key.Esc))
+			if (settingsIconStatus.HasClicked)
+			{
+				this.globalState.SaveData(sessionState: this.sessionState, soundVolume: soundOutput.GetSoundVolume());
+				soundOutput.PlaySound(ChessSound.Click);
 				return new SettingsMenuFrame(globalState: this.globalState, sessionState: this.sessionState, underlyingFrame: this, showPausedText: false);
+			}
 
-			bool clickedResetHacksButton = this.resetHacksButton.ProcessFrame(mouseInput: mouseInput, previousMouseInput: previousMouseInput);
-			if (clickedResetHacksButton)
-				this.sessionState.ResetResearchedHacks();
+			if (keyboardInput.IsPressed(Key.Esc) && !previousKeyboardInput.IsPressed(Key.Esc))
+			{
+				this.globalState.SaveData(sessionState: this.sessionState, soundVolume: soundOutput.GetSoundVolume());
+				soundOutput.PlaySound(ChessSound.Click);
+				return new SettingsMenuFrame(globalState: this.globalState, sessionState: this.sessionState, underlyingFrame: this, showPausedText: false);
+			}
+
+			HashSet<Hack> researchedHacks = this.sessionState.GetResearchedHacks();
+
+			if (researchedHacks.Count != this.numberOfHacksResearchedInPreviousFrame)
+				this.globalState.SaveData(sessionState: this.sessionState, soundVolume: soundOutput.GetSoundVolume());
+			
+			this.numberOfHacksResearchedInPreviousFrame = researchedHacks.Count;
 
 			return this;
 		}
@@ -161,33 +141,13 @@ namespace ChessCompStompWithHacksLibrary
 				color: new DTColor(223, 220, 217),
 				fill: true);
 
-			displayOutput.DrawText(
-				x: 436,
-				y: 675,
-				text: "Hacks",
-				font: ChessFont.Fetamont32Pt,
-				color: DTColor.Black());
-			
-			displayOutput.DrawText(
-				x: 250,
-				y: 122,
-				text: "Hack points remaining: " + this.sessionState.GetUnusedHackPoints().ToStringCultureInvariant() + "\n"
-					+ "Get more hack points by winning games" + "\n"
-					+ "and completing objectives!",
-				font: ChessFont.Fetamont16Pt,
-				color: DTColor.Black());
-
-			foreach (HackDisplay hackDisplay in this.hackDisplays)
-				hackDisplay.RenderButtonDisplay(displayOutput: displayOutput);
-
-			this.resetHacksButton.Render(displayOutput: displayOutput);
+			this.hackSelectionScreenDisplay.RenderButtons(displayOutput: displayOutput);
 
 			this.settingsIcon.Render(displayOutput: displayOutput);
 
 			this.continueButton.Render(displayOutput: displayOutput);
 
-			foreach (HackDisplay hackDisplay in this.hackDisplays)
-				hackDisplay.RenderHoverDisplay(displayOutput: displayOutput);
+			this.hackSelectionScreenDisplay.RenderHoverDisplay(displayOutput: displayOutput);
 		}
 
 		public void RenderMusic(IMusicOutput<ChessMusic> musicOutput)
