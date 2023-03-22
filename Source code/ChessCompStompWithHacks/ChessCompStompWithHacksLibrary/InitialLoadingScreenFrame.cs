@@ -17,6 +17,16 @@ namespace ChessCompStompWithHacksLibrary
 		{
 		}
 
+		public string GetClickUrl()
+		{
+			return null;
+		}
+
+		public HashSet<string> GetCompletedAchievements()
+		{
+			return new HashSet<string>();
+		}
+
 		public IFrame<ChessImage, ChessFont, ChessSound, ChessMusic> GetNextFrame(
 			IKeyboard keyboardInput,
 			IMouse mouseInput,
@@ -78,7 +88,20 @@ namespace ChessCompStompWithHacksLibrary
 
 		public void Render(IDisplayOutput<ChessImage, ChessFont> displayOutput)
 		{
-			displayOutput.DrawInitialLoadingScreen();
+			displayOutput.DrawRectangle(
+				x: 0,
+				y: 0,
+				width: ChessCompStompWithHacks.WINDOW_WIDTH,
+				height: ChessCompStompWithHacks.WINDOW_HEIGHT,
+				color: new DTColor(223, 220, 217),
+				fill: true);
+
+			displayOutput.TryDrawText(
+				x: 440,
+				y: 400,
+				text: "Loading...",
+				font: ChessFont.ChessFont20Pt,
+				color: DTColor.Black());
 		}
 
 		public void RenderMusic(IMusicOutput<ChessMusic> musicOutput)

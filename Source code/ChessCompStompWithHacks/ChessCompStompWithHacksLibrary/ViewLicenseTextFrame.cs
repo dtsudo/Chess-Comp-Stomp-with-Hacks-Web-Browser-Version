@@ -2,6 +2,7 @@
 namespace ChessCompStompWithHacksLibrary
 {
 	using DTLibrary;
+	using System.Collections.Generic;
 
 	public class ViewLicenseTextFrame : IFrame<ChessImage, ChessFont, ChessSound, ChessMusic>
 	{
@@ -47,6 +48,16 @@ namespace ChessCompStompWithHacksLibrary
 				textXOffset: 67,
 				textYOffset: 16,
 				font: ChessFont.ChessFont20Pt);
+		}
+
+		public string GetClickUrl()
+		{
+			return null;
+		}
+
+		public HashSet<string> GetCompletedAchievements()
+		{
+			return new HashSet<string>();
 		}
 
 		public IFrame<ChessImage, ChessFont, ChessSound, ChessMusic> GetNextFrame(

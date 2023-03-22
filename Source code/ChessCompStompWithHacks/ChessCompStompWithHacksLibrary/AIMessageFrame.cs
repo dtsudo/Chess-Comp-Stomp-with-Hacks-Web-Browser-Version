@@ -4,7 +4,8 @@ namespace ChessCompStompWithHacksLibrary
 	using ChessCompStompWithHacksEngine;
 	using DTLibrary;
 	using System;
-	
+	using System.Collections.Generic;
+
 	public class AIMessageFrame : IFrame<ChessImage, ChessFont, ChessSound, ChessMusic>
 	{
 		private GlobalState globalState;
@@ -77,6 +78,16 @@ namespace ChessCompStompWithHacksLibrary
 				textXOffset: 57,
 				textYOffset: 8,
 				font: ChessFont.ChessFont20Pt);
+		}
+
+		public string GetClickUrl()
+		{
+			return null;
+		}
+
+		public HashSet<string> GetCompletedAchievements()
+		{
+			return new HashSet<string>();
 		}
 
 		public void ProcessExtraTime(int milliseconds)

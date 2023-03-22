@@ -1,4 +1,5 @@
 /**
+ * @version 1.0.0.0
  * @compiler Bridge.NET 17.6.0
  */
 Bridge.assembly("ChessCompStompWithHacks", function ($asm, globals) {
@@ -235,8 +236,10 @@ Bridge.assembly("ChessCompStompWithHacks", function ($asm, globals) {
                 music: null,
                 displayLogger: null,
                 shouldRenderDisplayLogger: false,
+                completedAchievements: null,
                 frame: null,
-                hasInitializedClearCanvasJavascript: false
+                hasInitializedClearCanvasJavascript: false,
+                clickUrl: null
             },
             methods: {
                 InitializeClearCanvasJavascript: function () {
@@ -250,10 +253,34 @@ Bridge.assembly("ChessCompStompWithHacks", function ($asm, globals) {
 
                     window.ChessCompStompWithHacksBridgeClearCanvasJavascript.clearCanvas();
                 },
-                Start: function (fps, debugMode) {
+                ClearClickUrl: function () {
+                    eval("window.chessCompStompWithHacksClickUrl = null;");
+                },
+                UpdateClickUrl: function (clickUrl) {
+                    eval("window.chessCompStompWithHacksClickUrl = '" + (clickUrl || "") + "';");
+                },
+                AddClickUrlListener: function () {
+                    eval("\r\n\t\t\t\tdocument.addEventListener('click', function (e) {\r\n\t\t\t\t\tif (window.chessCompStompWithHacksClickUrl !== undefined\r\n\t\t\t\t\t\t\t&& window.chessCompStompWithHacksClickUrl !== null\r\n\t\t\t\t\t\t\t&& window.chessCompStompWithHacksClickUrl !== '')\r\n\t\t\t\t\t\twindow.open(window.chessCompStompWithHacksClickUrl, '_blank');\r\n\t\t\t\t}, false);\r\n\t\t\t");
+                },
+                RemoveMarginOnBody: function () {
+                    eval("\r\n\t\t\t\t((function () {\r\n\t\t\t\t\tvar removeMargin;\r\n\t\t\t\t\t\r\n\t\t\t\t\tremoveMargin = function () {\r\n\t\t\t\t\t\tvar bodyElement = document.body;\r\n\t\t\t\t\t\t\r\n\t\t\t\t\t\tif (!bodyElement) {\r\n\t\t\t\t\t\t\tsetTimeout(removeMargin, 50);\r\n\t\t\t\t\t\t\treturn;\r\n\t\t\t\t\t\t}\r\n\t\t\t\t\t\t\r\n\t\t\t\t\t\tbodyElement.style.margin = '0px';\r\n\t\t\t\t\t};\r\n\t\t\t\t\t\r\n\t\t\t\t\tremoveMargin();\r\n\t\t\t\t})());\r\n\t\t\t");
+                },
+                Start: function (fps, isWebPortalVersion, debugMode) {
                     ChessCompStompWithHacks.ChessCompStompWithHacksInitializer.hasInitializedClearCanvasJavascript = false;
 
                     ChessCompStompWithHacks.ChessCompStompWithHacksInitializer.shouldRenderDisplayLogger = true;
+
+                    ChessCompStompWithHacks.ChessCompStompWithHacksInitializer.clickUrl = null;
+
+                    ChessCompStompWithHacks.ChessCompStompWithHacksInitializer.completedAchievements = new (System.Collections.Generic.HashSet$1(System.String)).ctor();
+
+                    ChessCompStompWithHacks.ChessCompStompWithHacksInitializer.ClearClickUrl();
+
+                    ChessCompStompWithHacks.ChessCompStompWithHacksInitializer.AddClickUrlListener();
+
+                    if (isWebPortalVersion) {
+                        ChessCompStompWithHacks.ChessCompStompWithHacksInitializer.RemoveMarginOnBody();
+                    }
 
                     var logger;
                     if (debugMode) {
@@ -264,7 +291,7 @@ Bridge.assembly("ChessCompStompWithHacks", function ($asm, globals) {
                         logger = new DTLibrary.EmptyLogger();
                     }
 
-                    var globalState = new ChessCompStompWithHacksLibrary.GlobalState(fps, new DTLibrary.DTRandom(), new DTLibrary.GuidGenerator("94197619109494365160"), logger, new DTLibrary.SimpleTimer(), new ChessCompStompWithHacks.BridgeFileIO(), true, debugMode, false, null);
+                    var globalState = new ChessCompStompWithHacksLibrary.GlobalState(fps, new DTLibrary.DTRandom(), new DTLibrary.GuidGenerator("94197619109494365160"), logger, new DTLibrary.SimpleTimer(), new ChessCompStompWithHacks.BridgeFileIO(), true, isWebPortalVersion, debugMode, false, null);
 
                     ChessCompStompWithHacks.ChessCompStompWithHacksInitializer.frame = ChessCompStompWithHacksLibrary.ChessCompStompWithHacks.GetFirstFrame(globalState);
 
@@ -288,7 +315,13 @@ Bridge.assembly("ChessCompStompWithHacks", function ($asm, globals) {
                 ProcessExtraTime: function (milliseconds) {
                     ChessCompStompWithHacks.ChessCompStompWithHacksInitializer.frame.DTLibrary$IFrame$4$ChessCompStompWithHacksLibrary$ChessImage$ChessCompStompWithHacksLibrary$ChessFont$ChessCompStompWithHacksLibrary$ChessSound$ChessCompStompWithHacksLibrary$ChessMusic$ProcessExtraTime(milliseconds);
                 },
+                AddAchievementToJavascriptArray: function (achievement) {
+                    eval("if (!window.chessCompStompWithHacksCompletedAchievements) window.chessCompStompWithHacksCompletedAchievements = [];");
+
+                    eval("window.chessCompStompWithHacksCompletedAchievements.push('" + (achievement || "") + "');");
+                },
                 ComputeAndRenderNextFrame: function () {
+                    var $t;
                     var currentKeyboard = new DTLibrary.CopiedKeyboard(ChessCompStompWithHacks.ChessCompStompWithHacksInitializer.bridgeKeyboard);
                     var currentMouse = new DTLibrary.CopiedMouse(ChessCompStompWithHacks.ChessCompStompWithHacksInitializer.bridgeMouse);
 
@@ -298,6 +331,36 @@ Bridge.assembly("ChessCompStompWithHacks", function ($asm, globals) {
                     ChessCompStompWithHacks.ChessCompStompWithHacksInitializer.ClearCanvas();
                     ChessCompStompWithHacks.ChessCompStompWithHacksInitializer.frame.DTLibrary$IFrame$4$ChessCompStompWithHacksLibrary$ChessImage$ChessCompStompWithHacksLibrary$ChessFont$ChessCompStompWithHacksLibrary$ChessSound$ChessCompStompWithHacksLibrary$ChessMusic$Render(ChessCompStompWithHacks.ChessCompStompWithHacksInitializer.display);
                     ChessCompStompWithHacks.ChessCompStompWithHacksInitializer.frame.DTLibrary$IFrame$4$ChessCompStompWithHacksLibrary$ChessImage$ChessCompStompWithHacksLibrary$ChessFont$ChessCompStompWithHacksLibrary$ChessSound$ChessCompStompWithHacksLibrary$ChessMusic$RenderMusic(ChessCompStompWithHacks.ChessCompStompWithHacksInitializer.music);
+
+                    var newCompletedAchievements = ChessCompStompWithHacks.ChessCompStompWithHacksInitializer.frame.DTLibrary$IFrame$4$ChessCompStompWithHacksLibrary$ChessImage$ChessCompStompWithHacksLibrary$ChessFont$ChessCompStompWithHacksLibrary$ChessSound$ChessCompStompWithHacksLibrary$ChessMusic$GetCompletedAchievements();
+
+                    $t = Bridge.getEnumerator(newCompletedAchievements);
+                    try {
+                        while ($t.moveNext()) {
+                            var completedAchievement = $t.Current;
+                            var wasAdded = ChessCompStompWithHacks.ChessCompStompWithHacksInitializer.completedAchievements.add(completedAchievement);
+
+                            if (wasAdded) {
+                                ChessCompStompWithHacks.ChessCompStompWithHacksInitializer.AddAchievementToJavascriptArray(completedAchievement);
+                            }
+                        }
+                    } finally {
+                        if (Bridge.is($t, System.IDisposable)) {
+                            $t.System$IDisposable$Dispose();
+                        }
+                    }
+
+                    var newClickUrl = ChessCompStompWithHacks.ChessCompStompWithHacksInitializer.frame.DTLibrary$IFrame$4$ChessCompStompWithHacksLibrary$ChessImage$ChessCompStompWithHacksLibrary$ChessFont$ChessCompStompWithHacksLibrary$ChessSound$ChessCompStompWithHacksLibrary$ChessMusic$GetClickUrl();
+
+                    if (!Bridge.referenceEquals(ChessCompStompWithHacks.ChessCompStompWithHacksInitializer.clickUrl, newClickUrl)) {
+                        ChessCompStompWithHacks.ChessCompStompWithHacksInitializer.clickUrl = newClickUrl;
+                        if (ChessCompStompWithHacks.ChessCompStompWithHacksInitializer.clickUrl == null) {
+                            ChessCompStompWithHacks.ChessCompStompWithHacksInitializer.ClearClickUrl();
+                        } else {
+                            ChessCompStompWithHacks.ChessCompStompWithHacksInitializer.UpdateClickUrl(ChessCompStompWithHacks.ChessCompStompWithHacksInitializer.clickUrl);
+                        }
+                    }
+
                     if (ChessCompStompWithHacks.ChessCompStompWithHacksInitializer.displayLogger != null && ChessCompStompWithHacks.ChessCompStompWithHacksInitializer.shouldRenderDisplayLogger) {
                         ChessCompStompWithHacks.ChessCompStompWithHacksInitializer.displayLogger.Render(ChessCompStompWithHacksLibrary.ChessImage, ChessCompStompWithHacksLibrary.ChessFont, ChessCompStompWithHacks.ChessCompStompWithHacksInitializer.display, ChessCompStompWithHacksLibrary.ChessFont.ChessFont14Pt, DTLibrary.DTColor.Black());
                     }
@@ -324,7 +387,7 @@ Bridge.assembly("ChessCompStompWithHacks", function ($asm, globals) {
                     eval("\n\t\t\t\twindow.ChessCompStompWithHacksFpsDisplayJavascript = ((function () {\n\t\t\t\t\t'use strict';\n\t\t\t\t\t\n\t\t\t\t\tvar numberOfFrames = 0;\n\t\t\t\t\tvar hasAddedFpsLabel = false;\n\t\t\t\t\tvar startTimeMillis = Date.now();\n\t\t\t\t\tvar fpsNode = null;\n\t\t\t\t\t\n\t\t\t\t\tvar frameComputedAndRendered = function () {\n\t\t\t\t\t\tnumberOfFrames++;\n\t\t\t\t\t};\n\t\t\t\t\t\n\t\t\t\t\tvar displayFps = function () {\n\t\t\t\t\t\tif (!hasAddedFpsLabel) {\n\t\t\t\t\t\t\tvar fpsLabelNode = document.getElementById('chessCompStompWithHacksFpsLabel');\n\t\t\t\t\t\t\tif (fpsLabelNode !== null) {\n\t\t\t\t\t\t\t\tfpsLabelNode.textContent = 'FPS: ';\n\t\t\t\t\t\t\t\thasAddedFpsLabel = true;\n\t\t\t\t\t\t\t}\n\t\t\t\t\t\t}\n\t\t\t\t\t\t\n\t\t\t\t\t\tvar currentTimeMillis = Date.now();\n\t\t\t\t\t\tif (currentTimeMillis - startTimeMillis > 2000) {\n\t\t\t\t\t\t\tvar actualFps = numberOfFrames / 2;\n\t\t\t\t\t\t\t\n\t\t\t\t\t\t\tif (fpsNode === null)\n\t\t\t\t\t\t\t\tfpsNode = document.getElementById('chessCompStompWithHacksFps');\n\t\t\t\t\t\t\t\n\t\t\t\t\t\t\tif (fpsNode !== null)\n\t\t\t\t\t\t\t\tfpsNode.textContent = actualFps.toString();\n\t\t\t\t\t\t\t\n\t\t\t\t\t\t\tnumberOfFrames = 0;\n\t\t\t\t\t\t\tstartTimeMillis = currentTimeMillis;\n\t\t\t\t\t\t}\n\t\t\t\t\t};\n\t\t\t\t\t\n\t\t\t\t\treturn {\n\t\t\t\t\t\tframeComputedAndRendered: frameComputedAndRendered,\n\t\t\t\t\t\tdisplayFps: displayFps\n\t\t\t\t\t};\n\t\t\t\t})());\n\t\t\t");
                 },
                 Initialize: function () {
-                    eval("\n\t\t\t\t((function () {\n\t\t\t\t\t'use strict';\n\t\t\t\t\t\n\t\t\t\t\tvar urlParams = (new URL(document.location)).searchParams;\n\t\t\t\t\t\n\t\t\t\t\tvar showFps = urlParams.get('showfps') !== null\n\t\t\t\t\t\t? (urlParams.get('showfps') === 'true')\n\t\t\t\t\t\t: false;\n\t\t\t\t\tvar fps = urlParams.get('fps') !== null\n\t\t\t\t\t\t? parseInt(urlParams.get('fps'), 10)\n\t\t\t\t\t\t: 60;\n\t\t\t\t\tvar debugMode = urlParams.get('debugmode') !== null\n\t\t\t\t\t\t? (urlParams.get('debugmode') === 'true')\n\t\t\t\t\t\t: false;\n\t\t\t\t\t\n\t\t\t\t\twindow.ChessCompStompWithHacks.ChessCompStompWithHacksInitializer.Start(fps, debugMode);\n\t\t\t\t\t\n\t\t\t\t\tvar computeAndRenderNextFrame;\n\t\t\t\t\t\n\t\t\t\t\tvar nextTimeToAct = Date.now() + (1000.0 / fps);\n\t\t\t\t\t\n\t\t\t\t\tvar hasProcessedExtraTime = false;\n\t\t\t\t\t\n\t\t\t\t\tcomputeAndRenderNextFrame = function () {\n\t\t\t\t\t\tvar now = Date.now();\n\t\t\t\t\t\t\n\t\t\t\t\t\tif (nextTimeToAct > now) {\n\t\t\t\t\t\t\tif (!hasProcessedExtraTime) {\n\t\t\t\t\t\t\t\tvar extraTime = Math.round(nextTimeToAct - now);\n\t\t\t\t\t\t\t\tif (extraTime > 0)\n\t\t\t\t\t\t\t\t\twindow.ChessCompStompWithHacks.ChessCompStompWithHacksInitializer.ProcessExtraTime(extraTime);\n\t\t\t\t\t\t\t\thasProcessedExtraTime = true;\n\t\t\t\t\t\t\t\tsetTimeout(computeAndRenderNextFrame, 0);\n\t\t\t\t\t\t\t} else {\n\t\t\t\t\t\t\t\tsetTimeout(computeAndRenderNextFrame, 5);\n\t\t\t\t\t\t\t}\n\t\t\t\t\t\t\treturn;\n\t\t\t\t\t\t}\n\t\t\t\t\t\t\n\t\t\t\t\t\thasProcessedExtraTime = false;\n\t\t\t\t\t\t\n\t\t\t\t\t\tif (nextTimeToAct < now - 5.0*(1000.0 / fps))\n\t\t\t\t\t\t\tnextTimeToAct = now - 5.0*(1000.0 / fps);\n\t\t\t\t\t\t\n\t\t\t\t\t\tnextTimeToAct = nextTimeToAct + (1000.0 / fps);\n\t\t\t\t\t\t\n\t\t\t\t\t\twindow.ChessCompStompWithHacks.ChessCompStompWithHacksInitializer.ComputeAndRenderNextFrame();\n\t\t\t\t\t\twindow.ChessCompStompWithHacksFpsDisplayJavascript.frameComputedAndRendered();\n\t\t\t\t\t\t\n\t\t\t\t\t\tif (showFps)\n\t\t\t\t\t\t\twindow.ChessCompStompWithHacksFpsDisplayJavascript.displayFps();\n\t\t\t\t\t\t\n\t\t\t\t\t\tsetTimeout(computeAndRenderNextFrame, 0);\n\t\t\t\t\t};\n\t\t\t\t\t\n\t\t\t\t\tsetTimeout(computeAndRenderNextFrame, 0);\n\t\t\t\t})());\n\t\t\t");
+                    eval("\n\t\t\t\t((function () {\n\t\t\t\t\t'use strict';\n\t\t\t\t\t\n\t\t\t\t\tvar isWebPortalVersion = false;\n\t\t\t\t\t\n\t\t\t\t\tvar defaultFps = window.navigator.userAgent.indexOf('Gecko/') >= 0\n\t\t\t\t\t\t? 30\n\t\t\t\t\t\t: 60;\n\t\t\t\t\t\n\t\t\t\t\tvar urlParams = (new URL(document.location)).searchParams;\n\t\t\t\t\t\n\t\t\t\t\tvar showFps = urlParams.get('showfps') !== null\n\t\t\t\t\t\t? (urlParams.get('showfps') === 'true')\n\t\t\t\t\t\t: false;\n\t\t\t\t\tvar fps = urlParams.get('fps') !== null\n\t\t\t\t\t\t? parseInt(urlParams.get('fps'), 10)\n\t\t\t\t\t\t: defaultFps;\n\t\t\t\t\tvar debugMode = urlParams.get('debugmode') !== null\n\t\t\t\t\t\t? (urlParams.get('debugmode') === 'true')\n\t\t\t\t\t\t: false;\n\t\t\t\t\t\n\t\t\t\t\twindow.ChessCompStompWithHacks.ChessCompStompWithHacksInitializer.Start(fps, isWebPortalVersion, debugMode);\n\t\t\t\t\t\n\t\t\t\t\tvar computeAndRenderNextFrame;\n\t\t\t\t\t\n\t\t\t\t\tvar nextTimeToAct = Date.now() + (1000.0 / fps);\n\t\t\t\t\t\n\t\t\t\t\tvar hasProcessedExtraTime = false;\n\t\t\t\t\t\n\t\t\t\t\tcomputeAndRenderNextFrame = function () {\n\t\t\t\t\t\tvar now = Date.now();\n\t\t\t\t\t\t\n\t\t\t\t\t\tif (nextTimeToAct > now) {\n\t\t\t\t\t\t\tif (!hasProcessedExtraTime) {\n\t\t\t\t\t\t\t\tvar extraTime = Math.round(nextTimeToAct - now);\n\t\t\t\t\t\t\t\tif (extraTime > 0)\n\t\t\t\t\t\t\t\t\twindow.ChessCompStompWithHacks.ChessCompStompWithHacksInitializer.ProcessExtraTime(extraTime);\n\t\t\t\t\t\t\t\thasProcessedExtraTime = true;\n\t\t\t\t\t\t\t\tsetTimeout(computeAndRenderNextFrame, 0);\n\t\t\t\t\t\t\t} else {\n\t\t\t\t\t\t\t\tsetTimeout(computeAndRenderNextFrame, 5);\n\t\t\t\t\t\t\t}\n\t\t\t\t\t\t\treturn;\n\t\t\t\t\t\t}\n\t\t\t\t\t\t\n\t\t\t\t\t\thasProcessedExtraTime = false;\n\t\t\t\t\t\t\n\t\t\t\t\t\tif (nextTimeToAct < now - 5.0*(1000.0 / fps))\n\t\t\t\t\t\t\tnextTimeToAct = now - 5.0*(1000.0 / fps);\n\t\t\t\t\t\t\n\t\t\t\t\t\tnextTimeToAct = nextTimeToAct + (1000.0 / fps);\n\t\t\t\t\t\t\n\t\t\t\t\t\twindow.ChessCompStompWithHacks.ChessCompStompWithHacksInitializer.ComputeAndRenderNextFrame();\n\t\t\t\t\t\twindow.ChessCompStompWithHacksFpsDisplayJavascript.frameComputedAndRendered();\n\t\t\t\t\t\t\n\t\t\t\t\t\tif (showFps)\n\t\t\t\t\t\t\twindow.ChessCompStompWithHacksFpsDisplayJavascript.displayFps();\n\t\t\t\t\t\t\n\t\t\t\t\t\tsetTimeout(computeAndRenderNextFrame, 0);\n\t\t\t\t\t};\n\t\t\t\t\t\n\t\t\t\t\tsetTimeout(computeAndRenderNextFrame, 0);\n\t\t\t\t})());\n\t\t\t");
                 }
             }
         }
@@ -4875,8 +4938,28 @@ Bridge.assembly("ChessCompStompWithHacks", function ($asm, globals) {
     Bridge.define("ChessCompStompWithHacksLibrary.Credits_DesignAndCoding", {
         statics: {
             methods: {
-                GetWebBrowserVersionText: function () {
+                IsHoverOverGitHubUrl: function (mouseInput, height) {
+                    var mouseX = mouseInput.DTLibrary$IMouse$GetX();
+                    var mouseY = mouseInput.DTLibrary$IMouse$GetY();
+
+                    return 107 <= mouseX && mouseX <= 460 && ((height - 265) | 0) <= mouseY && mouseY <= ((((height - 265) | 0) + 32) | 0);
+                },
+                GetInfo: function () {
+                    var str = "ddit";
+
+                    var str2 = "tsudo";
+
+                    str = "Re" + (str || "");
+
+                    return (str || "") + ": /u/d" + (str2 || "");
+                },
+                GetWebBrowserNonWebPortalVersionText: function () {
                     return "Design and coding by dtsudo (https://github.com/dtsudo)\n\nThis game is open source, under the MIT license.\n\nThe source code is written in C#.\n\nBridge.NET is used to transpile the C# source code into javascript.\nBridge.NET is licensed under Apache License 2.0.\n(https://github.com/bridgedotnet/Bridge)";
+                },
+                GetWebPortalVersionText: function () {
+                    var returnValue = "Design and coding by dtsudo \n\nThe source code is written in C#. Bridge.NET is used to transpile the\nC# source code into javascript. Bridge.NET is licensed under Apache\nLicense 2.0.\n\n\n" + (ChessCompStompWithHacksLibrary.Credits_DesignAndCoding.GetInfo() || "");
+
+                    return returnValue;
                 },
                 GetDesktopVersionText: function () {
                     return "";
@@ -4887,33 +4970,30 @@ Bridge.assembly("ChessCompStompWithHacks", function ($asm, globals) {
             colorTheme: 0,
             viewLicenseButton: null,
             height: 0,
-            isWebBrowserVersion: false
+            isWebBrowserVersion: false,
+            isWebPortalVersion: false,
+            isHoverOverGitHubUrl: false
         },
         ctors: {
-            ctor: function (colorTheme, height, isWebBrowserVersion) {
+            ctor: function (colorTheme, height, isWebBrowserVersion, isWebPortalVersion) {
                 this.$initialize();
                 this.colorTheme = colorTheme;
 
                 this.height = height;
 
                 this.isWebBrowserVersion = isWebBrowserVersion;
+                this.isWebPortalVersion = isWebPortalVersion;
 
-                this.viewLicenseButton = new ChessCompStompWithHacksLibrary.Button(10, ((height - 320) | 0), 400, 50, new DTLibrary.DTColor.ctor(235, 235, 235), ChessCompStompWithHacksLibrary.ColorThemeUtil.GetHoverColor(colorTheme), ChessCompStompWithHacksLibrary.ColorThemeUtil.GetClickColor(colorTheme), "View Bridge.NET license text", 11, 11, ChessCompStompWithHacksLibrary.ChessFont.ChessFont20Pt);
+                this.isHoverOverGitHubUrl = false;
+
+                if (isWebPortalVersion) {
+                    this.viewLicenseButton = new ChessCompStompWithHacksLibrary.Button(170, ((height - 145) | 0), 235, 20, new DTLibrary.DTColor.ctor(235, 235, 235), ChessCompStompWithHacksLibrary.ColorThemeUtil.GetHoverColor(colorTheme), ChessCompStompWithHacksLibrary.ColorThemeUtil.GetClickColor(colorTheme), "View Bridge.NET license text", 5, 3, ChessCompStompWithHacksLibrary.ChessFont.ChessFont12Pt);
+                } else {
+                    this.viewLicenseButton = new ChessCompStompWithHacksLibrary.Button(10, ((height - 320) | 0), 400, 50, new DTLibrary.DTColor.ctor(235, 235, 235), ChessCompStompWithHacksLibrary.ColorThemeUtil.GetHoverColor(colorTheme), ChessCompStompWithHacksLibrary.ColorThemeUtil.GetClickColor(colorTheme), "View Bridge.NET license text", 11, 11, ChessCompStompWithHacksLibrary.ChessFont.ChessFont20Pt);
+                }
             }
         },
         methods: {
-            /**
-             * Returns true iff the user clicked the "view license" button
-             *
-             * @instance
-             * @public
-             * @this ChessCompStompWithHacksLibrary.Credits_DesignAndCoding
-             * @memberof ChessCompStompWithHacksLibrary.Credits_DesignAndCoding
-             * @param   {DTLibrary.IMouse}            mouseInput            
-             * @param   {DTLibrary.IMouse}            previousMouseInput    
-             * @param   {DTLibrary.ISoundOutput$1}    soundOutput
-             * @return  {boolean}
-             */
             ProcessFrame: function (mouseInput, previousMouseInput, soundOutput) {
                 var clickedButton;
                 if (this.isWebBrowserVersion) {
@@ -4922,16 +5002,64 @@ Bridge.assembly("ChessCompStompWithHacks", function ($asm, globals) {
                     clickedButton = false;
                 }
 
-                return clickedButton;
+                if (this.isWebPortalVersion) {
+                    this.isHoverOverGitHubUrl = ChessCompStompWithHacksLibrary.Credits_DesignAndCoding.IsHoverOverGitHubUrl(mouseInput, this.height);
+                }
+
+                var clickUrl = null;
+
+                if (this.isHoverOverGitHubUrl) {
+                    var a = "htt";
+                    var b = "/githu";
+                    var c = "udo";
+                    var d = "ps:/";
+                    var e = "dts";
+                    var f = "b.com/";
+
+                    clickUrl = (a || "") + (d || "") + (b || "") + (f || "") + (e || "") + (c || "");
+                }
+
+                return new ChessCompStompWithHacksLibrary.Credits_DesignAndCoding.Result(clickedButton, clickUrl);
             },
             Render: function (displayOutput) {
-                var text = this.isWebBrowserVersion ? ChessCompStompWithHacksLibrary.Credits_DesignAndCoding.GetWebBrowserVersionText() : ChessCompStompWithHacksLibrary.Credits_DesignAndCoding.GetDesktopVersionText();
-
-                displayOutput.DTLibrary$IDisplayOutput$2$ChessCompStompWithHacksLibrary$ChessImage$ChessCompStompWithHacksLibrary$ChessFont$DrawText(10, ((this.height - 10) | 0), text, ChessCompStompWithHacksLibrary.ChessFont.ChessFont20Pt, DTLibrary.DTColor.Black());
-
                 if (this.isWebBrowserVersion) {
-                    this.viewLicenseButton.Render(displayOutput);
+                    if (this.isWebPortalVersion) {
+                        var text = ChessCompStompWithHacksLibrary.Credits_DesignAndCoding.GetWebPortalVersionText();
+
+                        displayOutput.DTLibrary$IDisplayOutput$2$ChessCompStompWithHacksLibrary$ChessImage$ChessCompStompWithHacksLibrary$ChessFont$DrawText(10, ((this.height - 10) | 0), text, ChessCompStompWithHacksLibrary.ChessFont.ChessFont20Pt, DTLibrary.DTColor.Black());
+
+                        displayOutput.DTLibrary$IDisplayOutput$2$ChessCompStompWithHacksLibrary$ChessImage$ChessCompStompWithHacksLibrary$ChessFont$DrawText(10, ((((this.height - 10) | 0) - 226) | 0), "GitHub:", ChessCompStompWithHacksLibrary.ChessFont.ChessFont20Pt, DTLibrary.DTColor.Black());
+
+                        displayOutput.DTLibrary$IDisplayOutput$2$ChessCompStompWithHacksLibrary$ChessImage$ChessCompStompWithHacksLibrary$ChessFont$DrawText(109, ((((this.height - 10) | 0) - 226) | 0), "https://github.com/dtsudo", ChessCompStompWithHacksLibrary.ChessFont.ChessFont20Pt, this.isHoverOverGitHubUrl ? new DTLibrary.DTColor.ctor(0, 0, 255) : DTLibrary.DTColor.Black());
+
+                        this.viewLicenseButton.Render(displayOutput);
+                    } else {
+                        var text1 = ChessCompStompWithHacksLibrary.Credits_DesignAndCoding.GetWebBrowserNonWebPortalVersionText();
+
+                        displayOutput.DTLibrary$IDisplayOutput$2$ChessCompStompWithHacksLibrary$ChessImage$ChessCompStompWithHacksLibrary$ChessFont$DrawText(10, ((this.height - 10) | 0), text1, ChessCompStompWithHacksLibrary.ChessFont.ChessFont20Pt, DTLibrary.DTColor.Black());
+
+                        this.viewLicenseButton.Render(displayOutput);
+                    }
+                } else {
+                    var text2 = ChessCompStompWithHacksLibrary.Credits_DesignAndCoding.GetDesktopVersionText();
+
+                    displayOutput.DTLibrary$IDisplayOutput$2$ChessCompStompWithHacksLibrary$ChessImage$ChessCompStompWithHacksLibrary$ChessFont$DrawText(10, ((this.height - 10) | 0), text2, ChessCompStompWithHacksLibrary.ChessFont.ChessFont20Pt, DTLibrary.DTColor.Black());
                 }
+            }
+        }
+    });
+
+    Bridge.define("ChessCompStompWithHacksLibrary.Credits_DesignAndCoding.Result", {
+        $kind: "nested class",
+        fields: {
+            ClickedButton: false,
+            ClickUrl: null
+        },
+        ctors: {
+            ctor: function (clickedButton, clickUrl) {
+                this.$initialize();
+                this.ClickedButton = clickedButton;
+                this.ClickUrl = clickUrl;
             }
         }
     });
@@ -6063,6 +6191,7 @@ Bridge.assembly("ChessCompStompWithHacks", function ($asm, globals) {
             Logger: null,
             Timer: null,
             IsWebBrowserVersion: false,
+            IsWebPortalVersion: false,
             DebugMode: false,
             saveAndLoadData: null,
             UseDebugAI: false,
@@ -6082,7 +6211,7 @@ Bridge.assembly("ChessCompStompWithHacks", function ($asm, globals) {
             }
         },
         ctors: {
-            ctor: function (fps, rng, guidGenerator, logger, timer, fileIO, isWebBrowserVersion, debugMode, useDebugAI, initialMusicVolume) {
+            ctor: function (fps, rng, guidGenerator, logger, timer, fileIO, isWebBrowserVersion, isWebPortalVersion, debugMode, useDebugAI, initialMusicVolume) {
                 var $t;
                 this.$initialize();
                 this.Fps = fps;
@@ -6091,6 +6220,7 @@ Bridge.assembly("ChessCompStompWithHacks", function ($asm, globals) {
                 this.Logger = logger;
                 this.Timer = timer;
                 this.IsWebBrowserVersion = isWebBrowserVersion;
+                this.IsWebPortalVersion = isWebPortalVersion;
                 this.DebugMode = debugMode;
                 this.desiredMusicVolume = ($t = initialMusicVolume, $t != null ? $t : ChessCompStompWithHacksLibrary.GlobalState.DEFAULT_VOLUME);
                 this.currentMusicVolume = this.desiredMusicVolume;
@@ -8815,6 +8945,21 @@ Bridge.assembly("ChessCompStompWithHacks", function ($asm, globals) {
             GetCompletedObjectives: function () {
                 return new (System.Collections.Generic.HashSet$1(ChessCompStompWithHacksEngine.Objective)).$ctor1(this.data.CompletedObjectives);
             },
+            GetCompletedAchievements: function () {
+                var numberOfCompletedObjectives = this.data.CompletedObjectives.Count;
+
+                var completedAchievements = new (System.Collections.Generic.HashSet$1(System.String)).ctor();
+
+                if (numberOfCompletedObjectives >= 1) {
+                    completedAchievements.add("completed_1_objective");
+                }
+
+                for (var i = 2; i <= numberOfCompletedObjectives; i = (i + 1) | 0) {
+                    completedAchievements.add("completed_" + (DTLibrary.StringUtil.ToStringCultureInvariant(i) || "") + "_objectives");
+                }
+
+                return completedAchievements;
+            },
             GetObjectivesThatWereAlreadyCompletedPriorToCurrentGame: function () {
                 return new (System.Collections.Generic.HashSet$1(ChessCompStompWithHacksEngine.Objective)).$ctor1(this.data.ObjectivesThatWereAlreadyCompletedPriorToCurrentGame);
             },
@@ -9364,6 +9509,7 @@ Bridge.assembly("ChessCompStompWithHacks", function ($asm, globals) {
 
                     list.add(new ChessCompStompWithHacksLibrary.VersionInfo("1.00", "9958487281526502"));
                     list.add(new ChessCompStompWithHacksLibrary.VersionInfo("1.01", "4655654740627213"));
+                    list.add(new ChessCompStompWithHacksLibrary.VersionInfo("1.01b", "2713258488048715"));
 
                     return list;
                 }
@@ -10840,7 +10986,7 @@ Bridge.assembly("ChessCompStompWithHacks", function ($asm, globals) {
         ctors: {
             ctor: function () {
                 this.$initialize();
-                eval("\r\n\t\t\t\twindow.ChessCompStompWithHacksBridgeFileIOJavascript = ((function () {\r\n\t\t\t\t\t'use strict';\r\n\t\t\t\t\t\r\n\t\t\t\t\tvar persistData = function (fileName, base64String) {\r\n\t\t\t\t\t\ttry {\r\n\t\t\t\t\t\t\tlocalStorage.setItem(fileName, base64String);\r\n\t\t\t\t\t\t} catch (error) {\r\n\t\t\t\t\t\t\t// do nothing\r\n\t\t\t\t\t\t}\r\n\t\t\t\t\t};\r\n\t\t\t\t\t\t\t\t\t\t\r\n\t\t\t\t\tvar fetchData = function (fileName) {\r\n\t\t\t\t\t\tvar value = localStorage.getItem(fileName);\r\n\t\t\t\t\t\treturn value;\r\n\t\t\t\t\t};\r\n\t\t\t\t\t\r\n\t\t\t\t\tvar hasData = function (fileName) {\r\n\t\t\t\t\t\tvar value = localStorage.getItem(fileName);\r\n\t\t\t\t\t\treturn value !== null;\r\n\t\t\t\t\t};\r\n\t\t\t\t\t\t\t\t\t\t\r\n\t\t\t\t\treturn {\r\n\t\t\t\t\t\tpersistData: persistData,\r\n\t\t\t\t\t\tfetchData: fetchData,\r\n\t\t\t\t\t\thasData: hasData\r\n\t\t\t\t\t};\r\n\t\t\t\t})());\r\n\t\t\t");
+                eval("\r\n\t\t\t\twindow.ChessCompStompWithHacksBridgeFileIOJavascript = ((function () {\r\n\t\t\t\t\t'use strict';\r\n\t\t\t\t\t\r\n\t\t\t\t\tvar persistData = function (fileName, base64String) {\r\n\t\t\t\t\t\ttry {\r\n\t\t\t\t\t\t\tlocalStorage.setItem(fileName, base64String);\r\n\t\t\t\t\t\t} catch (error) {\r\n\t\t\t\t\t\t\t// do nothing\r\n\t\t\t\t\t\t}\r\n\t\t\t\t\t};\r\n\t\t\t\t\t\t\t\t\t\t\r\n\t\t\t\t\tvar fetchData = function (fileName) {\r\n\t\t\t\t\t\ttry {\r\n\t\t\t\t\t\t\tvar value = localStorage.getItem(fileName);\r\n\t\t\t\t\t\t\treturn value;\r\n\t\t\t\t\t\t} catch (error) {\r\n\t\t\t\t\t\t\treturn null;\r\n\t\t\t\t\t\t}\r\n\t\t\t\t\t};\r\n\t\t\t\t\t\r\n\t\t\t\t\tvar hasData = function (fileName) {\r\n\t\t\t\t\t\ttry {\r\n\t\t\t\t\t\t\tvar value = localStorage.getItem(fileName);\r\n\t\t\t\t\t\t\treturn value !== null;\r\n\t\t\t\t\t\t} catch (error) {\r\n\t\t\t\t\t\t\treturn false;\r\n\t\t\t\t\t\t}\r\n\t\t\t\t\t};\r\n\t\t\t\t\t\t\t\t\t\t\r\n\t\t\t\t\treturn {\r\n\t\t\t\t\t\tpersistData: persistData,\r\n\t\t\t\t\t\tfetchData: fetchData,\r\n\t\t\t\t\t\thasData: hasData\r\n\t\t\t\t\t};\r\n\t\t\t\t})());\r\n\t\t\t");
             }
         },
         methods: {
@@ -15898,7 +16044,7 @@ Bridge.assembly("ChessCompStompWithHacks", function ($asm, globals) {
                 this.desiredSoundVolume = ChessCompStompWithHacksLibrary.GlobalState.DEFAULT_VOLUME;
                 this.currentSoundVolume = this.desiredSoundVolume;
                 this.elapsedMicrosPerFrame = elapsedMicrosPerFrame;
-                eval("\r\n\t\t\t\twindow.ChessCompStompWithHacksBridgeSoundOutputJavascript = ((function () {\r\n\t\t\t\t\t'use strict';\r\n\t\t\t\t\t\t\r\n\t\t\t\t\tvar soundDictionary = {};\r\n\t\t\t\t\t\r\n\t\t\t\t\tvar numberOfAudioObjectsLoaded = 0;\r\n\t\t\t\t\t\r\n\t\t\t\t\tvar loadSounds = function (soundNames) {\r\n\t\t\t\t\t\tvar soundNamesArray = soundNames.split(',');\r\n\t\t\t\t\t\t\r\n\t\t\t\t\t\tvar numberOfAudioObjects = soundNamesArray.length * 10;\r\n\t\t\t\t\t\t\r\n\t\t\t\t\t\tfor (var i = 0; i < soundNamesArray.length; i++) {\r\n\t\t\t\t\t\t\tvar soundName = soundNamesArray[i];\r\n\t\t\t\t\t\t\t\r\n\t\t\t\t\t\t\tif (soundDictionary[soundName])\r\n\t\t\t\t\t\t\t\tcontinue;\r\n\t\t\t\t\t\t\t\r\n\t\t\t\t\t\t\tsoundDictionary[soundName] = [];\r\n\t\t\t\t\t\t\t\r\n\t\t\t\t\t\t\tvar soundPath = 'Data/Sound/' + soundName + '?doNotCache=' + Date.now().toString();\r\n\t\t\t\t\t\t\tfor (var j = 0; j < 10; j++) {\r\n\t\t\t\t\t\t\t\tvar audio = new Audio(soundPath);\r\n\t\t\t\t\t\t\t\taudio.addEventListener('canplaythrough', function () {\r\n\t\t\t\t\t\t\t\t\tnumberOfAudioObjectsLoaded++;\r\n\t\t\t\t\t\t\t\t});\r\n\t\t\t\t\t\t\t\t\r\n\t\t\t\t\t\t\t\tsoundDictionary[soundName].push(audio);\r\n\t\t\t\t\t\t\t}\r\n\t\t\t\t\t\t}\r\n\t\t\t\t\t\t\r\n\t\t\t\t\t\treturn numberOfAudioObjects === numberOfAudioObjectsLoaded;\r\n\t\t\t\t\t};\r\n\t\t\t\t\t\r\n\t\t\t\t\tvar playSound = function (soundName, volume) {\r\n\t\t\t\t\t\tvar sound = soundDictionary[soundName];\r\n\t\t\t\t\t\t\r\n\t\t\t\t\t\tif (volume > 1.0)\r\n\t\t\t\t\t\t\tvolume = 1.0;\r\n\t\t\t\t\t\tif (volume < 0.0)\r\n\t\t\t\t\t\t\tvolume = 0.0;\r\n\t\t\t\t\t\t\r\n\t\t\t\t\t\tvar audio = sound[0];\r\n\t\t\t\t\t\t\r\n\t\t\t\t\t\tfor (var i = 0; i < sound.length; i++) {\r\n\t\t\t\t\t\t\tif (i === sound.length - 1)\r\n\t\t\t\t\t\t\t\tsound[i] = audio;\r\n\t\t\t\t\t\t\telse\r\n\t\t\t\t\t\t\t\tsound[i] = sound[i+1];\r\n\t\t\t\t\t\t}\r\n\t\t\t\t\t\t\r\n\t\t\t\t\t\taudio.volume = volume;\r\n\t\t\t\t\t\taudio.play();\r\n\t\t\t\t\t};\r\n\t\t\t\t\t\r\n\t\t\t\t\treturn {\r\n\t\t\t\t\t\tloadSounds: loadSounds,\r\n\t\t\t\t\t\tplaySound: playSound\r\n\t\t\t\t\t};\r\n\t\t\t\t})());\r\n\t\t\t");
+                eval("\r\n\t\t\t\twindow.ChessCompStompWithHacksBridgeSoundOutputJavascript = ((function () {\r\n\t\t\t\t\t'use strict';\r\n\t\t\t\t\t\t\r\n\t\t\t\t\tvar soundDictionary = {};\r\n\t\t\t\t\t\r\n\t\t\t\t\tvar numberOfAudioObjectsLoaded = 0;\r\n\t\t\t\t\t\r\n\t\t\t\t\tvar loadSounds = function (soundNames) {\r\n\t\t\t\t\t\tvar soundNamesArray = soundNames.split(',');\r\n\t\t\t\t\t\t\r\n\t\t\t\t\t\tvar numberOfAudioObjects = soundNamesArray.length * 4;\r\n\t\t\t\t\t\t\r\n\t\t\t\t\t\tfor (var i = 0; i < soundNamesArray.length; i++) {\r\n\t\t\t\t\t\t\tvar soundName = soundNamesArray[i];\r\n\t\t\t\t\t\t\t\r\n\t\t\t\t\t\t\tif (soundDictionary[soundName])\r\n\t\t\t\t\t\t\t\tcontinue;\r\n\t\t\t\t\t\t\t\r\n\t\t\t\t\t\t\tsoundDictionary[soundName] = [];\r\n\t\t\t\t\t\t\t\r\n\t\t\t\t\t\t\tvar soundPath = 'Data/Sound/' + soundName + '?doNotCache=' + Date.now().toString();\r\n\t\t\t\t\t\t\tfor (var j = 0; j < 4; j++) {\r\n\t\t\t\t\t\t\t\tvar audio = new Audio(soundPath);\r\n\t\t\t\t\t\t\t\taudio.addEventListener('canplaythrough', function () {\r\n\t\t\t\t\t\t\t\t\tnumberOfAudioObjectsLoaded++;\r\n\t\t\t\t\t\t\t\t});\r\n\t\t\t\t\t\t\t\t\r\n\t\t\t\t\t\t\t\tsoundDictionary[soundName].push(audio);\r\n\t\t\t\t\t\t\t}\r\n\t\t\t\t\t\t}\r\n\t\t\t\t\t\t\r\n\t\t\t\t\t\treturn numberOfAudioObjects === numberOfAudioObjectsLoaded;\r\n\t\t\t\t\t};\r\n\t\t\t\t\t\r\n\t\t\t\t\tvar playSound = function (soundName, volume) {\r\n\t\t\t\t\t\tvar sound = soundDictionary[soundName];\r\n\t\t\t\t\t\t\r\n\t\t\t\t\t\tif (volume > 1.0)\r\n\t\t\t\t\t\t\tvolume = 1.0;\r\n\t\t\t\t\t\tif (volume < 0.0)\r\n\t\t\t\t\t\t\tvolume = 0.0;\r\n\t\t\t\t\t\t\r\n\t\t\t\t\t\tvar audio = sound[0];\r\n\t\t\t\t\t\t\r\n\t\t\t\t\t\tfor (var i = 0; i < sound.length; i++) {\r\n\t\t\t\t\t\t\tif (i === sound.length - 1)\r\n\t\t\t\t\t\t\t\tsound[i] = audio;\r\n\t\t\t\t\t\t\telse\r\n\t\t\t\t\t\t\t\tsound[i] = sound[i+1];\r\n\t\t\t\t\t\t}\r\n\t\t\t\t\t\t\r\n\t\t\t\t\t\taudio.volume = volume;\r\n\t\t\t\t\t\taudio.play();\r\n\t\t\t\t\t};\r\n\t\t\t\t\t\r\n\t\t\t\t\treturn {\r\n\t\t\t\t\t\tloadSounds: loadSounds,\r\n\t\t\t\t\t\tplaySound: playSound\r\n\t\t\t\t\t};\r\n\t\t\t\t})());\r\n\t\t\t");
             }
         },
         methods: {
@@ -16076,6 +16222,8 @@ Bridge.assembly("ChessCompStompWithHacks", function ($asm, globals) {
             confirmButton: null
         },
         alias: [
+            "GetClickUrl", "DTLibrary$IFrame$4$ChessCompStompWithHacksLibrary$ChessImage$ChessCompStompWithHacksLibrary$ChessFont$ChessCompStompWithHacksLibrary$ChessSound$ChessCompStompWithHacksLibrary$ChessMusic$GetClickUrl",
+            "GetCompletedAchievements", "DTLibrary$IFrame$4$ChessCompStompWithHacksLibrary$ChessImage$ChessCompStompWithHacksLibrary$ChessFont$ChessCompStompWithHacksLibrary$ChessSound$ChessCompStompWithHacksLibrary$ChessMusic$GetCompletedAchievements",
             "ProcessExtraTime", "DTLibrary$IFrame$4$ChessCompStompWithHacksLibrary$ChessImage$ChessCompStompWithHacksLibrary$ChessFont$ChessCompStompWithHacksLibrary$ChessSound$ChessCompStompWithHacksLibrary$ChessMusic$ProcessExtraTime",
             "GetNextFrame", "DTLibrary$IFrame$4$ChessCompStompWithHacksLibrary$ChessImage$ChessCompStompWithHacksLibrary$ChessFont$ChessCompStompWithHacksLibrary$ChessSound$ChessCompStompWithHacksLibrary$ChessMusic$GetNextFrame",
             "ProcessMusic", "DTLibrary$IFrame$4$ChessCompStompWithHacksLibrary$ChessImage$ChessCompStompWithHacksLibrary$ChessFont$ChessCompStompWithHacksLibrary$ChessSound$ChessCompStompWithHacksLibrary$ChessMusic$ProcessMusic",
@@ -16098,6 +16246,12 @@ Bridge.assembly("ChessCompStompWithHacks", function ($asm, globals) {
             }
         },
         methods: {
+            GetClickUrl: function () {
+                return null;
+            },
+            GetCompletedAchievements: function () {
+                return new (System.Collections.Generic.HashSet$1(System.String)).ctor();
+            },
             ProcessExtraTime: function (milliseconds) { },
             GetNextFrame: function (keyboardInput, mouseInput, previousKeyboardInput, previousMouseInput, displayProcessing, soundOutput, musicProcessing) {
                 var music = ChessCompStompWithHacksLibrary.ChessMusicUtil.GetChessMusic(this.sessionState.GetColorTheme());
@@ -16162,6 +16316,8 @@ Bridge.assembly("ChessCompStompWithHacks", function ($asm, globals) {
             viewHacksButton: null
         },
         alias: [
+            "GetClickUrl", "DTLibrary$IFrame$4$ChessCompStompWithHacksLibrary$ChessImage$ChessCompStompWithHacksLibrary$ChessFont$ChessCompStompWithHacksLibrary$ChessSound$ChessCompStompWithHacksLibrary$ChessMusic$GetClickUrl",
+            "GetCompletedAchievements", "DTLibrary$IFrame$4$ChessCompStompWithHacksLibrary$ChessImage$ChessCompStompWithHacksLibrary$ChessFont$ChessCompStompWithHacksLibrary$ChessSound$ChessCompStompWithHacksLibrary$ChessMusic$GetCompletedAchievements",
             "ProcessExtraTime", "DTLibrary$IFrame$4$ChessCompStompWithHacksLibrary$ChessImage$ChessCompStompWithHacksLibrary$ChessFont$ChessCompStompWithHacksLibrary$ChessSound$ChessCompStompWithHacksLibrary$ChessMusic$ProcessExtraTime",
             "GetNextFrame", "DTLibrary$IFrame$4$ChessCompStompWithHacksLibrary$ChessImage$ChessCompStompWithHacksLibrary$ChessFont$ChessCompStompWithHacksLibrary$ChessSound$ChessCompStompWithHacksLibrary$ChessMusic$GetNextFrame",
             "ProcessMusic", "DTLibrary$IFrame$4$ChessCompStompWithHacksLibrary$ChessImage$ChessCompStompWithHacksLibrary$ChessFont$ChessCompStompWithHacksLibrary$ChessSound$ChessCompStompWithHacksLibrary$ChessMusic$ProcessMusic",
@@ -16187,6 +16343,12 @@ Bridge.assembly("ChessCompStompWithHacks", function ($asm, globals) {
             }
         },
         methods: {
+            GetClickUrl: function () {
+                return null;
+            },
+            GetCompletedAchievements: function () {
+                return this.sessionState.GetCompletedAchievements();
+            },
             ProcessExtraTime: function (milliseconds) {
                 var gameLogic = this.sessionState.GetGameLogic();
                 if (gameLogic != null) {
@@ -16372,6 +16534,8 @@ Bridge.assembly("ChessCompStompWithHacks", function ($asm, globals) {
         },
         alias: [
             "ProcessExtraTime", "DTLibrary$IFrame$4$ChessCompStompWithHacksLibrary$ChessImage$ChessCompStompWithHacksLibrary$ChessFont$ChessCompStompWithHacksLibrary$ChessSound$ChessCompStompWithHacksLibrary$ChessMusic$ProcessExtraTime",
+            "GetClickUrl", "DTLibrary$IFrame$4$ChessCompStompWithHacksLibrary$ChessImage$ChessCompStompWithHacksLibrary$ChessFont$ChessCompStompWithHacksLibrary$ChessSound$ChessCompStompWithHacksLibrary$ChessMusic$GetClickUrl",
+            "GetCompletedAchievements", "DTLibrary$IFrame$4$ChessCompStompWithHacksLibrary$ChessImage$ChessCompStompWithHacksLibrary$ChessFont$ChessCompStompWithHacksLibrary$ChessSound$ChessCompStompWithHacksLibrary$ChessMusic$GetCompletedAchievements",
             "GetNextFrame", "DTLibrary$IFrame$4$ChessCompStompWithHacksLibrary$ChessImage$ChessCompStompWithHacksLibrary$ChessFont$ChessCompStompWithHacksLibrary$ChessSound$ChessCompStompWithHacksLibrary$ChessMusic$GetNextFrame",
             "ProcessMusic", "DTLibrary$IFrame$4$ChessCompStompWithHacksLibrary$ChessImage$ChessCompStompWithHacksLibrary$ChessFont$ChessCompStompWithHacksLibrary$ChessSound$ChessCompStompWithHacksLibrary$ChessMusic$ProcessMusic",
             "Render", "DTLibrary$IFrame$4$ChessCompStompWithHacksLibrary$ChessImage$ChessCompStompWithHacksLibrary$ChessFont$ChessCompStompWithHacksLibrary$ChessSound$ChessCompStompWithHacksLibrary$ChessMusic$Render",
@@ -16394,6 +16558,12 @@ Bridge.assembly("ChessCompStompWithHacks", function ($asm, globals) {
         },
         methods: {
             ProcessExtraTime: function (milliseconds) { },
+            GetClickUrl: function () {
+                return null;
+            },
+            GetCompletedAchievements: function () {
+                return new (System.Collections.Generic.HashSet$1(System.String)).ctor();
+            },
             GetNextFrame: function (keyboardInput, mouseInput, previousKeyboardInput, previousMouseInput, displayProcessing, soundOutput, musicProcessing) {
                 if (keyboardInput.DTLibrary$IKeyboard$IsPressed(DTLibrary.Key.Esc) && !previousKeyboardInput.DTLibrary$IKeyboard$IsPressed(DTLibrary.Key.Esc)) {
                     soundOutput.DTLibrary$ISoundOutput$1$ChessCompStompWithHacksLibrary$ChessSound$PlaySound(ChessCompStompWithHacksLibrary.ChessSound.Click);
@@ -16453,9 +16623,12 @@ Bridge.assembly("ChessCompStompWithHacks", function ($asm, globals) {
             backButton: null,
             creditsDesignAndCoding: null,
             creditsImages: null,
-            creditsFont: null
+            creditsFont: null,
+            clickUrl: null
         },
         alias: [
+            "GetClickUrl", "DTLibrary$IFrame$4$ChessCompStompWithHacksLibrary$ChessImage$ChessCompStompWithHacksLibrary$ChessFont$ChessCompStompWithHacksLibrary$ChessSound$ChessCompStompWithHacksLibrary$ChessMusic$GetClickUrl",
+            "GetCompletedAchievements", "DTLibrary$IFrame$4$ChessCompStompWithHacksLibrary$ChessImage$ChessCompStompWithHacksLibrary$ChessFont$ChessCompStompWithHacksLibrary$ChessSound$ChessCompStompWithHacksLibrary$ChessMusic$GetCompletedAchievements",
             "GetNextFrame", "DTLibrary$IFrame$4$ChessCompStompWithHacksLibrary$ChessImage$ChessCompStompWithHacksLibrary$ChessFont$ChessCompStompWithHacksLibrary$ChessSound$ChessCompStompWithHacksLibrary$ChessMusic$GetNextFrame",
             "ProcessExtraTime", "DTLibrary$IFrame$4$ChessCompStompWithHacksLibrary$ChessImage$ChessCompStompWithHacksLibrary$ChessFont$ChessCompStompWithHacksLibrary$ChessSound$ChessCompStompWithHacksLibrary$ChessMusic$ProcessExtraTime",
             "ProcessMusic", "DTLibrary$IFrame$4$ChessCompStompWithHacksLibrary$ChessImage$ChessCompStompWithHacksLibrary$ChessFont$ChessCompStompWithHacksLibrary$ChessSound$ChessCompStompWithHacksLibrary$ChessMusic$ProcessMusic",
@@ -16472,7 +16645,7 @@ Bridge.assembly("ChessCompStompWithHacks", function ($asm, globals) {
                 this.hoverTab = null;
                 this.clickTab = null;
 
-                this.creditsDesignAndCoding = new ChessCompStompWithHacksLibrary.Credits_DesignAndCoding(sessionState.GetColorTheme(), 450, globalState.IsWebBrowserVersion);
+                this.creditsDesignAndCoding = new ChessCompStompWithHacksLibrary.Credits_DesignAndCoding(sessionState.GetColorTheme(), 450, globalState.IsWebBrowserVersion, globalState.IsWebPortalVersion);
                 this.creditsImages = new ChessCompStompWithHacksLibrary.Credits_Images(sessionState.GetColorTheme(), 450);
                 this.creditsFont = new ChessCompStompWithHacksLibrary.Credits_Font(sessionState.GetColorTheme(), 450);
 
@@ -16484,13 +16657,23 @@ Bridge.assembly("ChessCompStompWithHacks", function ($asm, globals) {
                 this.tabButtons.add(new ChessCompStompWithHacksLibrary.CreditsFrame.TabButton(535, 569, 90, 40, ChessCompStompWithHacksLibrary.CreditsFrame.Tab.Music, "Music"));
 
                 this.backButton = new ChessCompStompWithHacksLibrary.Button(780, 20, 200, 80, new DTLibrary.DTColor.ctor(235, 235, 235), ChessCompStompWithHacksLibrary.ColorThemeUtil.GetHoverColor(sessionState.GetColorTheme()), ChessCompStompWithHacksLibrary.ColorThemeUtil.GetClickColor(sessionState.GetColorTheme()), "Back", 67, 28, ChessCompStompWithHacksLibrary.ChessFont.ChessFont20Pt);
+
+                this.clickUrl = null;
             }
         },
         methods: {
+            GetClickUrl: function () {
+                return this.clickUrl;
+            },
+            GetCompletedAchievements: function () {
+                return new (System.Collections.Generic.HashSet$1(System.String)).ctor();
+            },
             GetNextFrame: function (keyboardInput, mouseInput, previousKeyboardInput, previousMouseInput, displayProcessing, soundOutput, musicProcessing) {
                 var $t;
                 var mouseX = mouseInput.DTLibrary$IMouse$GetX();
                 var mouseY = mouseInput.DTLibrary$IMouse$GetY();
+
+                this.clickUrl = null;
 
                 this.hoverTab = null;
                 $t = Bridge.getEnumerator(this.tabButtons);
@@ -16537,7 +16720,11 @@ Bridge.assembly("ChessCompStompWithHacks", function ($asm, globals) {
                 var translatedPreviousMouse = new DTLibrary.TranslatedMouse(previousMouseInput, -20, -120);
 
                 if (this.selectedTab === ChessCompStompWithHacksLibrary.CreditsFrame.Tab.DesignAndCoding) {
-                    var clickedViewLicenseButton = this.creditsDesignAndCoding.ProcessFrame(translatedMouse, translatedPreviousMouse, soundOutput);
+                    var result = this.creditsDesignAndCoding.ProcessFrame(translatedMouse, translatedPreviousMouse, soundOutput);
+
+                    var clickedViewLicenseButton = result.ClickedButton;
+
+                    this.clickUrl = result.ClickUrl;
 
                     if (clickedViewLicenseButton) {
                         soundOutput.DTLibrary$ISoundOutput$1$ChessCompStompWithHacksLibrary$ChessSound$PlaySound(ChessCompStompWithHacksLibrary.ChessSound.Click);
@@ -16670,6 +16857,8 @@ Bridge.assembly("ChessCompStompWithHacks", function ($asm, globals) {
             crossIconSelected: false
         },
         alias: [
+            "GetClickUrl", "DTLibrary$IFrame$4$ChessCompStompWithHacksLibrary$ChessImage$ChessCompStompWithHacksLibrary$ChessFont$ChessCompStompWithHacksLibrary$ChessSound$ChessCompStompWithHacksLibrary$ChessMusic$GetClickUrl",
+            "GetCompletedAchievements", "DTLibrary$IFrame$4$ChessCompStompWithHacksLibrary$ChessImage$ChessCompStompWithHacksLibrary$ChessFont$ChessCompStompWithHacksLibrary$ChessSound$ChessCompStompWithHacksLibrary$ChessMusic$GetCompletedAchievements",
             "GetNextFrame", "DTLibrary$IFrame$4$ChessCompStompWithHacksLibrary$ChessImage$ChessCompStompWithHacksLibrary$ChessFont$ChessCompStompWithHacksLibrary$ChessSound$ChessCompStompWithHacksLibrary$ChessMusic$GetNextFrame",
             "ProcessExtraTime", "DTLibrary$IFrame$4$ChessCompStompWithHacksLibrary$ChessImage$ChessCompStompWithHacksLibrary$ChessFont$ChessCompStompWithHacksLibrary$ChessSound$ChessCompStompWithHacksLibrary$ChessMusic$ProcessExtraTime",
             "ProcessMusic", "DTLibrary$IFrame$4$ChessCompStompWithHacksLibrary$ChessImage$ChessCompStompWithHacksLibrary$ChessFont$ChessCompStompWithHacksLibrary$ChessSound$ChessCompStompWithHacksLibrary$ChessMusic$ProcessMusic",
@@ -16691,6 +16880,12 @@ Bridge.assembly("ChessCompStompWithHacks", function ($asm, globals) {
             }
         },
         methods: {
+            GetClickUrl: function () {
+                return null;
+            },
+            GetCompletedAchievements: function () {
+                return new (System.Collections.Generic.HashSet$1(System.String)).ctor();
+            },
             GetNextFrame: function (keyboardInput, mouseInput, previousKeyboardInput, previousMouseInput, displayProcessing, soundOutput, musicProcessing) {
                 if (keyboardInput.DTLibrary$IKeyboard$IsPressed(DTLibrary.Key.Esc) && !previousKeyboardInput.DTLibrary$IKeyboard$IsPressed(DTLibrary.Key.Esc) || !mouseInput.DTLibrary$IMouse$IsLeftMouseButtonPressed() && previousMouseInput.DTLibrary$IMouse$IsLeftMouseButtonPressed() || !mouseInput.DTLibrary$IMouse$IsRightMouseButtonPressed() && previousMouseInput.DTLibrary$IMouse$IsRightMouseButtonPressed()) {
                     soundOutput.DTLibrary$ISoundOutput$1$ChessCompStompWithHacksLibrary$ChessSound$PlaySound(ChessCompStompWithHacksLibrary.ChessSound.Click);
@@ -16771,6 +16966,8 @@ Bridge.assembly("ChessCompStompWithHacks", function ($asm, globals) {
         },
         alias: [
             "ProcessExtraTime", "DTLibrary$IFrame$4$ChessCompStompWithHacksLibrary$ChessImage$ChessCompStompWithHacksLibrary$ChessFont$ChessCompStompWithHacksLibrary$ChessSound$ChessCompStompWithHacksLibrary$ChessMusic$ProcessExtraTime",
+            "GetClickUrl", "DTLibrary$IFrame$4$ChessCompStompWithHacksLibrary$ChessImage$ChessCompStompWithHacksLibrary$ChessFont$ChessCompStompWithHacksLibrary$ChessSound$ChessCompStompWithHacksLibrary$ChessMusic$GetClickUrl",
+            "GetCompletedAchievements", "DTLibrary$IFrame$4$ChessCompStompWithHacksLibrary$ChessImage$ChessCompStompWithHacksLibrary$ChessFont$ChessCompStompWithHacksLibrary$ChessSound$ChessCompStompWithHacksLibrary$ChessMusic$GetCompletedAchievements",
             "GetNextFrame", "DTLibrary$IFrame$4$ChessCompStompWithHacksLibrary$ChessImage$ChessCompStompWithHacksLibrary$ChessFont$ChessCompStompWithHacksLibrary$ChessSound$ChessCompStompWithHacksLibrary$ChessMusic$GetNextFrame",
             "ProcessMusic", "DTLibrary$IFrame$4$ChessCompStompWithHacksLibrary$ChessImage$ChessCompStompWithHacksLibrary$ChessFont$ChessCompStompWithHacksLibrary$ChessSound$ChessCompStompWithHacksLibrary$ChessMusic$ProcessMusic",
             "Render", "DTLibrary$IFrame$4$ChessCompStompWithHacksLibrary$ChessImage$ChessCompStompWithHacksLibrary$ChessFont$ChessCompStompWithHacksLibrary$ChessSound$ChessCompStompWithHacksLibrary$ChessMusic$Render",
@@ -16793,6 +16990,12 @@ Bridge.assembly("ChessCompStompWithHacks", function ($asm, globals) {
         },
         methods: {
             ProcessExtraTime: function (milliseconds) { },
+            GetClickUrl: function () {
+                return null;
+            },
+            GetCompletedAchievements: function () {
+                return new (System.Collections.Generic.HashSet$1(System.String)).ctor();
+            },
             GetNextFrame: function (keyboardInput, mouseInput, previousKeyboardInput, previousMouseInput, displayProcessing, soundOutput, musicProcessing) {
                 if (this.globalState.DebugMode) {
                     if (keyboardInput.DTLibrary$IKeyboard$IsPressed(DTLibrary.Key.One) && !previousKeyboardInput.DTLibrary$IKeyboard$IsPressed(DTLibrary.Key.One)) {
@@ -16882,6 +17085,8 @@ Bridge.assembly("ChessCompStompWithHacks", function ($asm, globals) {
         },
         alias: [
             "ProcessExtraTime", "DTLibrary$IFrame$4$ChessCompStompWithHacksLibrary$ChessImage$ChessCompStompWithHacksLibrary$ChessFont$ChessCompStompWithHacksLibrary$ChessSound$ChessCompStompWithHacksLibrary$ChessMusic$ProcessExtraTime",
+            "GetClickUrl", "DTLibrary$IFrame$4$ChessCompStompWithHacksLibrary$ChessImage$ChessCompStompWithHacksLibrary$ChessFont$ChessCompStompWithHacksLibrary$ChessSound$ChessCompStompWithHacksLibrary$ChessMusic$GetClickUrl",
+            "GetCompletedAchievements", "DTLibrary$IFrame$4$ChessCompStompWithHacksLibrary$ChessImage$ChessCompStompWithHacksLibrary$ChessFont$ChessCompStompWithHacksLibrary$ChessSound$ChessCompStompWithHacksLibrary$ChessMusic$GetCompletedAchievements",
             "GetNextFrame", "DTLibrary$IFrame$4$ChessCompStompWithHacksLibrary$ChessImage$ChessCompStompWithHacksLibrary$ChessFont$ChessCompStompWithHacksLibrary$ChessSound$ChessCompStompWithHacksLibrary$ChessMusic$GetNextFrame",
             "ProcessMusic", "DTLibrary$IFrame$4$ChessCompStompWithHacksLibrary$ChessImage$ChessCompStompWithHacksLibrary$ChessFont$ChessCompStompWithHacksLibrary$ChessSound$ChessCompStompWithHacksLibrary$ChessMusic$ProcessMusic",
             "Render", "DTLibrary$IFrame$4$ChessCompStompWithHacksLibrary$ChessImage$ChessCompStompWithHacksLibrary$ChessFont$ChessCompStompWithHacksLibrary$ChessSound$ChessCompStompWithHacksLibrary$ChessMusic$Render",
@@ -16895,6 +17100,12 @@ Bridge.assembly("ChessCompStompWithHacks", function ($asm, globals) {
         },
         methods: {
             ProcessExtraTime: function (milliseconds) { },
+            GetClickUrl: function () {
+                return null;
+            },
+            GetCompletedAchievements: function () {
+                return new (System.Collections.Generic.HashSet$1(System.String)).ctor();
+            },
             GetNextFrame: function (keyboardInput, mouseInput, previousKeyboardInput, previousMouseInput, displayProcessing, soundOutput, musicProcessing) {
                 var returnValue = this.GetNextFrameHelper(displayProcessing, soundOutput, musicProcessing);
 
@@ -16947,7 +17158,9 @@ Bridge.assembly("ChessCompStompWithHacks", function ($asm, globals) {
             },
             ProcessMusic: function () { },
             Render: function (displayOutput) {
-                displayOutput.DTLibrary$IDisplayOutput$2$ChessCompStompWithHacksLibrary$ChessImage$ChessCompStompWithHacksLibrary$ChessFont$DrawInitialLoadingScreen();
+                displayOutput.DTLibrary$IDisplayOutput$2$ChessCompStompWithHacksLibrary$ChessImage$ChessCompStompWithHacksLibrary$ChessFont$DrawRectangle(0, 0, ChessCompStompWithHacksLibrary.ChessCompStompWithHacks.WINDOW_WIDTH, ChessCompStompWithHacksLibrary.ChessCompStompWithHacks.WINDOW_HEIGHT, new DTLibrary.DTColor.ctor(223, 220, 217), true);
+
+                displayOutput.DTLibrary$IDisplayOutput$2$ChessCompStompWithHacksLibrary$ChessImage$ChessCompStompWithHacksLibrary$ChessFont$TryDrawText(440, 400, "Loading...", ChessCompStompWithHacksLibrary.ChessFont.ChessFont20Pt, DTLibrary.DTColor.Black());
             },
             RenderMusic: function (musicOutput) { }
         }
@@ -16974,6 +17187,8 @@ Bridge.assembly("ChessCompStompWithHacks", function ($asm, globals) {
         },
         alias: [
             "ProcessExtraTime", "DTLibrary$IFrame$4$ChessCompStompWithHacksLibrary$ChessImage$ChessCompStompWithHacksLibrary$ChessFont$ChessCompStompWithHacksLibrary$ChessSound$ChessCompStompWithHacksLibrary$ChessMusic$ProcessExtraTime",
+            "GetClickUrl", "DTLibrary$IFrame$4$ChessCompStompWithHacksLibrary$ChessImage$ChessCompStompWithHacksLibrary$ChessFont$ChessCompStompWithHacksLibrary$ChessSound$ChessCompStompWithHacksLibrary$ChessMusic$GetClickUrl",
+            "GetCompletedAchievements", "DTLibrary$IFrame$4$ChessCompStompWithHacksLibrary$ChessImage$ChessCompStompWithHacksLibrary$ChessFont$ChessCompStompWithHacksLibrary$ChessSound$ChessCompStompWithHacksLibrary$ChessMusic$GetCompletedAchievements",
             "GetNextFrame", "DTLibrary$IFrame$4$ChessCompStompWithHacksLibrary$ChessImage$ChessCompStompWithHacksLibrary$ChessFont$ChessCompStompWithHacksLibrary$ChessSound$ChessCompStompWithHacksLibrary$ChessMusic$GetNextFrame",
             "ProcessMusic", "DTLibrary$IFrame$4$ChessCompStompWithHacksLibrary$ChessImage$ChessCompStompWithHacksLibrary$ChessFont$ChessCompStompWithHacksLibrary$ChessSound$ChessCompStompWithHacksLibrary$ChessMusic$ProcessMusic",
             "Render", "DTLibrary$IFrame$4$ChessCompStompWithHacksLibrary$ChessImage$ChessCompStompWithHacksLibrary$ChessFont$ChessCompStompWithHacksLibrary$ChessSound$ChessCompStompWithHacksLibrary$ChessMusic$Render",
@@ -16993,6 +17208,12 @@ Bridge.assembly("ChessCompStompWithHacks", function ($asm, globals) {
         },
         methods: {
             ProcessExtraTime: function (milliseconds) { },
+            GetClickUrl: function () {
+                return null;
+            },
+            GetCompletedAchievements: function () {
+                return new (System.Collections.Generic.HashSet$1(System.String)).ctor();
+            },
             GetNextFrame: function (keyboardInput, mouseInput, previousKeyboardInput, previousMouseInput, displayProcessing, soundOutput, musicProcessing) {
                 this.elapsedTimeMicros = (this.elapsedTimeMicros + this.globalState.ElapsedMicrosPerFrame) | 0;
                 if (this.elapsedTimeMicros >= ChessCompStompWithHacksLibrary.IntroScreenFrame.TOTAL_TIME_TO_DISPLAY_TEXT) {
@@ -17077,6 +17298,8 @@ Bridge.assembly("ChessCompStompWithHacks", function ($asm, globals) {
             objectivesScreenDisplay: null
         },
         alias: [
+            "GetClickUrl", "DTLibrary$IFrame$4$ChessCompStompWithHacksLibrary$ChessImage$ChessCompStompWithHacksLibrary$ChessFont$ChessCompStompWithHacksLibrary$ChessSound$ChessCompStompWithHacksLibrary$ChessMusic$GetClickUrl",
+            "GetCompletedAchievements", "DTLibrary$IFrame$4$ChessCompStompWithHacksLibrary$ChessImage$ChessCompStompWithHacksLibrary$ChessFont$ChessCompStompWithHacksLibrary$ChessSound$ChessCompStompWithHacksLibrary$ChessMusic$GetCompletedAchievements",
             "ProcessExtraTime", "DTLibrary$IFrame$4$ChessCompStompWithHacksLibrary$ChessImage$ChessCompStompWithHacksLibrary$ChessFont$ChessCompStompWithHacksLibrary$ChessSound$ChessCompStompWithHacksLibrary$ChessMusic$ProcessExtraTime",
             "GetNextFrame", "DTLibrary$IFrame$4$ChessCompStompWithHacksLibrary$ChessImage$ChessCompStompWithHacksLibrary$ChessFont$ChessCompStompWithHacksLibrary$ChessSound$ChessCompStompWithHacksLibrary$ChessMusic$GetNextFrame",
             "ProcessMusic", "DTLibrary$IFrame$4$ChessCompStompWithHacksLibrary$ChessImage$ChessCompStompWithHacksLibrary$ChessFont$ChessCompStompWithHacksLibrary$ChessSound$ChessCompStompWithHacksLibrary$ChessMusic$ProcessMusic",
@@ -17107,6 +17330,12 @@ Bridge.assembly("ChessCompStompWithHacks", function ($asm, globals) {
             }
         },
         methods: {
+            GetClickUrl: function () {
+                return null;
+            },
+            GetCompletedAchievements: function () {
+                return new (System.Collections.Generic.HashSet$1(System.String)).ctor();
+            },
             ProcessExtraTime: function (milliseconds) { },
             GetNextFrame: function (keyboardInput, mouseInput, previousKeyboardInput, previousMouseInput, displayProcessing, soundOutput, musicProcessing) {
                 var clickedSettingsIcon = this.settingsIcon.ProcessFrame(mouseInput, previousMouseInput, false, displayProcessing).HasClicked;
@@ -17200,6 +17429,8 @@ Bridge.assembly("ChessCompStompWithHacks", function ($asm, globals) {
         },
         alias: [
             "ProcessExtraTime", "DTLibrary$IFrame$4$ChessCompStompWithHacksLibrary$ChessImage$ChessCompStompWithHacksLibrary$ChessFont$ChessCompStompWithHacksLibrary$ChessSound$ChessCompStompWithHacksLibrary$ChessMusic$ProcessExtraTime",
+            "GetClickUrl", "DTLibrary$IFrame$4$ChessCompStompWithHacksLibrary$ChessImage$ChessCompStompWithHacksLibrary$ChessFont$ChessCompStompWithHacksLibrary$ChessSound$ChessCompStompWithHacksLibrary$ChessMusic$GetClickUrl",
+            "GetCompletedAchievements", "DTLibrary$IFrame$4$ChessCompStompWithHacksLibrary$ChessImage$ChessCompStompWithHacksLibrary$ChessFont$ChessCompStompWithHacksLibrary$ChessSound$ChessCompStompWithHacksLibrary$ChessMusic$GetCompletedAchievements",
             "GetNextFrame", "DTLibrary$IFrame$4$ChessCompStompWithHacksLibrary$ChessImage$ChessCompStompWithHacksLibrary$ChessFont$ChessCompStompWithHacksLibrary$ChessSound$ChessCompStompWithHacksLibrary$ChessMusic$GetNextFrame",
             "ProcessMusic", "DTLibrary$IFrame$4$ChessCompStompWithHacksLibrary$ChessImage$ChessCompStompWithHacksLibrary$ChessFont$ChessCompStompWithHacksLibrary$ChessSound$ChessCompStompWithHacksLibrary$ChessMusic$ProcessMusic",
             "Render", "DTLibrary$IFrame$4$ChessCompStompWithHacksLibrary$ChessImage$ChessCompStompWithHacksLibrary$ChessFont$ChessCompStompWithHacksLibrary$ChessSound$ChessCompStompWithHacksLibrary$ChessMusic$Render",
@@ -17226,6 +17457,12 @@ Bridge.assembly("ChessCompStompWithHacks", function ($asm, globals) {
                 if (gameLogic != null) {
                     gameLogic.ProcessExtraTime(milliseconds);
                 }
+            },
+            GetClickUrl: function () {
+                return null;
+            },
+            GetCompletedAchievements: function () {
+                return new (System.Collections.Generic.HashSet$1(System.String)).ctor();
             },
             GetNextFrame: function (keyboardInput, mouseInput, previousKeyboardInput, previousMouseInput, displayProcessing, soundOutput, musicProcessing) {
                 if (keyboardInput.DTLibrary$IKeyboard$IsPressed(DTLibrary.Key.Esc) && !previousKeyboardInput.DTLibrary$IKeyboard$IsPressed(DTLibrary.Key.Esc)) {
@@ -17312,6 +17549,8 @@ Bridge.assembly("ChessCompStompWithHacks", function ($asm, globals) {
             panelHeight: 0
         },
         alias: [
+            "GetClickUrl", "DTLibrary$IFrame$4$ChessCompStompWithHacksLibrary$ChessImage$ChessCompStompWithHacksLibrary$ChessFont$ChessCompStompWithHacksLibrary$ChessSound$ChessCompStompWithHacksLibrary$ChessMusic$GetClickUrl",
+            "GetCompletedAchievements", "DTLibrary$IFrame$4$ChessCompStompWithHacksLibrary$ChessImage$ChessCompStompWithHacksLibrary$ChessFont$ChessCompStompWithHacksLibrary$ChessSound$ChessCompStompWithHacksLibrary$ChessMusic$GetCompletedAchievements",
             "ProcessExtraTime", "DTLibrary$IFrame$4$ChessCompStompWithHacksLibrary$ChessImage$ChessCompStompWithHacksLibrary$ChessFont$ChessCompStompWithHacksLibrary$ChessSound$ChessCompStompWithHacksLibrary$ChessMusic$ProcessExtraTime",
             "GetNextFrame", "DTLibrary$IFrame$4$ChessCompStompWithHacksLibrary$ChessImage$ChessCompStompWithHacksLibrary$ChessFont$ChessCompStompWithHacksLibrary$ChessSound$ChessCompStompWithHacksLibrary$ChessMusic$GetNextFrame",
             "ProcessMusic", "DTLibrary$IFrame$4$ChessCompStompWithHacksLibrary$ChessImage$ChessCompStompWithHacksLibrary$ChessFont$ChessCompStompWithHacksLibrary$ChessSound$ChessCompStompWithHacksLibrary$ChessMusic$ProcessMusic",
@@ -17337,6 +17576,12 @@ Bridge.assembly("ChessCompStompWithHacks", function ($asm, globals) {
             }
         },
         methods: {
+            GetClickUrl: function () {
+                return null;
+            },
+            GetCompletedAchievements: function () {
+                return new (System.Collections.Generic.HashSet$1(System.String)).ctor();
+            },
             ProcessExtraTime: function (milliseconds) {
                 this.underlyingFrame.DTLibrary$IFrame$4$ChessCompStompWithHacksLibrary$ChessImage$ChessCompStompWithHacksLibrary$ChessFont$ChessCompStompWithHacksLibrary$ChessSound$ChessCompStompWithHacksLibrary$ChessMusic$ProcessExtraTime(milliseconds);
             },
@@ -17421,6 +17666,8 @@ Bridge.assembly("ChessCompStompWithHacks", function ($asm, globals) {
         },
         alias: [
             "ProcessExtraTime", "DTLibrary$IFrame$4$ChessCompStompWithHacksLibrary$ChessImage$ChessCompStompWithHacksLibrary$ChessFont$ChessCompStompWithHacksLibrary$ChessSound$ChessCompStompWithHacksLibrary$ChessMusic$ProcessExtraTime",
+            "GetClickUrl", "DTLibrary$IFrame$4$ChessCompStompWithHacksLibrary$ChessImage$ChessCompStompWithHacksLibrary$ChessFont$ChessCompStompWithHacksLibrary$ChessSound$ChessCompStompWithHacksLibrary$ChessMusic$GetClickUrl",
+            "GetCompletedAchievements", "DTLibrary$IFrame$4$ChessCompStompWithHacksLibrary$ChessImage$ChessCompStompWithHacksLibrary$ChessFont$ChessCompStompWithHacksLibrary$ChessSound$ChessCompStompWithHacksLibrary$ChessMusic$GetCompletedAchievements",
             "GetNextFrame", "DTLibrary$IFrame$4$ChessCompStompWithHacksLibrary$ChessImage$ChessCompStompWithHacksLibrary$ChessFont$ChessCompStompWithHacksLibrary$ChessSound$ChessCompStompWithHacksLibrary$ChessMusic$GetNextFrame",
             "ProcessMusic", "DTLibrary$IFrame$4$ChessCompStompWithHacksLibrary$ChessImage$ChessCompStompWithHacksLibrary$ChessFont$ChessCompStompWithHacksLibrary$ChessSound$ChessCompStompWithHacksLibrary$ChessMusic$ProcessMusic",
             "Render", "DTLibrary$IFrame$4$ChessCompStompWithHacksLibrary$ChessImage$ChessCompStompWithHacksLibrary$ChessFont$ChessCompStompWithHacksLibrary$ChessSound$ChessCompStompWithHacksLibrary$ChessMusic$Render",
@@ -17435,6 +17682,12 @@ Bridge.assembly("ChessCompStompWithHacks", function ($asm, globals) {
         },
         methods: {
             ProcessExtraTime: function (milliseconds) { },
+            GetClickUrl: function () {
+                return null;
+            },
+            GetCompletedAchievements: function () {
+                return new (System.Collections.Generic.HashSet$1(System.String)).ctor();
+            },
             GetNextFrame: function (keyboardInput, mouseInput, previousKeyboardInput, previousMouseInput, displayProcessing, soundOutput, musicProcessing) {
                 if (keyboardInput.DTLibrary$IKeyboard$IsPressed(DTLibrary.Key.Esc) && !previousKeyboardInput.DTLibrary$IKeyboard$IsPressed(DTLibrary.Key.Esc)) {
                     return new ChessCompStompWithHacksLibrary.TestingFrame(this.globalState, this.sessionState);
@@ -17485,6 +17738,8 @@ Bridge.assembly("ChessCompStompWithHacks", function ($asm, globals) {
             sessionState: null
         },
         alias: [
+            "GetClickUrl", "DTLibrary$IFrame$4$ChessCompStompWithHacksLibrary$ChessImage$ChessCompStompWithHacksLibrary$ChessFont$ChessCompStompWithHacksLibrary$ChessSound$ChessCompStompWithHacksLibrary$ChessMusic$GetClickUrl",
+            "GetCompletedAchievements", "DTLibrary$IFrame$4$ChessCompStompWithHacksLibrary$ChessImage$ChessCompStompWithHacksLibrary$ChessFont$ChessCompStompWithHacksLibrary$ChessSound$ChessCompStompWithHacksLibrary$ChessMusic$GetCompletedAchievements",
             "ProcessExtraTime", "DTLibrary$IFrame$4$ChessCompStompWithHacksLibrary$ChessImage$ChessCompStompWithHacksLibrary$ChessFont$ChessCompStompWithHacksLibrary$ChessSound$ChessCompStompWithHacksLibrary$ChessMusic$ProcessExtraTime",
             "GetNextFrame", "DTLibrary$IFrame$4$ChessCompStompWithHacksLibrary$ChessImage$ChessCompStompWithHacksLibrary$ChessFont$ChessCompStompWithHacksLibrary$ChessSound$ChessCompStompWithHacksLibrary$ChessMusic$GetNextFrame",
             "ProcessMusic", "DTLibrary$IFrame$4$ChessCompStompWithHacksLibrary$ChessImage$ChessCompStompWithHacksLibrary$ChessFont$ChessCompStompWithHacksLibrary$ChessSound$ChessCompStompWithHacksLibrary$ChessMusic$ProcessMusic",
@@ -17499,6 +17754,12 @@ Bridge.assembly("ChessCompStompWithHacks", function ($asm, globals) {
             }
         },
         methods: {
+            GetClickUrl: function () {
+                return null;
+            },
+            GetCompletedAchievements: function () {
+                return new (System.Collections.Generic.HashSet$1(System.String)).ctor();
+            },
             ProcessExtraTime: function (milliseconds) { },
             GetNextFrame: function (keyboardInput, mouseInput, previousKeyboardInput, previousMouseInput, displayProcessing, soundOutput, musicProcessing) {
                 if (keyboardInput.DTLibrary$IKeyboard$IsPressed(DTLibrary.Key.Esc) && !previousKeyboardInput.DTLibrary$IKeyboard$IsPressed(DTLibrary.Key.Esc)) {
@@ -17535,6 +17796,8 @@ Bridge.assembly("ChessCompStompWithHacks", function ($asm, globals) {
         },
         alias: [
             "ProcessExtraTime", "DTLibrary$IFrame$4$ChessCompStompWithHacksLibrary$ChessImage$ChessCompStompWithHacksLibrary$ChessFont$ChessCompStompWithHacksLibrary$ChessSound$ChessCompStompWithHacksLibrary$ChessMusic$ProcessExtraTime",
+            "GetClickUrl", "DTLibrary$IFrame$4$ChessCompStompWithHacksLibrary$ChessImage$ChessCompStompWithHacksLibrary$ChessFont$ChessCompStompWithHacksLibrary$ChessSound$ChessCompStompWithHacksLibrary$ChessMusic$GetClickUrl",
+            "GetCompletedAchievements", "DTLibrary$IFrame$4$ChessCompStompWithHacksLibrary$ChessImage$ChessCompStompWithHacksLibrary$ChessFont$ChessCompStompWithHacksLibrary$ChessSound$ChessCompStompWithHacksLibrary$ChessMusic$GetCompletedAchievements",
             "GetNextFrame", "DTLibrary$IFrame$4$ChessCompStompWithHacksLibrary$ChessImage$ChessCompStompWithHacksLibrary$ChessFont$ChessCompStompWithHacksLibrary$ChessSound$ChessCompStompWithHacksLibrary$ChessMusic$GetNextFrame",
             "ProcessMusic", "DTLibrary$IFrame$4$ChessCompStompWithHacksLibrary$ChessImage$ChessCompStompWithHacksLibrary$ChessFont$ChessCompStompWithHacksLibrary$ChessSound$ChessCompStompWithHacksLibrary$ChessMusic$ProcessMusic",
             "Render", "DTLibrary$IFrame$4$ChessCompStompWithHacksLibrary$ChessImage$ChessCompStompWithHacksLibrary$ChessFont$ChessCompStompWithHacksLibrary$ChessSound$ChessCompStompWithHacksLibrary$ChessMusic$Render",
@@ -17549,6 +17812,12 @@ Bridge.assembly("ChessCompStompWithHacks", function ($asm, globals) {
         },
         methods: {
             ProcessExtraTime: function (milliseconds) { },
+            GetClickUrl: function () {
+                return null;
+            },
+            GetCompletedAchievements: function () {
+                return new (System.Collections.Generic.HashSet$1(System.String)).ctor();
+            },
             GetNextFrame: function (keyboardInput, mouseInput, previousKeyboardInput, previousMouseInput, displayProcessing, soundOutput, musicProcessing) {
                 if (keyboardInput.DTLibrary$IKeyboard$IsPressed(DTLibrary.Key.Esc) && !previousKeyboardInput.DTLibrary$IKeyboard$IsPressed(DTLibrary.Key.Esc)) {
                     return new ChessCompStompWithHacksLibrary.TitleScreenFrame(this.globalState, this.sessionState);
@@ -17598,6 +17867,8 @@ Bridge.assembly("ChessCompStompWithHacks", function ($asm, globals) {
         },
         alias: [
             "ProcessExtraTime", "DTLibrary$IFrame$4$ChessCompStompWithHacksLibrary$ChessImage$ChessCompStompWithHacksLibrary$ChessFont$ChessCompStompWithHacksLibrary$ChessSound$ChessCompStompWithHacksLibrary$ChessMusic$ProcessExtraTime",
+            "GetClickUrl", "DTLibrary$IFrame$4$ChessCompStompWithHacksLibrary$ChessImage$ChessCompStompWithHacksLibrary$ChessFont$ChessCompStompWithHacksLibrary$ChessSound$ChessCompStompWithHacksLibrary$ChessMusic$GetClickUrl",
+            "GetCompletedAchievements", "DTLibrary$IFrame$4$ChessCompStompWithHacksLibrary$ChessImage$ChessCompStompWithHacksLibrary$ChessFont$ChessCompStompWithHacksLibrary$ChessSound$ChessCompStompWithHacksLibrary$ChessMusic$GetCompletedAchievements",
             "GetNextFrame", "DTLibrary$IFrame$4$ChessCompStompWithHacksLibrary$ChessImage$ChessCompStompWithHacksLibrary$ChessFont$ChessCompStompWithHacksLibrary$ChessSound$ChessCompStompWithHacksLibrary$ChessMusic$GetNextFrame",
             "ProcessMusic", "DTLibrary$IFrame$4$ChessCompStompWithHacksLibrary$ChessImage$ChessCompStompWithHacksLibrary$ChessFont$ChessCompStompWithHacksLibrary$ChessSound$ChessCompStompWithHacksLibrary$ChessMusic$ProcessMusic",
             "Render", "DTLibrary$IFrame$4$ChessCompStompWithHacksLibrary$ChessImage$ChessCompStompWithHacksLibrary$ChessFont$ChessCompStompWithHacksLibrary$ChessSound$ChessCompStompWithHacksLibrary$ChessMusic$Render",
@@ -17615,6 +17886,12 @@ Bridge.assembly("ChessCompStompWithHacks", function ($asm, globals) {
         },
         methods: {
             ProcessExtraTime: function (milliseconds) { },
+            GetClickUrl: function () {
+                return null;
+            },
+            GetCompletedAchievements: function () {
+                return new (System.Collections.Generic.HashSet$1(System.String)).ctor();
+            },
             GetNextFrame: function (keyboardInput, mouseInput, previousKeyboardInput, previousMouseInput, displayProcessing, soundOutput, musicProcessing) {
                 if (keyboardInput.DTLibrary$IKeyboard$IsPressed(DTLibrary.Key.Esc) && !previousKeyboardInput.DTLibrary$IKeyboard$IsPressed(DTLibrary.Key.Esc)) {
                     return new ChessCompStompWithHacksLibrary.TestingFrame(this.globalState, this.sessionState);
@@ -17673,6 +17950,8 @@ Bridge.assembly("ChessCompStompWithHacks", function ($asm, globals) {
             shouldFill: false
         },
         alias: [
+            "GetClickUrl", "DTLibrary$IFrame$4$ChessCompStompWithHacksLibrary$ChessImage$ChessCompStompWithHacksLibrary$ChessFont$ChessCompStompWithHacksLibrary$ChessSound$ChessCompStompWithHacksLibrary$ChessMusic$GetClickUrl",
+            "GetCompletedAchievements", "DTLibrary$IFrame$4$ChessCompStompWithHacksLibrary$ChessImage$ChessCompStompWithHacksLibrary$ChessFont$ChessCompStompWithHacksLibrary$ChessSound$ChessCompStompWithHacksLibrary$ChessMusic$GetCompletedAchievements",
             "ProcessExtraTime", "DTLibrary$IFrame$4$ChessCompStompWithHacksLibrary$ChessImage$ChessCompStompWithHacksLibrary$ChessFont$ChessCompStompWithHacksLibrary$ChessSound$ChessCompStompWithHacksLibrary$ChessMusic$ProcessExtraTime",
             "GetNextFrame", "DTLibrary$IFrame$4$ChessCompStompWithHacksLibrary$ChessImage$ChessCompStompWithHacksLibrary$ChessFont$ChessCompStompWithHacksLibrary$ChessSound$ChessCompStompWithHacksLibrary$ChessMusic$GetNextFrame",
             "ProcessMusic", "DTLibrary$IFrame$4$ChessCompStompWithHacksLibrary$ChessImage$ChessCompStompWithHacksLibrary$ChessFont$ChessCompStompWithHacksLibrary$ChessSound$ChessCompStompWithHacksLibrary$ChessMusic$ProcessMusic",
@@ -17692,6 +17971,12 @@ Bridge.assembly("ChessCompStompWithHacks", function ($asm, globals) {
             }
         },
         methods: {
+            GetClickUrl: function () {
+                return null;
+            },
+            GetCompletedAchievements: function () {
+                return new (System.Collections.Generic.HashSet$1(System.String)).ctor();
+            },
             ProcessExtraTime: function (milliseconds) { },
             GetNextFrame: function (keyboardInput, mouseInput, previousKeyboardInput, previousMouseInput, displayProcessing, soundOutput, musicProcessing) {
                 if (keyboardInput.DTLibrary$IKeyboard$IsPressed(DTLibrary.Key.Esc) && !previousKeyboardInput.DTLibrary$IKeyboard$IsPressed(DTLibrary.Key.Esc)) {
@@ -17754,6 +18039,8 @@ Bridge.assembly("ChessCompStompWithHacks", function ($asm, globals) {
         },
         alias: [
             "ProcessExtraTime", "DTLibrary$IFrame$4$ChessCompStompWithHacksLibrary$ChessImage$ChessCompStompWithHacksLibrary$ChessFont$ChessCompStompWithHacksLibrary$ChessSound$ChessCompStompWithHacksLibrary$ChessMusic$ProcessExtraTime",
+            "GetClickUrl", "DTLibrary$IFrame$4$ChessCompStompWithHacksLibrary$ChessImage$ChessCompStompWithHacksLibrary$ChessFont$ChessCompStompWithHacksLibrary$ChessSound$ChessCompStompWithHacksLibrary$ChessMusic$GetClickUrl",
+            "GetCompletedAchievements", "DTLibrary$IFrame$4$ChessCompStompWithHacksLibrary$ChessImage$ChessCompStompWithHacksLibrary$ChessFont$ChessCompStompWithHacksLibrary$ChessSound$ChessCompStompWithHacksLibrary$ChessMusic$GetCompletedAchievements",
             "GetNextFrame", "DTLibrary$IFrame$4$ChessCompStompWithHacksLibrary$ChessImage$ChessCompStompWithHacksLibrary$ChessFont$ChessCompStompWithHacksLibrary$ChessSound$ChessCompStompWithHacksLibrary$ChessMusic$GetNextFrame",
             "ProcessMusic", "DTLibrary$IFrame$4$ChessCompStompWithHacksLibrary$ChessImage$ChessCompStompWithHacksLibrary$ChessFont$ChessCompStompWithHacksLibrary$ChessSound$ChessCompStompWithHacksLibrary$ChessMusic$ProcessMusic",
             "Render", "DTLibrary$IFrame$4$ChessCompStompWithHacksLibrary$ChessImage$ChessCompStompWithHacksLibrary$ChessFont$ChessCompStompWithHacksLibrary$ChessSound$ChessCompStompWithHacksLibrary$ChessMusic$Render",
@@ -17770,6 +18057,12 @@ Bridge.assembly("ChessCompStompWithHacks", function ($asm, globals) {
         },
         methods: {
             ProcessExtraTime: function (milliseconds) { },
+            GetClickUrl: function () {
+                return null;
+            },
+            GetCompletedAchievements: function () {
+                return new (System.Collections.Generic.HashSet$1(System.String)).ctor();
+            },
             GetNextFrame: function (keyboardInput, mouseInput, previousKeyboardInput, previousMouseInput, displayProcessing, soundOutput, musicProcessing) {
                 if (keyboardInput.DTLibrary$IKeyboard$IsPressed(DTLibrary.Key.Esc) && !previousKeyboardInput.DTLibrary$IKeyboard$IsPressed(DTLibrary.Key.Esc)) {
                     return new ChessCompStompWithHacksLibrary.TestingFrame(this.globalState, this.sessionState);
@@ -17838,6 +18131,8 @@ Bridge.assembly("ChessCompStompWithHacks", function ($asm, globals) {
         },
         alias: [
             "ProcessExtraTime", "DTLibrary$IFrame$4$ChessCompStompWithHacksLibrary$ChessImage$ChessCompStompWithHacksLibrary$ChessFont$ChessCompStompWithHacksLibrary$ChessSound$ChessCompStompWithHacksLibrary$ChessMusic$ProcessExtraTime",
+            "GetClickUrl", "DTLibrary$IFrame$4$ChessCompStompWithHacksLibrary$ChessImage$ChessCompStompWithHacksLibrary$ChessFont$ChessCompStompWithHacksLibrary$ChessSound$ChessCompStompWithHacksLibrary$ChessMusic$GetClickUrl",
+            "GetCompletedAchievements", "DTLibrary$IFrame$4$ChessCompStompWithHacksLibrary$ChessImage$ChessCompStompWithHacksLibrary$ChessFont$ChessCompStompWithHacksLibrary$ChessSound$ChessCompStompWithHacksLibrary$ChessMusic$GetCompletedAchievements",
             "GetNextFrame", "DTLibrary$IFrame$4$ChessCompStompWithHacksLibrary$ChessImage$ChessCompStompWithHacksLibrary$ChessFont$ChessCompStompWithHacksLibrary$ChessSound$ChessCompStompWithHacksLibrary$ChessMusic$GetNextFrame",
             "ProcessMusic", "DTLibrary$IFrame$4$ChessCompStompWithHacksLibrary$ChessImage$ChessCompStompWithHacksLibrary$ChessFont$ChessCompStompWithHacksLibrary$ChessSound$ChessCompStompWithHacksLibrary$ChessMusic$ProcessMusic",
             "Render", "DTLibrary$IFrame$4$ChessCompStompWithHacksLibrary$ChessImage$ChessCompStompWithHacksLibrary$ChessFont$ChessCompStompWithHacksLibrary$ChessSound$ChessCompStompWithHacksLibrary$ChessMusic$Render",
@@ -17856,6 +18151,12 @@ Bridge.assembly("ChessCompStompWithHacks", function ($asm, globals) {
         },
         methods: {
             ProcessExtraTime: function (milliseconds) { },
+            GetClickUrl: function () {
+                return null;
+            },
+            GetCompletedAchievements: function () {
+                return new (System.Collections.Generic.HashSet$1(System.String)).ctor();
+            },
             GetNextFrame: function (keyboardInput, mouseInput, previousKeyboardInput, previousMouseInput, displayProcessing, soundOutput, musicProcessing) {
                 if (keyboardInput.DTLibrary$IKeyboard$IsPressed(DTLibrary.Key.Esc) && !previousKeyboardInput.DTLibrary$IKeyboard$IsPressed(DTLibrary.Key.Esc)) {
                     return new ChessCompStompWithHacksLibrary.TestingFrame(this.globalState, this.sessionState);
@@ -17913,6 +18214,8 @@ Bridge.assembly("ChessCompStompWithHacks", function ($asm, globals) {
             versionString: null
         },
         alias: [
+            "GetClickUrl", "DTLibrary$IFrame$4$ChessCompStompWithHacksLibrary$ChessImage$ChessCompStompWithHacksLibrary$ChessFont$ChessCompStompWithHacksLibrary$ChessSound$ChessCompStompWithHacksLibrary$ChessMusic$GetClickUrl",
+            "GetCompletedAchievements", "DTLibrary$IFrame$4$ChessCompStompWithHacksLibrary$ChessImage$ChessCompStompWithHacksLibrary$ChessFont$ChessCompStompWithHacksLibrary$ChessSound$ChessCompStompWithHacksLibrary$ChessMusic$GetCompletedAchievements",
             "ProcessExtraTime", "DTLibrary$IFrame$4$ChessCompStompWithHacksLibrary$ChessImage$ChessCompStompWithHacksLibrary$ChessFont$ChessCompStompWithHacksLibrary$ChessSound$ChessCompStompWithHacksLibrary$ChessMusic$ProcessExtraTime",
             "GetNextFrame", "DTLibrary$IFrame$4$ChessCompStompWithHacksLibrary$ChessImage$ChessCompStompWithHacksLibrary$ChessFont$ChessCompStompWithHacksLibrary$ChessSound$ChessCompStompWithHacksLibrary$ChessMusic$GetNextFrame",
             "ProcessMusic", "DTLibrary$IFrame$4$ChessCompStompWithHacksLibrary$ChessImage$ChessCompStompWithHacksLibrary$ChessFont$ChessCompStompWithHacksLibrary$ChessSound$ChessCompStompWithHacksLibrary$ChessMusic$ProcessMusic",
@@ -17942,6 +18245,12 @@ Bridge.assembly("ChessCompStompWithHacks", function ($asm, globals) {
             }
         },
         methods: {
+            GetClickUrl: function () {
+                return null;
+            },
+            GetCompletedAchievements: function () {
+                return this.sessionState.GetCompletedAchievements();
+            },
             ProcessExtraTime: function (milliseconds) { },
             GetNextFrame: function (keyboardInput, mouseInput, previousKeyboardInput, previousMouseInput, displayProcessing, soundOutput, musicProcessing) {
                 if (this.volumePicker == null) {
@@ -18026,7 +18335,7 @@ Bridge.assembly("ChessCompStompWithHacks", function ($asm, globals) {
                     this.quitButton.Render(displayOutput);
                 }
 
-                displayOutput.DTLibrary$IDisplayOutput$2$ChessCompStompWithHacksLibrary$ChessImage$ChessCompStompWithHacksLibrary$ChessFont$DrawText(958, 55, "v" + (this.versionString || ""), ChessCompStompWithHacksLibrary.ChessFont.ChessFont12Pt, DTLibrary.DTColor.Black());
+                displayOutput.DTLibrary$IDisplayOutput$2$ChessCompStompWithHacksLibrary$ChessImage$ChessCompStompWithHacksLibrary$ChessFont$DrawText(950, 55, "v" + (this.versionString || ""), ChessCompStompWithHacksLibrary.ChessFont.ChessFont12Pt, DTLibrary.DTColor.Black());
 
                 this.creditsButton.Render(displayOutput);
 
@@ -18051,6 +18360,8 @@ Bridge.assembly("ChessCompStompWithHacks", function ($asm, globals) {
         },
         alias: [
             "ProcessExtraTime", "DTLibrary$IFrame$4$ChessCompStompWithHacksLibrary$ChessImage$ChessCompStompWithHacksLibrary$ChessFont$ChessCompStompWithHacksLibrary$ChessSound$ChessCompStompWithHacksLibrary$ChessMusic$ProcessExtraTime",
+            "GetClickUrl", "DTLibrary$IFrame$4$ChessCompStompWithHacksLibrary$ChessImage$ChessCompStompWithHacksLibrary$ChessFont$ChessCompStompWithHacksLibrary$ChessSound$ChessCompStompWithHacksLibrary$ChessMusic$GetClickUrl",
+            "GetCompletedAchievements", "DTLibrary$IFrame$4$ChessCompStompWithHacksLibrary$ChessImage$ChessCompStompWithHacksLibrary$ChessFont$ChessCompStompWithHacksLibrary$ChessSound$ChessCompStompWithHacksLibrary$ChessMusic$GetCompletedAchievements",
             "GetNextFrame", "DTLibrary$IFrame$4$ChessCompStompWithHacksLibrary$ChessImage$ChessCompStompWithHacksLibrary$ChessFont$ChessCompStompWithHacksLibrary$ChessSound$ChessCompStompWithHacksLibrary$ChessMusic$GetNextFrame",
             "ProcessMusic", "DTLibrary$IFrame$4$ChessCompStompWithHacksLibrary$ChessImage$ChessCompStompWithHacksLibrary$ChessFont$ChessCompStompWithHacksLibrary$ChessSound$ChessCompStompWithHacksLibrary$ChessMusic$ProcessMusic",
             "Render", "DTLibrary$IFrame$4$ChessCompStompWithHacksLibrary$ChessImage$ChessCompStompWithHacksLibrary$ChessFont$ChessCompStompWithHacksLibrary$ChessSound$ChessCompStompWithHacksLibrary$ChessMusic$Render",
@@ -18075,6 +18386,12 @@ Bridge.assembly("ChessCompStompWithHacks", function ($asm, globals) {
                 if (gameLogic != null) {
                     gameLogic.ProcessExtraTime(milliseconds);
                 }
+            },
+            GetClickUrl: function () {
+                return null;
+            },
+            GetCompletedAchievements: function () {
+                return new (System.Collections.Generic.HashSet$1(System.String)).ctor();
             },
             GetNextFrame: function (keyboardInput, mouseInput, previousKeyboardInput, previousMouseInput, displayProcessing, soundOutput, musicProcessing) {
                 var rightClickedHack = this.hackSelectionScreenDisplay.ProcessFrame(mouseInput, previousMouseInput, displayProcessing, soundOutput);
@@ -18133,6 +18450,8 @@ Bridge.assembly("ChessCompStompWithHacks", function ($asm, globals) {
             underlyingFrame: null
         },
         alias: [
+            "GetClickUrl", "DTLibrary$IFrame$4$ChessCompStompWithHacksLibrary$ChessImage$ChessCompStompWithHacksLibrary$ChessFont$ChessCompStompWithHacksLibrary$ChessSound$ChessCompStompWithHacksLibrary$ChessMusic$GetClickUrl",
+            "GetCompletedAchievements", "DTLibrary$IFrame$4$ChessCompStompWithHacksLibrary$ChessImage$ChessCompStompWithHacksLibrary$ChessFont$ChessCompStompWithHacksLibrary$ChessSound$ChessCompStompWithHacksLibrary$ChessMusic$GetCompletedAchievements",
             "GetNextFrame", "DTLibrary$IFrame$4$ChessCompStompWithHacksLibrary$ChessImage$ChessCompStompWithHacksLibrary$ChessFont$ChessCompStompWithHacksLibrary$ChessSound$ChessCompStompWithHacksLibrary$ChessMusic$GetNextFrame",
             "ProcessExtraTime", "DTLibrary$IFrame$4$ChessCompStompWithHacksLibrary$ChessImage$ChessCompStompWithHacksLibrary$ChessFont$ChessCompStompWithHacksLibrary$ChessSound$ChessCompStompWithHacksLibrary$ChessMusic$ProcessExtraTime",
             "ProcessMusic", "DTLibrary$IFrame$4$ChessCompStompWithHacksLibrary$ChessImage$ChessCompStompWithHacksLibrary$ChessFont$ChessCompStompWithHacksLibrary$ChessSound$ChessCompStompWithHacksLibrary$ChessMusic$ProcessMusic",
@@ -18152,6 +18471,12 @@ Bridge.assembly("ChessCompStompWithHacks", function ($asm, globals) {
             }
         },
         methods: {
+            GetClickUrl: function () {
+                return null;
+            },
+            GetCompletedAchievements: function () {
+                return new (System.Collections.Generic.HashSet$1(System.String)).ctor();
+            },
             GetNextFrame: function (keyboardInput, mouseInput, previousKeyboardInput, previousMouseInput, displayProcessing, soundOutput, musicProcessing) {
                 this.scrollableTextDisplay.ProcessFrame(keyboardInput, mouseInput, previousKeyboardInput, previousMouseInput, displayProcessing, soundOutput);
 
@@ -18205,6 +18530,8 @@ Bridge.assembly("ChessCompStompWithHacks", function ($asm, globals) {
         },
         alias: [
             "ProcessExtraTime", "DTLibrary$IFrame$4$ChessCompStompWithHacksLibrary$ChessImage$ChessCompStompWithHacksLibrary$ChessFont$ChessCompStompWithHacksLibrary$ChessSound$ChessCompStompWithHacksLibrary$ChessMusic$ProcessExtraTime",
+            "GetClickUrl", "DTLibrary$IFrame$4$ChessCompStompWithHacksLibrary$ChessImage$ChessCompStompWithHacksLibrary$ChessFont$ChessCompStompWithHacksLibrary$ChessSound$ChessCompStompWithHacksLibrary$ChessMusic$GetClickUrl",
+            "GetCompletedAchievements", "DTLibrary$IFrame$4$ChessCompStompWithHacksLibrary$ChessImage$ChessCompStompWithHacksLibrary$ChessFont$ChessCompStompWithHacksLibrary$ChessSound$ChessCompStompWithHacksLibrary$ChessMusic$GetCompletedAchievements",
             "GetNextFrame", "DTLibrary$IFrame$4$ChessCompStompWithHacksLibrary$ChessImage$ChessCompStompWithHacksLibrary$ChessFont$ChessCompStompWithHacksLibrary$ChessSound$ChessCompStompWithHacksLibrary$ChessMusic$GetNextFrame",
             "ProcessMusic", "DTLibrary$IFrame$4$ChessCompStompWithHacksLibrary$ChessImage$ChessCompStompWithHacksLibrary$ChessFont$ChessCompStompWithHacksLibrary$ChessSound$ChessCompStompWithHacksLibrary$ChessMusic$ProcessMusic",
             "Render", "DTLibrary$IFrame$4$ChessCompStompWithHacksLibrary$ChessImage$ChessCompStompWithHacksLibrary$ChessFont$ChessCompStompWithHacksLibrary$ChessSound$ChessCompStompWithHacksLibrary$ChessMusic$Render",
@@ -18229,6 +18556,12 @@ Bridge.assembly("ChessCompStompWithHacks", function ($asm, globals) {
                 if (gameLogic != null) {
                     gameLogic.ProcessExtraTime(milliseconds);
                 }
+            },
+            GetClickUrl: function () {
+                return null;
+            },
+            GetCompletedAchievements: function () {
+                return new (System.Collections.Generic.HashSet$1(System.String)).ctor();
             },
             GetNextFrame: function (keyboardInput, mouseInput, previousKeyboardInput, previousMouseInput, displayProcessing, soundOutput, musicProcessing) {
                 var clickedSettingsIcon = this.settingsIcon.ProcessFrame(mouseInput, previousMouseInput, false, displayProcessing).HasClicked;

@@ -3,6 +3,7 @@ namespace ChessCompStompWithHacksLibrary
 {
 	using ChessCompStompWithHacksEngine;
 	using DTLibrary;
+	using System.Collections.Generic;
 
 	public class ViewHacksFrame : IFrame<ChessImage, ChessFont, ChessSound, ChessMusic>
 	{
@@ -43,6 +44,16 @@ namespace ChessCompStompWithHacksLibrary
 			GameLogic gameLogic = this.sessionState.GetGameLogic();
 			if (gameLogic != null)
 				gameLogic.ProcessExtraTime(milliseconds: milliseconds);
+		}
+
+		public string GetClickUrl()
+		{
+			return null;
+		}
+
+		public HashSet<string> GetCompletedAchievements()
+		{
+			return new HashSet<string>();
 		}
 
 		public IFrame<ChessImage, ChessFont, ChessSound, ChessMusic> GetNextFrame(

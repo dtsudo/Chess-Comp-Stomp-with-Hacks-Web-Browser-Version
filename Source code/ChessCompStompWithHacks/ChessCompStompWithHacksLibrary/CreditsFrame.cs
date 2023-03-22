@@ -2,6 +2,7 @@
 namespace ChessCompStompWithHacksLibrary
 {
 	using DTLibrary;
+	using System;
 	using System.Collections.Generic;
 
 	public class CreditsFrame : IFrame<ChessImage, ChessFont, ChessSound, ChessMusic>
@@ -56,6 +57,8 @@ namespace ChessCompStompWithHacksLibrary
 		private Credits_Images creditsImages;
 		private Credits_Font creditsFont;
 
+		private string clickUrl;
+
 		public CreditsFrame(GlobalState globalState, SessionState sessionState)
 		{
 			this.globalState = globalState;
@@ -65,7 +68,7 @@ namespace ChessCompStompWithHacksLibrary
 			this.hoverTab = null;
 			this.clickTab = null;
 
-			this.creditsDesignAndCoding = new Credits_DesignAndCoding(colorTheme: sessionState.GetColorTheme(), height: 450, isWebBrowserVersion: globalState.IsWebBrowserVersion);
+			this.creditsDesignAndCoding = new Credits_DesignAndCoding(colorTheme: sessionState.GetColorTheme(), height: 450, isWebBrowserVersion: globalState.IsWebBrowserVersion, isWebPortalVersion: globalState.IsWebPortalVersion);
 			this.creditsImages = new Credits_Images(colorTheme: sessionState.GetColorTheme(), height: 450);
 			this.creditsFont = new Credits_Font(colorTheme: sessionState.GetColorTheme(), height: 450);
 
@@ -88,6 +91,18 @@ namespace ChessCompStompWithHacksLibrary
 				textXOffset: 67,
 				textYOffset: 28,
 				font: ChessFont.ChessFont20Pt);
+
+			this.clickUrl = null;
+		}
+
+		public string GetClickUrl()
+		{
+			return this.clickUrl;
+		}
+
+		public HashSet<string> GetCompletedAchievements()
+		{
+			return new HashSet<string>();
 		}
 
 		public IFrame<ChessImage, ChessFont, ChessSound, ChessMusic> GetNextFrame(
@@ -101,6 +116,8 @@ namespace ChessCompStompWithHacksLibrary
 		{
 			int mouseX = mouseInput.GetX();
 			int mouseY = mouseInput.GetY();
+
+			this.clickUrl = null;
 
 			this.hoverTab = null;
 			foreach (TabButton tabButton in this.tabButtons)
@@ -144,10 +161,14 @@ namespace ChessCompStompWithHacksLibrary
 
 			if (this.selectedTab == Tab.DesignAndCoding)
 			{
-				bool clickedViewLicenseButton = this.creditsDesignAndCoding.ProcessFrame(
+				Credits_DesignAndCoding.Result result = this.creditsDesignAndCoding.ProcessFrame(
 					mouseInput: translatedMouse, 
 					previousMouseInput: translatedPreviousMouse, 
 					soundOutput: soundOutput);
+
+				bool clickedViewLicenseButton = result.ClickedButton;
+
+				this.clickUrl = result.ClickUrl;
 
 				if (clickedViewLicenseButton)
 				{

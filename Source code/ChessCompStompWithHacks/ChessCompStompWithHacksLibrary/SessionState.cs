@@ -232,6 +232,21 @@ namespace ChessCompStompWithHacksLibrary
 			return new HashSet<Objective>(this.data.CompletedObjectives);
 		}
 
+		public HashSet<string> GetCompletedAchievements()
+		{
+			int numberOfCompletedObjectives = this.data.CompletedObjectives.Count;
+
+			HashSet<string> completedAchievements = new HashSet<string>();
+
+			if (numberOfCompletedObjectives >= 1)
+				completedAchievements.Add("completed_1_objective");
+
+			for (int i = 2; i <= numberOfCompletedObjectives; i++)
+				completedAchievements.Add("completed_" + i.ToStringCultureInvariant() + "_objectives");
+
+			return completedAchievements;
+		}
+
 		public HashSet<Objective> GetObjectivesThatWereAlreadyCompletedPriorToCurrentGame()
 		{
 			return new HashSet<Objective>(this.data.ObjectivesThatWereAlreadyCompletedPriorToCurrentGame);

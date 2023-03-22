@@ -74,6 +74,16 @@ namespace ChessCompStompWithHacksLibrary
 				font: ChessFont.ChessFont16Pt);
 		}
 
+		public string GetClickUrl()
+		{
+			return null;
+		}
+
+		public HashSet<string> GetCompletedAchievements()
+		{
+			return this.sessionState.GetCompletedAchievements();
+		}
+
 		public void ProcessExtraTime(int milliseconds)
 		{
 			GameLogic gameLogic = this.sessionState.GetGameLogic();

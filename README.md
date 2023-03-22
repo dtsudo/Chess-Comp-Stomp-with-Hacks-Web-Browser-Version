@@ -12,7 +12,7 @@ Open the `Chess Comp Stomp with Hacks.html` file in a web browser.
 
 The source code of Chess Comp Stomp with Hacks is licensed under the MIT license. However, note that it uses dependencies and other assets that are licensed under different licenses.
 
-This project uses Bridge.NET to compile the C# code into javascript. Bridge.NET is licensed under the Apache License Version 2.0. See https://github.com/dtsudo/Bridge.NET and https://github.com/dtsudo/Bridge.NET-CLI for more details about Bridge.NET.
+This project uses Bridge.NET to compile the C# code into javascript. Bridge.NET is licensed under the Apache License Version 2.0. See https://github.com/dtsudo/Bridge.NET for more details about Bridge.NET.
 
 ##### Font
 
@@ -34,17 +34,16 @@ The music tracks were created by Juhani Junkala and are licensed under the CC0 C
 
 # How to compile the source code
 
-This project uses Bridge.NET to compile the C# code into javascript. The Bridge CLI (https://github.com/dtsudo/Bridge.NET-CLI) needs to be installed so that we can run the Bridge compiler on the command line.
+This game is written in C# so you need to have .NET installed.
 
-Once the Bridge CLI is installed, go to the source code folder and run `bridge build` to compile the C# code:
+The game uses Bridge.NET to transpile the C# code into javascript. Compile the code using `MSBuild`:
 
-* `cd "Source code/ChessCompStompWithHacks/"`
-* `bridge build`
+* `"MSBuild.exe" "./Source code/ChessCompStompWithHacks.sln"`
 
-This will generate a few files in the `Source code/ChessCompStompWithHacks/dist/` folder.
+This will generate the transpiled javascript files in `Source code/ChessCompStompWithHacks/bin/Debug/bridge/`
 
 We also need the font, image, and audio files:
 
-* Copy the `Data` folder to `Source code/ChessCompStompWithHacks/dist/`
+* Copy the `Data` folder to `Source code/ChessCompStompWithHacks/bin/Debug/bridge/`
 
-Then, to run the program, simply run `Source code/ChessCompStompWithHacks/dist/Chess Comp Stomp with Hacks.html` in a web browser.
+Then, to run the game, simply run `Source code/ChessCompStompWithHacks/bin/Debug/bridge/Chess Comp Stomp with Hacks.html` in a web browser.

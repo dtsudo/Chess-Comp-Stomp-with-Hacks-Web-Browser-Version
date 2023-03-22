@@ -3,6 +3,7 @@ namespace ChessCompStompWithHacksLibrary
 {
 	using DTLibrary;
 	using System;
+	using System.Collections.Generic;
 
 	public class SettingsMenuFrame : IFrame<ChessImage, ChessFont, ChessSound, ChessMusic>
 	{
@@ -70,6 +71,16 @@ namespace ChessCompStompWithHacksLibrary
 				textXOffset: 11,
 				textYOffset: 12,
 				font: ChessFont.ChessFont14Pt);
+		}
+
+		public string GetClickUrl()
+		{
+			return null;
+		}
+
+		public HashSet<string> GetCompletedAchievements()
+		{
+			return new HashSet<string>();
 		}
 
 		public void ProcessExtraTime(int milliseconds)

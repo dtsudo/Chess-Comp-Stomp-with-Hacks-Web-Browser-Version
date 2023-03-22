@@ -3,6 +3,7 @@ namespace ChessCompStompWithHacksLibrary
 {
 	using ChessCompStompWithHacksEngine;
 	using DTLibrary;
+	using System.Collections.Generic;
 
 	public class HackExplanationFrame : IFrame<ChessImage, ChessFont, ChessSound, ChessMusic>
 	{
@@ -43,6 +44,16 @@ namespace ChessCompStompWithHacksLibrary
 
 			this.crossIconHover = false;
 			this.crossIconSelected = false;
+		}
+
+		public string GetClickUrl()
+		{
+			return null;
+		}
+
+		public HashSet<string> GetCompletedAchievements()
+		{
+			return new HashSet<string>();
 		}
 
 		public IFrame<ChessImage, ChessFont, ChessSound, ChessMusic> GetNextFrame(

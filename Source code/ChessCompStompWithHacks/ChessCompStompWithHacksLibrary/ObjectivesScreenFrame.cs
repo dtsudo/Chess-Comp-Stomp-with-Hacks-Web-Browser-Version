@@ -88,6 +88,16 @@ namespace ChessCompStompWithHacksLibrary
 				font: ChessFont.ChessFont16Pt);
 		}
 
+		public string GetClickUrl()
+		{
+			return null;
+		}
+
+		public HashSet<string> GetCompletedAchievements()
+		{
+			return new HashSet<string>();
+		}
+
 		public void ProcessExtraTime(int milliseconds)
 		{
 		}

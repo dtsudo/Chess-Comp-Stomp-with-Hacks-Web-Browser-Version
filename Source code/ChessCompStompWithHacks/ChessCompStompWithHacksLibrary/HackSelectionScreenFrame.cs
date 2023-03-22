@@ -48,6 +48,16 @@ namespace ChessCompStompWithHacksLibrary
 		{
 		}
 
+		public string GetClickUrl()
+		{
+			return null;
+		}
+
+		public HashSet<string> GetCompletedAchievements()
+		{
+			return new HashSet<string>();
+		}
+
 		public IFrame<ChessImage, ChessFont, ChessSound, ChessMusic> GetNextFrame(
 			IKeyboard keyboardInput,
 			IMouse mouseInput,

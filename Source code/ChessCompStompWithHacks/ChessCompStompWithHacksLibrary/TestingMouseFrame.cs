@@ -3,6 +3,7 @@ namespace ChessCompStompWithHacksLibrary
 {
 	using DTLibrary;
 	using System;
+	using System.Collections.Generic;
 
 	public class TestingMouseFrame : IFrame<ChessImage, ChessFont, ChessSound, ChessMusic>
 	{
@@ -23,6 +24,16 @@ namespace ChessCompStompWithHacksLibrary
 			this.y = 0;
 			this.color = 0;
 			this.shouldFill = true;
+		}
+
+		public string GetClickUrl()
+		{
+			return null;
+		}
+
+		public HashSet<string> GetCompletedAchievements()
+		{
+			return new HashSet<string>();
 		}
 
 		public void ProcessExtraTime(int milliseconds)

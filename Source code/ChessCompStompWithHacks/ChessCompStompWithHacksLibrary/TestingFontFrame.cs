@@ -2,6 +2,7 @@
 namespace ChessCompStompWithHacksLibrary
 {
 	using DTLibrary;
+	using System.Collections.Generic;
 
 	public class TestingFontFrame : IFrame<ChessImage, ChessFont, ChessSound, ChessMusic>
 	{
@@ -16,6 +17,16 @@ namespace ChessCompStompWithHacksLibrary
 
 		public void ProcessExtraTime(int milliseconds)
 		{
+		}
+
+		public string GetClickUrl()
+		{
+			return null;
+		}
+
+		public HashSet<string> GetCompletedAchievements()
+		{
+			return new HashSet<string>();
 		}
 
 		public IFrame<ChessImage, ChessFont, ChessSound, ChessMusic> GetNextFrame(

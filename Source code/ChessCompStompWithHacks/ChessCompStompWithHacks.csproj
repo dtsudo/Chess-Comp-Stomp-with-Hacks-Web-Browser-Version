@@ -1,0 +1,217 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{E0CCA12D-B99C-4242-89D0-C1670588E6B0}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>ChessCompStompWithHacks</RootNamespace>
+    <AssemblyName>ChessCompStompWithHacks</AssemblyName>
+    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <Deterministic>true</Deterministic>
+    <NuGetPackageImportStamp>
+    </NuGetPackageImportStamp>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <NoStdLib>true</NoStdLib>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <NoStdLib>true</NoStdLib>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Bridge, Version=17.6.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Bridge.Core.17.6.0\lib\net40\Bridge.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="BridgeDisplay.cs" />
+    <Compile Include="BridgeDisplayFont.cs" />
+    <Compile Include="BridgeDisplayImages.cs" />
+    <Compile Include="BridgeDisplayRectangle.cs" />
+    <Compile Include="BridgeFileIO.cs" />
+    <Compile Include="BridgeKeyboard.cs" />
+    <Compile Include="BridgeMouse.cs" />
+    <Compile Include="BridgeMusic.cs" />
+    <Compile Include="BridgeSoundOutput.cs" />
+    <Compile Include="ChessCompStompWithHacksEngine\AIPondering.cs" />
+    <Compile Include="ChessCompStompWithHacksEngine\AlphaBetaAI.cs" />
+    <Compile Include="ChessCompStompWithHacksEngine\CastlingUtil.cs" />
+    <Compile Include="ChessCompStompWithHacksEngine\CheckKingUnderAttack.cs" />
+    <Compile Include="ChessCompStompWithHacksEngine\ChessSquare.cs" />
+    <Compile Include="ChessCompStompWithHacksEngine\ChessSquarePiece.cs" />
+    <Compile Include="ChessCompStompWithHacksEngine\ChessSquarePieceArray.cs" />
+    <Compile Include="ChessCompStompWithHacksEngine\CompositeAI.cs" />
+    <Compile Include="ChessCompStompWithHacksEngine\ComputeMoves.cs" />
+    <Compile Include="ChessCompStompWithHacksEngine\ComputeMovesBishop.cs" />
+    <Compile Include="ChessCompStompWithHacksEngine\ComputeMovesKing.cs" />
+    <Compile Include="ChessCompStompWithHacksEngine\ComputeMovesKnight.cs" />
+    <Compile Include="ChessCompStompWithHacksEngine\ComputeMovesPawn.cs" />
+    <Compile Include="ChessCompStompWithHacksEngine\ComputeMovesQueen.cs" />
+    <Compile Include="ChessCompStompWithHacksEngine\ComputeMovesRook.cs" />
+    <Compile Include="ChessCompStompWithHacksEngine\ComputeMovesTacticalNuke.cs" />
+    <Compile Include="ChessCompStompWithHacksEngine\DisplayMove.cs" />
+    <Compile Include="ChessCompStompWithHacksEngine\EarlyGameAI.cs" />
+    <Compile Include="ChessCompStompWithHacksEngine\GameState.cs" />
+    <Compile Include="ChessCompStompWithHacksEngine\GameStateUtil.cs" />
+    <Compile Include="ChessCompStompWithHacksEngine\Hack.cs" />
+    <Compile Include="ChessCompStompWithHacksEngine\IBoardEvaluator.cs" />
+    <Compile Include="ChessCompStompWithHacksEngine\IChessAI.cs" />
+    <Compile Include="ChessCompStompWithHacksEngine\Move.cs" />
+    <Compile Include="ChessCompStompWithHacksEngine\MoveImplementation.cs" />
+    <Compile Include="ChessCompStompWithHacksEngine\MoveNaming.cs" />
+    <Compile Include="ChessCompStompWithHacksEngine\Objective.cs" />
+    <Compile Include="ChessCompStompWithHacksEngine\ObjectiveChecker.cs" />
+    <Compile Include="ChessCompStompWithHacksEngine\OnlyPossibleMoveAI.cs" />
+    <Compile Include="ChessCompStompWithHacksEngine\RandomizedBoardEvaluator.cs" />
+    <Compile Include="ChessCompStompWithHacksEngine\RandomMoveAI.cs" />
+    <Compile Include="ChessCompStompWithHacksEngine\StandardBoardEvaluator.cs" />
+    <Compile Include="ChessCompStompWithHacksEngine\TacticalNukeUtil.cs" />
+    <Compile Include="ChessCompStompWithHacksEngine\UnmovedPawnsArray.cs" />
+    <Compile Include="ChessCompStompWithHacksInitializer.cs" />
+    <Compile Include="ChessCompStompWithHacksLibrary\AIMessageFrame.cs" />
+    <Compile Include="ChessCompStompWithHacksLibrary\Button.cs" />
+    <Compile Include="ChessCompStompWithHacksLibrary\ChessCompStompWithHacks.cs" />
+    <Compile Include="ChessCompStompWithHacksLibrary\ChessFont.cs" />
+    <Compile Include="ChessCompStompWithHacksLibrary\ChessFrame.cs" />
+    <Compile Include="ChessCompStompWithHacksLibrary\ChessImage.cs" />
+    <Compile Include="ChessCompStompWithHacksLibrary\ChessMusic.cs" />
+    <Compile Include="ChessCompStompWithHacksLibrary\ChessPiecesRenderer.cs" />
+    <Compile Include="ChessCompStompWithHacksLibrary\ChessPiecesRendererFadeOutFadeIn.cs" />
+    <Compile Include="ChessCompStompWithHacksLibrary\ChessPiecesRendererPieceAnimation.cs" />
+    <Compile Include="ChessCompStompWithHacksLibrary\ChessPiecesRendererUtil.cs" />
+    <Compile Include="ChessCompStompWithHacksLibrary\ChessSound.cs" />
+    <Compile Include="ChessCompStompWithHacksLibrary\ClearDataConfirmationFrame.cs" />
+    <Compile Include="ChessCompStompWithHacksLibrary\ColorTheme.cs" />
+    <Compile Include="ChessCompStompWithHacksLibrary\CreditsFrame.cs" />
+    <Compile Include="ChessCompStompWithHacksLibrary\Credits_DesignAndCoding.cs" />
+    <Compile Include="ChessCompStompWithHacksLibrary\Credits_DesignAndCoding_LicenseText.cs" />
+    <Compile Include="ChessCompStompWithHacksLibrary\Credits_Font.cs" />
+    <Compile Include="ChessCompStompWithHacksLibrary\Credits_Font_LicenseText.cs" />
+    <Compile Include="ChessCompStompWithHacksLibrary\Credits_Images.cs" />
+    <Compile Include="ChessCompStompWithHacksLibrary\Credits_Images_LicenseText.cs" />
+    <Compile Include="ChessCompStompWithHacksLibrary\Credits_Music.cs" />
+    <Compile Include="ChessCompStompWithHacksLibrary\Credits_Sound.cs" />
+    <Compile Include="ChessCompStompWithHacksLibrary\FinalBattleVictoryPanel.cs" />
+    <Compile Include="ChessCompStompWithHacksLibrary\GameLogic.cs" />
+    <Compile Include="ChessCompStompWithHacksLibrary\GlobalState.cs" />
+    <Compile Include="ChessCompStompWithHacksLibrary\HackDisplay.cs" />
+    <Compile Include="ChessCompStompWithHacksLibrary\HackExplanationFrame.cs" />
+    <Compile Include="ChessCompStompWithHacksLibrary\HackExplanationFrameUtil.cs" />
+    <Compile Include="ChessCompStompWithHacksLibrary\HackExplanation_AnyPieceCanPromote.cs" />
+    <Compile Include="ChessCompStompWithHacksLibrary\HackExplanation_ExtraPawnFirst.cs" />
+    <Compile Include="ChessCompStompWithHacksLibrary\HackExplanation_ExtraPawnSecond.cs" />
+    <Compile Include="ChessCompStompWithHacksLibrary\HackExplanation_ExtraQueen.cs" />
+    <Compile Include="ChessCompStompWithHacksLibrary\HackExplanation_KnightsCanMakeLargeKnightsMove.cs" />
+    <Compile Include="ChessCompStompWithHacksLibrary\HackExplanation_OpponentMustCaptureWhenPossible.cs" />
+    <Compile Include="ChessCompStompWithHacksLibrary\HackExplanation_PawnsCanMoveThreeSpacesInitially.cs" />
+    <Compile Include="ChessCompStompWithHacksLibrary\HackExplanation_PawnsDestroyCapturingPiece.cs" />
+    <Compile Include="ChessCompStompWithHacksLibrary\HackExplanation_QueensCanMoveLikeKnights.cs" />
+    <Compile Include="ChessCompStompWithHacksLibrary\HackExplanation_RooksCanCaptureLikeCannons.cs" />
+    <Compile Include="ChessCompStompWithHacksLibrary\HackExplanation_RooksCanMoveLikeBishops.cs" />
+    <Compile Include="ChessCompStompWithHacksLibrary\HackExplanation_StalemateIsVictory.cs" />
+    <Compile Include="ChessCompStompWithHacksLibrary\HackExplanation_SuperCastling.cs" />
+    <Compile Include="ChessCompStompWithHacksLibrary\HackExplanation_SuperEnPassant.cs" />
+    <Compile Include="ChessCompStompWithHacksLibrary\HackExplanation_TacticalNuke.cs" />
+    <Compile Include="ChessCompStompWithHacksLibrary\HackSelectionScreenDisplay.cs" />
+    <Compile Include="ChessCompStompWithHacksLibrary\HackSelectionScreenFrame.cs" />
+    <Compile Include="ChessCompStompWithHacksLibrary\HackUtil.cs" />
+    <Compile Include="ChessCompStompWithHacksLibrary\InitialLoadingScreenFrame.cs" />
+    <Compile Include="ChessCompStompWithHacksLibrary\IntroScreenFrame.cs" />
+    <Compile Include="ChessCompStompWithHacksLibrary\MoveTracker.cs" />
+    <Compile Include="ChessCompStompWithHacksLibrary\MoveTrackerRenderer.cs" />
+    <Compile Include="ChessCompStompWithHacksLibrary\MusicPlayer.cs" />
+    <Compile Include="ChessCompStompWithHacksLibrary\MusicVolumePicker.cs" />
+    <Compile Include="ChessCompStompWithHacksLibrary\NewGameCreation.cs" />
+    <Compile Include="ChessCompStompWithHacksLibrary\NukeRenderer.cs" />
+    <Compile Include="ChessCompStompWithHacksLibrary\ObjectiveDisplay.cs" />
+    <Compile Include="ChessCompStompWithHacksLibrary\ObjectiveDisplayUtil.cs" />
+    <Compile Include="ChessCompStompWithHacksLibrary\ObjectivesScreenDisplay.cs" />
+    <Compile Include="ChessCompStompWithHacksLibrary\ObjectivesScreenFrame.cs" />
+    <Compile Include="ChessCompStompWithHacksLibrary\ObjectiveUtil.cs" />
+    <Compile Include="ChessCompStompWithHacksLibrary\PromotionPanel.cs" />
+    <Compile Include="ChessCompStompWithHacksLibrary\ResignConfirmationFrame.cs" />
+    <Compile Include="ChessCompStompWithHacksLibrary\SaveAndLoadData.cs" />
+    <Compile Include="ChessCompStompWithHacksLibrary\ScrollableTextDisplay.cs" />
+    <Compile Include="ChessCompStompWithHacksLibrary\SessionState.cs" />
+    <Compile Include="ChessCompStompWithHacksLibrary\SettingsIcon.cs" />
+    <Compile Include="ChessCompStompWithHacksLibrary\SettingsMenuFrame.cs" />
+    <Compile Include="ChessCompStompWithHacksLibrary\SoundAndMusicVolumePicker.cs" />
+    <Compile Include="ChessCompStompWithHacksLibrary\SoundVolumePicker.cs" />
+    <Compile Include="ChessCompStompWithHacksLibrary\TestingFontFrame.cs" />
+    <Compile Include="ChessCompStompWithHacksLibrary\TestingFontFrame2.cs" />
+    <Compile Include="ChessCompStompWithHacksLibrary\TestingFrame.cs" />
+    <Compile Include="ChessCompStompWithHacksLibrary\TestingKeyboardFrame.cs" />
+    <Compile Include="ChessCompStompWithHacksLibrary\TestingMouseFrame.cs" />
+    <Compile Include="ChessCompStompWithHacksLibrary\TestingMusicFrame.cs" />
+    <Compile Include="ChessCompStompWithHacksLibrary\TestingSoundFrame.cs" />
+    <Compile Include="ChessCompStompWithHacksLibrary\TitleScreenFrame.cs" />
+    <Compile Include="ChessCompStompWithHacksLibrary\VersionInfo.cs" />
+    <Compile Include="ChessCompStompWithHacksLibrary\VictoryStalemateOrDefeatPanel.cs" />
+    <Compile Include="ChessCompStompWithHacksLibrary\ViewHacksFrame.cs" />
+    <Compile Include="ChessCompStompWithHacksLibrary\ViewLicenseTextFrame.cs" />
+    <Compile Include="ChessCompStompWithHacksLibrary\ViewObjectivesFrame.cs" />
+    <Compile Include="DTLibrary\ByteList.cs" />
+    <Compile Include="DTLibrary\ConsoleLogger.cs" />
+    <Compile Include="DTLibrary\CopiedKeyboard.cs" />
+    <Compile Include="DTLibrary\CopiedMouse.cs" />
+    <Compile Include="DTLibrary\DisplayLogger.cs" />
+    <Compile Include="DTLibrary\DTColor.cs" />
+    <Compile Include="DTLibrary\DTDeserializationException.cs" />
+    <Compile Include="DTLibrary\DTDisplay.cs" />
+    <Compile Include="DTLibrary\DTImmutableList.cs" />
+    <Compile Include="DTLibrary\DTRandom.cs" />
+    <Compile Include="DTLibrary\EmptyKeyboard.cs" />
+    <Compile Include="DTLibrary\EmptyLogger.cs" />
+    <Compile Include="DTLibrary\EmptyMouse.cs" />
+    <Compile Include="DTLibrary\GlobalConfigurationManager.cs" />
+    <Compile Include="DTLibrary\GuidGenerator.cs" />
+    <Compile Include="DTLibrary\IDTDeterministicRandom.cs" />
+    <Compile Include="DTLibrary\IDTLogger.cs" />
+    <Compile Include="DTLibrary\IDTRandom.cs" />
+    <Compile Include="DTLibrary\IFileIO.cs" />
+    <Compile Include="DTLibrary\IFrame.cs" />
+    <Compile Include="DTLibrary\IKeyboard.cs" />
+    <Compile Include="DTLibrary\IMouse.cs" />
+    <Compile Include="DTLibrary\IMusic.cs" />
+    <Compile Include="DTLibrary\ISoundOutput.cs" />
+    <Compile Include="DTLibrary\ITimer.cs" />
+    <Compile Include="DTLibrary\ListUtil.cs" />
+    <Compile Include="DTLibrary\SimpleTimer.cs" />
+    <Compile Include="DTLibrary\SimulatedMouse.cs" />
+    <Compile Include="DTLibrary\StringConcatenation.cs" />
+    <Compile Include="DTLibrary\StringUtil.cs" />
+    <Compile Include="DTLibrary\TranslatedDisplayOutput.cs" />
+    <Compile Include="DTLibrary\TranslatedMouse.cs" />
+    <Compile Include="DTLibrary\VolumeUtil.cs" />
+    <Compile Include="Program.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="bridge.json" />
+    <None Include="packages.config" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <Import Project="..\packages\Bridge.Min.17.6.0\build\Bridge.Min.targets" Condition="Exists('..\packages\Bridge.Min.17.6.0\build\Bridge.Min.targets')" />
+  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
+    <PropertyGroup>
+      <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
+    </PropertyGroup>
+    <Error Condition="!Exists('..\packages\Bridge.Min.17.6.0\build\Bridge.Min.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Bridge.Min.17.6.0\build\Bridge.Min.targets'))" />
+  </Target>
+</Project>

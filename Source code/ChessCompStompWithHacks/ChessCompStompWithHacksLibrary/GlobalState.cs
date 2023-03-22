@@ -15,6 +15,7 @@ namespace ChessCompStompWithHacksLibrary
 			ITimer timer,
 			IFileIO fileIO,
 			bool isWebBrowserVersion,
+			bool isWebPortalVersion,
 			bool debugMode,
 			bool useDebugAI,
 			int? initialMusicVolume)
@@ -25,6 +26,7 @@ namespace ChessCompStompWithHacksLibrary
 			this.Logger = logger;
 			this.Timer = timer;
 			this.IsWebBrowserVersion = isWebBrowserVersion;
+			this.IsWebPortalVersion = isWebPortalVersion;
 			this.DebugMode = debugMode;
 			this.desiredMusicVolume = initialMusicVolume ?? GlobalState.DEFAULT_VOLUME;
 			this.currentMusicVolume = this.desiredMusicVolume;
@@ -45,6 +47,7 @@ namespace ChessCompStompWithHacksLibrary
 		public IDTLogger Logger { get; private set; }
 		public ITimer Timer { get; private set; }
 		public bool IsWebBrowserVersion { get; private set; }
+		public bool IsWebPortalVersion { get; private set; }
 		public bool DebugMode { get; private set; }
 
 		private SaveAndLoadData saveAndLoadData;

@@ -3,6 +3,7 @@ namespace ChessCompStompWithHacksLibrary
 {
 	using DTLibrary;
 	using System;
+	using System.Collections.Generic;
 
 	public class TitleScreenFrame : IFrame<ChessImage, ChessFont, ChessSound, ChessMusic>
 	{
@@ -95,6 +96,16 @@ namespace ChessCompStompWithHacksLibrary
 				textXOffset: 13,
 				textYOffset: 10,
 				font: ChessFont.ChessFont14Pt);
+		}
+		
+		public string GetClickUrl()
+		{
+			return null;
+		}
+
+		public HashSet<string> GetCompletedAchievements()
+		{
+			return this.sessionState.GetCompletedAchievements();
 		}
 
 		public void ProcessExtraTime(int milliseconds)
@@ -218,7 +229,7 @@ namespace ChessCompStompWithHacksLibrary
 				this.quitButton.Render(displayOutput: displayOutput);
 
 			displayOutput.DrawText(
-				x: ChessCompStompWithHacks.WINDOW_WIDTH - 42,
+				x: ChessCompStompWithHacks.WINDOW_WIDTH - 50,
 				y: 55,
 				text: "v" + this.versionString,
 				font: ChessFont.ChessFont12Pt,
