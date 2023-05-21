@@ -27,7 +27,7 @@ namespace ChessCompStompWithHacksLibrary
 				text: "View license text",
 				textXOffset: 10,
 				textYOffset: 11,
-				font: ChessFont.ChessFont20Pt);
+				font: GameFont.GameFont20Pt);
 		}
 
 		/// <summary>
@@ -36,14 +36,14 @@ namespace ChessCompStompWithHacksLibrary
 		public bool ProcessFrame(
 			IMouse mouseInput,
 			IMouse previousMouseInput,
-			ISoundOutput<ChessSound> soundOutput)
+			ISoundOutput<GameSound> soundOutput)
 		{
 			bool clickedButton = this.viewLicenseButton.ProcessFrame(mouseInput: mouseInput, previousMouseInput: previousMouseInput);
 
 			return clickedButton;
 		}
 
-		public void Render(IDisplayOutput<ChessImage, ChessFont> displayOutput)
+		public void Render(IDisplayOutput<GameImage, GameFont> displayOutput)
 		{
 			string text = "The images of chess pieces were created by Cburnett" + "\n"
 				+ "(https://en.wikipedia.org/wiki/User:Cburnett) and are licensed under" + "\n"
@@ -59,7 +59,7 @@ namespace ChessCompStompWithHacksLibrary
 				x: 10,
 				y: this.height - 10,
 				text: text,
-				font: ChessFont.ChessFont20Pt,
+				font: GameFont.GameFont20Pt,
 				color: DTColor.Black());
 
 			this.viewLicenseButton.Render(displayOutput: displayOutput);

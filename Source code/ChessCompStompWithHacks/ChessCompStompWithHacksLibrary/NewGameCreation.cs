@@ -242,6 +242,7 @@ namespace ChessCompStompWithHacksLibrary
 				isPlayerWhite: isPlayerWhite,
 				isWhiteTurn: true,
 				previousPawnMoveFileForEnPassant: null,
+				previousPawnMoveRankForEnPassant: null,
 				castlingRights: new GameState.CastlingRights(
 					canWhiteCastleKingside: true,
 					canWhiteCastleQueenside: true,

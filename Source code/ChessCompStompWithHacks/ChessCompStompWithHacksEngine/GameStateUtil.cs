@@ -16,6 +16,7 @@ namespace ChessCompStompWithHacksEngine
 				isPlayerWhite: gameState.IsPlayerWhite,
 				isWhiteTurn: gameState.IsWhiteTurn,
 				previousPawnMoveFileForEnPassant: gameState.PreviousPawnMoveFileForEnPassant,
+				previousPawnMoveRankForEnPassant: gameState.PreviousPawnMoveRankForEnPassant,
 				castlingRights: gameState.Castling,
 				playerAbilities: new GameState.PlayerAbilities(
 					canPawnsMoveThreeSpacesInitially: gameState.Abilities.CanPawnsMoveThreeSpacesInitially,

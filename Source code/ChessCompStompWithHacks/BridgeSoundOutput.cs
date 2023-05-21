@@ -1,13 +1,13 @@
 
 namespace ChessCompStompWithHacks
 {
+	using Bridge;
 	using ChessCompStompWithHacksLibrary;
 	using DTLibrary;
 	using System;
 	using System.Collections.Generic;
-	using Bridge;
-	
-	public class BridgeSoundOutput : ISoundOutput<ChessSound>
+
+	public class BridgeSoundOutput : ISoundOutput<GameSound>
 	{	
 		private int desiredSoundVolume;
 		private int currentSoundVolume;
@@ -19,7 +19,7 @@ namespace ChessCompStompWithHacks
 			this.currentSoundVolume = this.desiredSoundVolume;
 			this.elapsedMicrosPerFrame = elapsedMicrosPerFrame;
 			Script.Eval(@"
-				window.ChessCompStompWithHacksBridgeSoundOutputJavascript = ((function () {
+				window.BridgeSoundOutputJavascript = ((function () {
 					'use strict';
 						
 					var soundDictionary = {};
@@ -86,21 +86,21 @@ namespace ChessCompStompWithHacks
 		{			
 			string soundNames = "";
 			bool isFirst = true;
-			foreach (ChessSound chessSound in Enum.GetValues(typeof(ChessSound)))
+			foreach (GameSound gameSound in Enum.GetValues(typeof(GameSound)))
 			{
 				if (isFirst)
 					isFirst = false;
 				else
 					soundNames = soundNames + ",";
 				
-				string soundFilename = chessSound.GetSoundFilename().DefaultFilename;
+				string soundFilename = gameSound.GetSoundFilename().DefaultFilename;
 				soundNames = soundNames + soundFilename;
 			}
 			
 			if (soundNames == "")
 				return true;
 			
-			bool result = Script.Eval<bool>("window.ChessCompStompWithHacksBridgeSoundOutputJavascript.loadSounds('" + soundNames + "')");
+			bool result = Script.Eval<bool>("window.BridgeSoundOutputJavascript.loadSounds('" + soundNames + "')");
 			
 			return result;
 		}
@@ -118,6 +118,18 @@ namespace ChessCompStompWithHacks
 
 			this.desiredSoundVolume = volume;
 		}
+		
+		public void SetSoundVolumeImmediately(int volume)
+		{
+			if (volume < 0)
+				throw new Exception();
+
+			if (volume > 100)
+				throw new Exception();
+
+			this.desiredSoundVolume = volume;
+			this.currentSoundVolume = volume;
+		}
 
 		public int GetSoundVolume()
 		{
@@ -132,7 +144,7 @@ namespace ChessCompStompWithHacks
 				desiredVolume: this.desiredSoundVolume);
 		}
 		
-		public void PlaySound(ChessSound sound)
+		public void PlaySound(GameSound sound)
 		{
 			double finalVolume = (sound.GetSoundVolume() / 100.0) * (this.currentSoundVolume / 100.0);
 			if (finalVolume > 1.0)
@@ -143,7 +155,7 @@ namespace ChessCompStompWithHacks
 			if (finalVolume > 0.0)
 			{
 				string soundFilename = sound.GetSoundFilename().DefaultFilename;
-				Script.Call("window.ChessCompStompWithHacksBridgeSoundOutputJavascript.playSound", soundFilename, finalVolume);
+				Script.Call("window.BridgeSoundOutputJavascript.playSound", soundFilename, finalVolume);
 			}
 		}
 		

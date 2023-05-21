@@ -1,23 +1,23 @@
 
 namespace ChessCompStompWithHacks
 {
+	using Bridge;
 	using ChessCompStompWithHacksLibrary;
 	using DTLibrary;
 	using System;
 	using System.Collections.Generic;
-	using Bridge;
-	
+
 	public class BridgeDisplayImages
 	{
-		private Dictionary<ChessImage, int> widthDictionary;
-		private Dictionary<ChessImage, int> heightDictionary;
+		private Dictionary<GameImage, int> widthDictionary;
+		private Dictionary<GameImage, int> heightDictionary;
 		
 		public BridgeDisplayImages()
 		{
-			this.widthDictionary = new Dictionary<ChessImage, int>();
-			this.heightDictionary = new Dictionary<ChessImage, int>();
+			this.widthDictionary = new Dictionary<GameImage, int>();
+			this.heightDictionary = new Dictionary<GameImage, int>();
 			Script.Eval(@"
-				window.ChessCompStompWithHacksBridgeDisplayImagesJavascript = ((function () {
+				window.BridgeDisplayImagesJavascript = ((function () {
 					'use strict';
 					
 					var imgDict = {};
@@ -63,9 +63,9 @@ namespace ChessCompStompWithHacks
 					
 					var drawImageRotatedClockwise = function (imageName, x, y, degreesScaled, scalingFactorScaled) {
 						if (canvas === null) {
-							canvas = document.getElementById('chessCompStompWithHacksCanvas');
+							canvas = document.getElementById('bridgeCanvas');
 							if (canvas !== null)
-								context = canvas.getContext('2d');
+								context = canvas.getContext('2d', { alpha: false });
 							else
 								return;
 						}
@@ -82,11 +82,40 @@ namespace ChessCompStompWithHacks
 						context.translate(x, y);
 						context.scale(scalingFactor, scalingFactor);
 						
-						context.translate(img.width / 2, img.height / 2);
-						context.rotate(degreesScaled * radianConversion);
-						context.translate(-img.width / 2, -img.height / 2);
+						if (degreesScaled !== 0) {
+							context.translate(img.width / 2, img.height / 2);
+							context.rotate(degreesScaled * radianConversion);
+							context.translate(-img.width / 2, -img.height / 2);
+						}
 						
 						context.drawImage(img, 0, 0);
+									
+						context.setTransform(1, 0, 0, 1, 0, 0);
+					};
+					
+					var drawImageRotatedClockwise2 = function (imageName, imageX, imageY, imageWidth, imageHeight, x, y, degreesScaled, scalingFactorScaled) {
+						if (canvas === null) {
+							canvas = document.getElementById('bridgeCanvas');
+							if (canvas !== null)
+								context = canvas.getContext('2d', { alpha: false });
+							else
+								return;
+						}
+						
+						var img = imgDict[imageName];
+						
+						var scalingFactor = scalingFactorScaled / 128.0;
+						
+						context.translate(x, y);
+						context.scale(scalingFactor, scalingFactor);
+						
+						if (degreesScaled !== 0) {
+							context.translate(imageWidth / 2, imageHeight / 2);
+							context.rotate(degreesScaled * radianConversion);
+							context.translate(-imageWidth / 2, -imageHeight / 2);
+						}
+						
+						context.drawImage(img, imageX, imageY, imageWidth, imageHeight, 0, 0, imageWidth, imageHeight);
 									
 						context.setTransform(1, 0, 0, 1, 0, 0);
 					};
@@ -102,6 +131,7 @@ namespace ChessCompStompWithHacks
 					return {
 						loadImages: loadImages,
 						drawImageRotatedClockwise: drawImageRotatedClockwise,
+						drawImageRotatedClockwise2: drawImageRotatedClockwise2,
 						getWidth: getWidth,
 						getHeight: getHeight
 					};
@@ -114,33 +144,33 @@ namespace ChessCompStompWithHacks
 			string imageNames = "";
 			bool isFirst = true;
 			
-			foreach (ChessImage chessImage in Enum.GetValues(typeof(ChessImage)))
+			foreach (GameImage gameImage in Enum.GetValues(typeof(GameImage)))
 			{
 				if (isFirst)
 					isFirst = false;
 				else
 					imageNames = imageNames + ",";
-				imageNames = imageNames + chessImage.GetImageFilename();
+				imageNames = imageNames + gameImage.GetImageFilename();
 			}
 			
 			if (imageNames == "")
 				return true;
 			
-			bool result = Script.Eval<bool>("window.ChessCompStompWithHacksBridgeDisplayImagesJavascript.loadImages('" + imageNames + "')");
+			bool result = Script.Eval<bool>("window.BridgeDisplayImagesJavascript.loadImages('" + imageNames + "')");
 				
 			if (result)
 				return true;
 			return false;
 		}
 		
-		public void DrawImageRotatedClockwise(ChessImage image, int x, int y, int degreesScaled, int scalingFactorScaled)
+		public void DrawImageRotatedClockwise(GameImage image, int x, int y, int degreesScaled, int scalingFactorScaled)
 		{
 			int height = this.GetHeight(image: image);
 			int scaledHeight = height * scalingFactorScaled / 128;
-			y = ChessCompStompWithHacks.WINDOW_HEIGHT - y - scaledHeight;
+			y = GlobalConstants.WINDOW_HEIGHT - y - scaledHeight;
 			
 			Script.Call(
-				"window.ChessCompStompWithHacksBridgeDisplayImagesJavascript.drawImageRotatedClockwise",
+				"window.BridgeDisplayImagesJavascript.drawImageRotatedClockwise",
 				image.GetImageFilename(),
 				x,
 				y,
@@ -148,7 +178,26 @@ namespace ChessCompStompWithHacks
 				scalingFactorScaled);
 		}
 		
-		public int GetWidth(ChessImage image)
+		public void DrawImageRotatedClockwise(GameImage image, int imageX, int imageY, int imageWidth, int imageHeight, int x, int y, int degreesScaled, int scalingFactorScaled)
+		{
+			int height = imageHeight;
+			int scaledHeight = height * scalingFactorScaled / 128;
+			y = GlobalConstants.WINDOW_HEIGHT - y - scaledHeight;
+			
+			Script.Call(
+				"window.BridgeDisplayImagesJavascript.drawImageRotatedClockwise2",
+				image.GetImageFilename(),
+				imageX,
+				imageY,
+				imageWidth,
+				imageHeight,
+				x,
+				y,
+				degreesScaled,
+				scalingFactorScaled);
+		}
+		
+		public int GetWidth(GameImage image)
 		{
 			if (this.widthDictionary.ContainsKey(image))
 				return this.widthDictionary[image];
@@ -158,12 +207,12 @@ namespace ChessCompStompWithHacks
 			return width;
 		}
 		
-		private int GetWidthFromJavascript(ChessImage image)
+		private int GetWidthFromJavascript(GameImage image)
 		{
-			return Script.Eval<int>("window.ChessCompStompWithHacksBridgeDisplayImagesJavascript.getWidth('" + image.GetImageFilename() + "')");
+			return Script.Eval<int>("window.BridgeDisplayImagesJavascript.getWidth('" + image.GetImageFilename() + "')");
 		}
 		
-		public int GetHeight(ChessImage image)
+		public int GetHeight(GameImage image)
 		{
 			if (this.heightDictionary.ContainsKey(image))
 				return this.heightDictionary[image];
@@ -173,9 +222,9 @@ namespace ChessCompStompWithHacks
 			return height;
 		}
 		
-		private int GetHeightFromJavascript(ChessImage image)
+		private int GetHeightFromJavascript(GameImage image)
 		{
-			return Script.Eval<int>("window.ChessCompStompWithHacksBridgeDisplayImagesJavascript.getHeight('" + image.GetImageFilename() + "')");
+			return Script.Eval<int>("window.BridgeDisplayImagesJavascript.getHeight('" + image.GetImageFilename() + "')");
 		}
 	}
 }

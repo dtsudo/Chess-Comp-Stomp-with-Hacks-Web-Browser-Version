@@ -330,16 +330,18 @@ namespace ChessCompStompWithHacksLibrary
 			this.data.GameLogic = null;
 		}
 
-		public IFrame<ChessImage, ChessFont, ChessSound, ChessMusic> StartGame(bool isFinalBattle, GlobalState globalState)
+		public bool WillPlayerBeWhiteNextGame()
+		{
+			if (this.data.WasPlayerWhiteInPreviousGame == null)
+				return true;
+			return !this.data.WasPlayerWhiteInPreviousGame.Value;
+		}
+
+		public IFrame<GameImage, GameFont, GameSound, GameMusic> StartGame(bool isFinalBattle, GlobalState globalState, AIHackLevel? aiHackLevelOverride)
 		{
 			this.data.ObjectivesThatWereAlreadyCompletedPriorToCurrentGame = new HashSet<Objective>(this.data.CompletedObjectives);
 
-			bool isPlayerWhite;
-
-			if (this.data.WasPlayerWhiteInPreviousGame == null)
-				isPlayerWhite = true;
-			else
-				isPlayerWhite = !this.data.WasPlayerWhiteInPreviousGame.Value;
+			bool isPlayerWhite = this.WillPlayerBeWhiteNextGame();
 
 			if (isFinalBattle)
 			{
@@ -363,7 +365,11 @@ namespace ChessCompStompWithHacksLibrary
 
 			AIHackLevel aiHackLevel;
 
-			if (!this.data.HasShownAIHackMessage && this.data.ResearchedHacks.Count == 0 || this.data.NumberOfWins <= 1)
+			if (aiHackLevelOverride.HasValue)
+			{
+				aiHackLevel = aiHackLevelOverride.Value;
+			}
+			else if (!this.data.HasShownAIHackMessage && this.data.ResearchedHacks.Count == 0 || this.data.NumberOfWins <= 1)
 			{
 				aiHackLevel = AIHackLevel.Initial;
 			}

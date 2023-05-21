@@ -1,18 +1,18 @@
 
 namespace ChessCompStompWithHacks
 {
+	using Bridge;
 	using ChessCompStompWithHacksLibrary;
 	using DTLibrary;
 	using System;
 	using System.Collections.Generic;
-	using Bridge;
-	
+
 	public class BridgeFileIO : IFileIO
 	{
 		public BridgeFileIO()
 		{
 			Script.Eval(@"
-				window.ChessCompStompWithHacksBridgeFileIOJavascript = ((function () {
+				window.BridgeFileIOJavascript = ((function () {
 					'use strict';
 					
 					var persistData = function (fileName, base64String) {
@@ -50,14 +50,13 @@ namespace ChessCompStompWithHacks
 			");
 		}
 		
-		private string GetFileName(int fileId)
+		private string GetFileName(int fileId, VersionInfo versionInfo)
 		{
-			VersionInfo versionInfo = VersionInfo.GetVersionInfo();
 			string alphanumericVersionGuid = versionInfo.AlphanumericVersionGuid;
 			return "guid" + alphanumericVersionGuid + "_file" + fileId.ToStringCultureInvariant();
 		}
-		
-		public void PersistData(int fileId, ByteList data)
+				
+		public void PersistData(int fileId, VersionInfo versionInfo, ByteList data)
 		{
 			List<byte> list = new List<byte>();
 			
@@ -77,19 +76,19 @@ namespace ChessCompStompWithHacks
 			
 			string base64String = Convert.ToBase64String(array);
 			
-			Script.Call("window.ChessCompStompWithHacksBridgeFileIOJavascript.persistData", this.GetFileName(fileId: fileId), base64String);
+			Script.Call("window.BridgeFileIOJavascript.persistData", this.GetFileName(fileId: fileId, versionInfo: versionInfo), base64String);
 		}
 		
-		public ByteList FetchData(int fileId)
+		public ByteList FetchData(int fileId, VersionInfo versionInfo)
 		{
-			string fileName = this.GetFileName(fileId: fileId);
+			string fileName = this.GetFileName(fileId: fileId, versionInfo: versionInfo);
 			
-			bool hasData = Script.Eval<bool>("window.ChessCompStompWithHacksBridgeFileIOJavascript.hasData('" + fileName + "')");
+			bool hasData = Script.Eval<bool>("window.BridgeFileIOJavascript.hasData('" + fileName + "')");
 			
 			if (!hasData)
 				return null;
 			
-			string result = Script.Eval<string>("window.ChessCompStompWithHacksBridgeFileIOJavascript.fetchData('" + fileName + "')");
+			string result = Script.Eval<string>("window.BridgeFileIOJavascript.fetchData('" + fileName + "')");
 			
 			if (result == null)
 				return null;

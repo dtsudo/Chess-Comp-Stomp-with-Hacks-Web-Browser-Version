@@ -5,7 +5,7 @@ namespace ChessCompStompWithHacksLibrary
 	using System;
 	using System.Collections.Generic;
 
-	public class TestingFrame : IFrame<ChessImage, ChessFont, ChessSound, ChessMusic>
+	public class TestingFrame : IFrame<GameImage, GameFont, GameSound, GameMusic>
 	{
 		private GlobalState globalState;
 		private SessionState sessionState;
@@ -30,13 +30,13 @@ namespace ChessCompStompWithHacksLibrary
 			return new HashSet<string>();
 		}
 
-		public IFrame<ChessImage, ChessFont, ChessSound, ChessMusic> GetNextFrame(
+		public IFrame<GameImage, GameFont, GameSound, GameMusic> GetNextFrame(
 			IKeyboard keyboardInput,
 			IMouse mouseInput,
 			IKeyboard previousKeyboardInput,
 			IMouse previousMouseInput,
-			IDisplayProcessing<ChessImage> displayProcessing,
-			ISoundOutput<ChessSound> soundOutput,
+			IDisplayProcessing<GameImage> displayProcessing,
+			ISoundOutput<GameSound> soundOutput,
 			IMusicProcessing musicProcessing)
 		{			
 			if (keyboardInput.IsPressed(Key.Esc) && !previousKeyboardInput.IsPressed(Key.Esc))
@@ -65,21 +65,21 @@ namespace ChessCompStompWithHacksLibrary
 			this.globalState.ProcessMusic();
 		}
 
-		public void Render(IDisplayOutput<ChessImage, ChessFont> displayOutput)
+		public void Render(IDisplayOutput<GameImage, GameFont> displayOutput)
 		{
 			displayOutput.DrawText(
 				x: 50,
-				y: ChessCompStompWithHacks.WINDOW_HEIGHT - 50,
+				y: GlobalConstants.WINDOW_HEIGHT - 50,
 				text: "1) Test keyboard"
 					+ "\n" + "2) Test mouse"
 					+ "\n" + "3) Test font"
 					+ "\n" + "4) Test sound"
 					+ "\n" + "5) Test music",
-				font: ChessFont.ChessFont16Pt,
+				font: GameFont.GameFont16Pt,
 				color: DTColor.Black());
 		}
 
-		public void RenderMusic(IMusicOutput<ChessMusic> musicOutput)
+		public void RenderMusic(IMusicOutput<GameMusic> musicOutput)
 		{
 			this.globalState.RenderMusic(musicOutput: musicOutput);
 		}

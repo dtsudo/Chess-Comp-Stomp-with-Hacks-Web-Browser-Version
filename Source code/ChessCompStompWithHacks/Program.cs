@@ -15,7 +15,7 @@ namespace ChessCompStompWithHacks
 		private static void AddFpsDisplayJavascript()
 		{
 			Script.Eval(@"
-				window.ChessCompStompWithHacksFpsDisplayJavascript = ((function () {
+				window.FpsDisplayJavascript = ((function () {
 					'use strict';
 					
 					var numberOfFrames = 0;
@@ -29,7 +29,7 @@ namespace ChessCompStompWithHacks
 					
 					var displayFps = function () {
 						if (!hasAddedFpsLabel) {
-							var fpsLabelNode = document.getElementById('chessCompStompWithHacksFpsLabel');
+							var fpsLabelNode = document.getElementById('fpsLabel');
 							if (fpsLabelNode !== null) {
 								fpsLabelNode.textContent = 'FPS: ';
 								hasAddedFpsLabel = true;
@@ -41,7 +41,7 @@ namespace ChessCompStompWithHacks
 							var actualFps = numberOfFrames / 2;
 							
 							if (fpsNode === null)
-								fpsNode = document.getElementById('chessCompStompWithHacksFps');
+								fpsNode = document.getElementById('fps');
 							
 							if (fpsNode !== null)
 								fpsNode.textContent = actualFps.toString();
@@ -65,7 +65,10 @@ namespace ChessCompStompWithHacks
 				((function () {
 					'use strict';
 					
-					var isWebPortalVersion = false;
+					var isEmbeddedVersion = false;
+										
+					var isElectronVersion = !isEmbeddedVersion
+						&& (window.navigator.userAgent.indexOf('Electron') >= 0 || window.navigator.userAgent.indexOf('electron') >= 0);
 					
 					var defaultFps = window.navigator.userAgent.indexOf('Gecko/') >= 0
 						? 30
@@ -83,7 +86,7 @@ namespace ChessCompStompWithHacks
 						? (urlParams.get('debugmode') === 'true')
 						: false;
 					
-					window.ChessCompStompWithHacks.ChessCompStompWithHacksInitializer.Start(fps, isWebPortalVersion, debugMode);
+					window.ChessCompStompWithHacks.GameInitializer.Start(fps, isEmbeddedVersion, isElectronVersion, debugMode);
 					
 					var computeAndRenderNextFrame;
 					
@@ -98,7 +101,7 @@ namespace ChessCompStompWithHacks
 							if (!hasProcessedExtraTime) {
 								var extraTime = Math.round(nextTimeToAct - now);
 								if (extraTime > 0)
-									window.ChessCompStompWithHacks.ChessCompStompWithHacksInitializer.ProcessExtraTime(extraTime);
+									window.ChessCompStompWithHacks.GameInitializer.ProcessExtraTime(extraTime);
 								hasProcessedExtraTime = true;
 								setTimeout(computeAndRenderNextFrame, 0);
 							} else {
@@ -114,11 +117,11 @@ namespace ChessCompStompWithHacks
 						
 						nextTimeToAct = nextTimeToAct + (1000.0 / fps);
 						
-						window.ChessCompStompWithHacks.ChessCompStompWithHacksInitializer.ComputeAndRenderNextFrame();
-						window.ChessCompStompWithHacksFpsDisplayJavascript.frameComputedAndRendered();
+						window.ChessCompStompWithHacks.GameInitializer.ComputeAndRenderNextFrame();
+						window.FpsDisplayJavascript.frameComputedAndRendered();
 						
 						if (showFps)
-							window.ChessCompStompWithHacksFpsDisplayJavascript.displayFps();
+							window.FpsDisplayJavascript.displayFps();
 						
 						setTimeout(computeAndRenderNextFrame, 0);
 					};

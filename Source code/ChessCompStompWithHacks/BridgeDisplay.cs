@@ -3,11 +3,8 @@ namespace ChessCompStompWithHacks
 {
 	using ChessCompStompWithHacksLibrary;
 	using DTLibrary;
-	using System;
-	using System.Collections.Generic;
-	using Bridge;
-	
-	public class BridgeDisplay : DTDisplay<ChessImage, ChessFont>
+
+	public class BridgeDisplay : DTDisplay<GameImage, GameFont>
 	{
 		private BridgeDisplayRectangle bridgeDisplayRectangle;
 		private BridgeDisplayImages bridgeDisplayImages;
@@ -45,7 +42,7 @@ namespace ChessCompStompWithHacks
 			return this.bridgeDisplayFont.LoadFonts();
 		}
 		
-		public override void DrawImageRotatedClockwise(ChessImage image, int x, int y, int degreesScaled, int scalingFactorScaled)
+		public override void DrawImageRotatedClockwise(GameImage image, int x, int y, int degreesScaled, int scalingFactorScaled)
 		{
 			this.bridgeDisplayImages.DrawImageRotatedClockwise(
 				image: image,
@@ -55,17 +52,31 @@ namespace ChessCompStompWithHacks
 				scalingFactorScaled: scalingFactorScaled);
 		}
 		
-		public override int GetWidth(ChessImage image)
+		public override void DrawImageRotatedClockwise(GameImage image, int imageX, int imageY, int imageWidth, int imageHeight, int x, int y, int degreesScaled, int scalingFactorScaled)
+		{
+			this.bridgeDisplayImages.DrawImageRotatedClockwise(
+				image: image,
+				imageX: imageX,
+				imageY: imageY,
+				imageWidth: imageWidth,
+				imageHeight: imageHeight,
+				x: x,
+				y: y,
+				degreesScaled: degreesScaled,
+				scalingFactorScaled: scalingFactorScaled);
+		}
+		
+		public override int GetWidth(GameImage image)
 		{
 			return this.bridgeDisplayImages.GetWidth(image: image);
 		}
 		
-		public override int GetHeight(ChessImage image)
+		public override int GetHeight(GameImage image)
 		{
 			return this.bridgeDisplayImages.GetHeight(image: image);
 		}
 
-		public override void DrawText(int x, int y, string text, ChessFont font, DTColor color)
+		public override void DrawText(int x, int y, string text, GameFont font, DTColor color)
 		{
 			this.bridgeDisplayFont.DrawText(
 				x: x,
@@ -75,7 +86,7 @@ namespace ChessCompStompWithHacks
 				color: color);
 		}
 
-		public override void TryDrawText(int x, int y, string text, ChessFont font, DTColor color)
+		public override void TryDrawText(int x, int y, string text, GameFont font, DTColor color)
 		{
 			this.bridgeDisplayFont.TryDrawText(
 				x: x,

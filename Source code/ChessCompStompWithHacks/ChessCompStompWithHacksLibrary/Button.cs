@@ -17,7 +17,7 @@ namespace ChessCompStompWithHacksLibrary
 		private string text;
 		private int textXOffset;
 		private int textYOffset;
-		private ChessFont font;
+		private GameFont font;
 
 		private bool isHover;
 		private bool isClicked;
@@ -35,7 +35,7 @@ namespace ChessCompStompWithHacksLibrary
 			string text,
 			int textXOffset,
 			int textYOffset,
-			ChessFont font)
+			GameFont font)
 		{
 			this.x = x;
 			this.y = y;
@@ -95,7 +95,7 @@ namespace ChessCompStompWithHacksLibrary
 			return false;
 		}
 
-		public void Render(IDisplayOutput<ChessImage, ChessFont> displayOutput)
+		public void Render(IDisplayOutput<GameImage, GameFont> displayOutput)
 		{
 			displayOutput.DrawRectangle(
 				x: this.x,

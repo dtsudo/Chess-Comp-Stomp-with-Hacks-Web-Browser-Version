@@ -11,38 +11,21 @@ namespace ChessCompStompWithHacksLibrary
 
 		private int height;
 
-		private bool isWebBrowserVersion;
-		private bool isWebPortalVersion;
+		private BuildType buildType;
 
 		private bool isHoverOverGitHubUrl;
 
-		public Credits_DesignAndCoding(ColorTheme colorTheme, int height, bool isWebBrowserVersion, bool isWebPortalVersion)
+		public Credits_DesignAndCoding(ColorTheme colorTheme, int height, BuildType buildType)
 		{
 			this.colorTheme = colorTheme;
 
 			this.height = height;
 
-			this.isWebBrowserVersion = isWebBrowserVersion;
-			this.isWebPortalVersion = isWebPortalVersion;
+			this.buildType = buildType;
 
 			this.isHoverOverGitHubUrl = false;
 
-			if (isWebPortalVersion)
-			{
-				this.viewLicenseButton = new Button(
-					x: 170,
-					y: height - 145,
-					width: 235,
-					height: 20,
-					backgroundColor: new DTColor(235, 235, 235),
-					hoverColor: ColorThemeUtil.GetHoverColor(colorTheme: colorTheme),
-					clickColor: ColorThemeUtil.GetClickColor(colorTheme: colorTheme),
-					text: "View Bridge.NET license text",
-					textXOffset: 5,
-					textYOffset: 3,
-					font: ChessFont.ChessFont12Pt);
-			}
-			else
+			if (buildType == BuildType.WebStandAlone || buildType == BuildType.Electron)
 			{
 				this.viewLicenseButton = new Button(
 					x: 10,
@@ -55,7 +38,30 @@ namespace ChessCompStompWithHacksLibrary
 					text: "View Bridge.NET license text",
 					textXOffset: 11,
 					textYOffset: 11,
-					font: ChessFont.ChessFont20Pt);
+					font: GameFont.GameFont20Pt);
+			}
+			else if (buildType == BuildType.WebEmbedded)
+			{
+				this.viewLicenseButton = new Button(
+					x: 170,
+					y: height - 145,
+					width: 235,
+					height: 20,
+					backgroundColor: new DTColor(235, 235, 235),
+					hoverColor: ColorThemeUtil.GetHoverColor(colorTheme: colorTheme),
+					clickColor: ColorThemeUtil.GetClickColor(colorTheme: colorTheme),
+					text: "View Bridge.NET license text",
+					textXOffset: 5,
+					textYOffset: 3,
+					font: GameFont.GameFont12Pt);
+			}
+			else if (buildType == BuildType.Desktop)
+			{
+				this.viewLicenseButton = null;
+			}
+			else
+			{
+				throw new Exception();
 			}
 		}
 
@@ -83,15 +89,15 @@ namespace ChessCompStompWithHacksLibrary
 		public Result ProcessFrame(
 			IMouse mouseInput,
 			IMouse previousMouseInput,
-			ISoundOutput<ChessSound> soundOutput)
+			ISoundOutput<GameSound> soundOutput)
 		{
 			bool clickedButton;
-			if (this.isWebBrowserVersion)
+			if (this.viewLicenseButton != null)
 				clickedButton = this.viewLicenseButton.ProcessFrame(mouseInput: mouseInput, previousMouseInput: previousMouseInput);
 			else
 				clickedButton = false;
 
-			if (this.isWebPortalVersion)
+			if (this.buildType == BuildType.WebEmbedded)
 				this.isHoverOverGitHubUrl = IsHoverOverGitHubUrl(mouseInput: mouseInput, height: this.height);
 
 			string clickUrl = null;
@@ -111,18 +117,12 @@ namespace ChessCompStompWithHacksLibrary
 			return new Result(clickedButton: clickedButton, clickUrl: clickUrl);
 		}
 
-		private static string GetInfo()
+		private static string GetDesktopVersionText()
 		{
-			string str = "ddit";
-
-			string str2 = "tsudo";
-
-			str = "Re" + str;
-
-			return str + ": /u/d" + str2;
+			return "";
 		}
 
-		private static string GetWebBrowserNonWebPortalVersionText()
+		private static string GetWebStandAloneVersionText()
 		{
 			return "Design and coding by dtsudo (https://github.com/dtsudo)" + "\n"
 				+ "\n"
@@ -135,7 +135,7 @@ namespace ChessCompStompWithHacksLibrary
 				+ "(https://github.com/bridgedotnet/Bridge)";
 		}
 
-		private static string GetWebPortalVersionText()
+		private static string GetWebEmbeddedVersionText()
 		{
 			string returnValue = "Design and coding by dtsudo " + "\n"
 				+ "\n"
@@ -149,57 +149,37 @@ namespace ChessCompStompWithHacksLibrary
 			return returnValue;
 		}
 
-		private static string GetDesktopVersionText()
+		private static string GetElectronVersionText()
 		{
-			return "";
+			return "Design and coding by dtsudo (https://github.com/dtsudo)" + "\n"
+				+ "\n"
+				+ "This game is open source, under the MIT license." + "\n"
+				+ "\n"
+				+ "The source code is written in C#." + "\n"
+				+ "\n"
+				+ "Bridge.NET is used to transpile the C# source code into javascript." + "\n"
+				+ "Bridge.NET is licensed under Apache License 2.0." + "\n"
+				+ "(https://github.com/bridgedotnet/Bridge)" + "\n"
+				+ "\n"
+				+ "\n"
+				+ "\n"
+				+ "This game uses Electron; for Electron's licensing, see";
 		}
 
-		public void Render(IDisplayOutput<ChessImage, ChessFont> displayOutput)
+		private static string GetInfo()
 		{
-			if (this.isWebBrowserVersion)
-			{
-				if (this.isWebPortalVersion)
-				{
-					string text = GetWebPortalVersionText();
+			string str = "ddit";
 
-					displayOutput.DrawText(
-						x: 10,
-						y: this.height - 10,
-						text: text,
-						font: ChessFont.ChessFont20Pt,
-						color: DTColor.Black());
+			string str2 = "tsudo";
 
-					displayOutput.DrawText(
-						x: 10,
-						y: this.height - 10 - 226,
-						text: "GitHub:",
-						font: ChessFont.ChessFont20Pt,
-						color: DTColor.Black());
+			str = "Re" + str;
 
-					displayOutput.DrawText(
-						x: 109,
-						y: this.height - 10 - 226,
-						text: "https://github.com/dtsudo",
-						font: ChessFont.ChessFont20Pt,
-						color: this.isHoverOverGitHubUrl ? new DTColor(0, 0, 255) : DTColor.Black());
+			return str + ": /u/d" + str2;
+		}
 
-					this.viewLicenseButton.Render(displayOutput: displayOutput);
-				}
-				else
-				{
-					string text = GetWebBrowserNonWebPortalVersionText();
-
-					displayOutput.DrawText(
-						x: 10,
-						y: this.height - 10,
-						text: text,
-						font: ChessFont.ChessFont20Pt,
-						color: DTColor.Black());
-					
-					this.viewLicenseButton.Render(displayOutput: displayOutput);
-				}
-			}
-			else
+		public void Render(IDisplayOutput<GameImage, GameFont> displayOutput)
+		{
+			if (this.buildType == BuildType.Desktop)
 			{
 				string text = GetDesktopVersionText();
 
@@ -207,9 +187,70 @@ namespace ChessCompStompWithHacksLibrary
 					x: 10,
 					y: this.height - 10,
 					text: text,
-					font: ChessFont.ChessFont20Pt,
+					font: GameFont.GameFont20Pt,
 					color: DTColor.Black());
 			}
+			else if (this.buildType == BuildType.WebStandAlone)
+			{
+				string text = GetWebStandAloneVersionText();
+
+				displayOutput.DrawText(
+					x: 10,
+					y: this.height - 10,
+					text: text,
+					font: GameFont.GameFont20Pt,
+					color: DTColor.Black());
+			}
+			else if (this.buildType == BuildType.WebEmbedded)
+			{
+				string text = GetWebEmbeddedVersionText();
+
+				displayOutput.DrawText(
+					x: 10,
+					y: this.height - 10,
+					text: text,
+					font: GameFont.GameFont20Pt,
+					color: DTColor.Black());
+
+				displayOutput.DrawText(
+					x: 10,
+					y: this.height - 10 - 226,
+					text: "GitHub:",
+					font: GameFont.GameFont20Pt,
+					color: DTColor.Black());
+
+				displayOutput.DrawText(
+					x: 109,
+					y: this.height - 10 - 226,
+					text: "https://github.com/dtsudo",
+					font: GameFont.GameFont20Pt,
+					color: this.isHoverOverGitHubUrl ? new DTColor(0, 0, 255) : DTColor.Black());
+			}
+			else if (this.buildType == BuildType.Electron)
+			{
+				string text = GetElectronVersionText();
+
+				displayOutput.DrawText(
+					x: 10,
+					y: this.height - 10,
+					text: text,
+					font: GameFont.GameFont20Pt,
+					color: DTColor.Black());
+
+				displayOutput.DrawText(
+					x: 10,
+					y: this.height - 10 - 370,
+					text: "https://github.com/electron/electron/blob/69586684484c05a0078e3b916239186a5c3d749a/LICENSE",
+					font: GameFont.GameFont14Pt,
+					color: DTColor.Black());
+			}
+			else
+			{
+				throw new Exception();
+			}
+
+			if (this.viewLicenseButton != null)
+				this.viewLicenseButton.Render(displayOutput: displayOutput);
 		}
 	}
 }

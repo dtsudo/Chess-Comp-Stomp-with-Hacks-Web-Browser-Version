@@ -1,18 +1,18 @@
 
 namespace ChessCompStompWithHacks
 {
+	using Bridge;
 	using ChessCompStompWithHacksLibrary;
 	using DTLibrary;
 	using System;
 	using System.Collections.Generic;
-	using Bridge;
-	
+
 	public class BridgeDisplayFont
 	{
 		public BridgeDisplayFont()
 		{
 			Script.Eval(@"
-				window.ChessCompStompWithHacksBridgeDisplayFontJavascript = ((function () {
+				window.BridgeDisplayFontJavascript = ((function () {
 					'use strict';
 					
 					var fontDictionary = {};
@@ -35,7 +35,7 @@ namespace ChessCompStompWithHacks
 							if (fontDictionary[fontName])
 								continue;
 							
-							var fontFamilyName = 'chessCompStompFontFamily' + fontFamilyCount;
+							var fontFamilyName = 'DTFontFamily' + fontFamilyCount;
 							fontFamilyCount++;
 							
 							var font = new FontFace(fontFamilyName, 'url(Data/Font/' + fontName + ')');
@@ -59,12 +59,12 @@ namespace ChessCompStompWithHacks
 						
 					var drawText = function (x, y, str, fontName, javascriptFontSize, lineHeight, red, green, blue, alpha) {
 						if (context === null) {
-							var canvas = document.getElementById('chessCompStompWithHacksCanvas');
+							var canvas = document.getElementById('bridgeCanvas');
 							
 							if (canvas === null)
 								return;
 							
-							context = canvas.getContext('2d');
+							context = canvas.getContext('2d', { alpha: false });
 						}
 						
 						lineHeight = parseFloat(lineHeight);
@@ -104,7 +104,7 @@ namespace ChessCompStompWithHacks
 			// Two fonts might have the same WoffFontFilename
 			HashSet<string> woffFontFilenames = new HashSet<string>();
 			
-			foreach (ChessFont font in Enum.GetValues(typeof(ChessFont)))
+			foreach (GameFont font in Enum.GetValues(typeof(GameFont)))
 				woffFontFilenames.Add(font.GetFontInfo().WoffFontFilename);
 		
 			string woffFontFilenamesAsString = "";
@@ -121,22 +121,22 @@ namespace ChessCompStompWithHacks
 			if (woffFontFilenamesAsString == "")
 				return true;
 			
-			return Script.Eval<bool>("window.ChessCompStompWithHacksBridgeDisplayFontJavascript.loadFonts('" + woffFontFilenamesAsString + "')");
+			return Script.Eval<bool>("window.BridgeDisplayFontJavascript.loadFonts('" + woffFontFilenamesAsString + "')");
 		}
 		
-		public void DrawText(int x, int y, string text, ChessFont font, DTColor color)
+		public void DrawText(int x, int y, string text, GameFont font, DTColor color)
 		{
-			y = ChessCompStompWithHacks.WINDOW_HEIGHT - y - 1;
+			y = GlobalConstants.WINDOW_HEIGHT - y - 1;
 
 			int red = color.R;
 			int green = color.G;
 			int blue = color.B;
 			int alpha = color.Alpha;
 			
-			ChessFontUtil.FontInfo fontInfo = font.GetFontInfo();
+			GameFontUtil.FontInfo fontInfo = font.GetFontInfo();
 			
 			Script.Call(
-				"window.ChessCompStompWithHacksBridgeDisplayFontJavascript.drawText",
+				"window.BridgeDisplayFontJavascript.drawText",
 				x,
 				y,
 				text,
@@ -149,19 +149,19 @@ namespace ChessCompStompWithHacks
 				alpha);
 		}
 		
-		public void TryDrawText(int x, int y, string text, ChessFont font, DTColor color)
+		public void TryDrawText(int x, int y, string text, GameFont font, DTColor color)
 		{
-			y = ChessCompStompWithHacks.WINDOW_HEIGHT - y - 1;
+			y = GlobalConstants.WINDOW_HEIGHT - y - 1;
 
 			int red = color.R;
 			int green = color.G;
 			int blue = color.B;
 			int alpha = color.Alpha;
 			
-			ChessFontUtil.FontInfo fontInfo = font.GetFontInfo();
+			GameFontUtil.FontInfo fontInfo = font.GetFontInfo();
 			
 			Script.Call(
-				"window.ChessCompStompWithHacksBridgeDisplayFontJavascript.tryDrawText",
+				"window.BridgeDisplayFontJavascript.tryDrawText",
 				x,
 				y,
 				text,

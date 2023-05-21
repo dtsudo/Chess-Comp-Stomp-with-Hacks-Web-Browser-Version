@@ -71,8 +71,8 @@ namespace ChessCompStompWithHacksLibrary
 		public bool ProcessFrame(
 			IMouse mouseInput,
 			IMouse previousMouseInput,
-			ISoundOutput<ChessSound> soundOutput,
-			IDisplayProcessing<ChessImage> displayProcessing)
+			ISoundOutput<GameSound> soundOutput,
+			IDisplayProcessing<GameImage> displayProcessing)
 		{
 			if (this.previousMouseInput != null)
 				previousMouseInput = this.previousMouseInput;
@@ -101,7 +101,7 @@ namespace ChessCompStompWithHacksLibrary
 				if (this.allowResearchingHacks)
 				{
 					if (isHover)
-						soundOutput.PlaySound(ChessSound.Click);
+						soundOutput.PlaySound(GameSound.Click);
 
 					if (isHover && this.CanAffordHack())
 						this.sessionState.AddResearchedHack(this.hack);
@@ -116,7 +116,7 @@ namespace ChessCompStompWithHacksLibrary
 
 				if (isHover)
 				{
-					soundOutput.PlaySound(ChessSound.Click);
+					soundOutput.PlaySound(GameSound.Click);
 					returnValue = true;
 				}
 			}
@@ -129,7 +129,7 @@ namespace ChessCompStompWithHacksLibrary
 			return this.sessionState.GetUnusedHackPoints() >= this.hack.GetHackCost();
 		}
 
-		public void RenderHoverDisplay(IDisplayOutput<ChessImage, ChessFont> displayOutput)
+		public void RenderHoverDisplay(IDisplayOutput<GameImage, GameFont> displayOutput)
 		{
 			if (this.isHover)
 			{
@@ -147,7 +147,7 @@ namespace ChessCompStompWithHacksLibrary
 				int height = 19 * (numberOfNewLines + 1) + 20;
 
 				int x;
-				if (this.mouseX + width > ChessCompStompWithHacks.WINDOW_WIDTH)
+				if (this.mouseX + width > GlobalConstants.WINDOW_WIDTH)
 					x = this.mouseX - width;
 				else
 					x = this.mouseX;
@@ -177,7 +177,7 @@ namespace ChessCompStompWithHacksLibrary
 					x: x + 25,
 					y: y + height - 10,
 					text: text,
-					font: ChessFont.ChessFont14Pt,
+					font: GameFont.GameFont14Pt,
 					color: DTColor.Black());
 			}
 		}
@@ -193,7 +193,7 @@ namespace ChessCompStompWithHacksLibrary
 			}
 		}
 
-		public void RenderButtonDisplay(IDisplayOutput<ChessImage, ChessFont> displayOutput)
+		public void RenderButtonDisplay(IDisplayOutput<GameImage, GameFont> displayOutput)
 		{
 			DTColor backgroundColor;
 
@@ -231,14 +231,14 @@ namespace ChessCompStompWithHacksLibrary
 				x: this.x + 3,
 				y: this.y + 90,
 				text: this.hack.GetHackNameForHackSelectionScreen(),
-				font: ChessFont.ChessFont16Pt,
+				font: GameFont.GameFont16Pt,
 				color: DTColor.Black());
 
 			displayOutput.DrawText(
 				x: this.x + 3,
 				y: this.y + 39,
 				text: "Cost: " + this.hack.GetHackCost().ToStringCultureInvariant() + " points",
-				font: ChessFont.ChessFont12Pt,
+				font: GameFont.GameFont12Pt,
 				color: new DTColor(128, 128, 128));
 
 			if (hasResearchedHack)
@@ -247,7 +247,7 @@ namespace ChessCompStompWithHacksLibrary
 					x: this.x + 3,
 					y: this.y + 20,
 					text: "Hack implemented",
-					font: ChessFont.ChessFont12Pt,
+					font: GameFont.GameFont12Pt,
 					color: new DTColor(128, 128, 128));
 			}
 		}

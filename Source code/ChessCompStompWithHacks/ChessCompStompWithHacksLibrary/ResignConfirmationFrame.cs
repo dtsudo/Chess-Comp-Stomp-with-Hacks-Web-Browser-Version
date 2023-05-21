@@ -6,11 +6,11 @@ namespace ChessCompStompWithHacksLibrary
 	using System;
 	using System.Collections.Generic;
 
-	public class ResignConfirmationFrame : IFrame<ChessImage, ChessFont, ChessSound, ChessMusic>
+	public class ResignConfirmationFrame : IFrame<GameImage, GameFont, GameSound, GameMusic>
 	{
 		private GlobalState globalState;
 		private SessionState sessionState;
-		private IFrame<ChessImage, ChessFont, ChessSound, ChessMusic> underlyingFrame;
+		private IFrame<GameImage, GameFont, GameSound, GameMusic> underlyingFrame;
 
 		private Button confirmButton;
 		private Button cancelButton;
@@ -18,10 +18,10 @@ namespace ChessCompStompWithHacksLibrary
 		private const int PANEL_WIDTH = 480;
 		private const int PANEL_HEIGHT = 150;
 
-		private const int PANEL_X = (ChessCompStompWithHacks.WINDOW_WIDTH - PANEL_WIDTH) / 2;
-		private const int PANEL_Y = (ChessCompStompWithHacks.WINDOW_HEIGHT - PANEL_HEIGHT) / 2;
+		private const int PANEL_X = (GlobalConstants.WINDOW_WIDTH - PANEL_WIDTH) / 2;
+		private const int PANEL_Y = (GlobalConstants.WINDOW_HEIGHT - PANEL_HEIGHT) / 2;
 		
-		public ResignConfirmationFrame(GlobalState globalState, SessionState sessionState, IFrame<ChessImage, ChessFont, ChessSound, ChessMusic> underlyingFrame)
+		public ResignConfirmationFrame(GlobalState globalState, SessionState sessionState, IFrame<GameImage, GameFont, GameSound, GameMusic> underlyingFrame)
 		{
 			this.globalState = globalState;
 			this.sessionState = sessionState;
@@ -41,7 +41,7 @@ namespace ChessCompStompWithHacksLibrary
 				text: "Yes",
 				textXOffset: 47,
 				textYOffset: 8,
-				font: ChessFont.ChessFont20Pt);
+				font: GameFont.GameFont20Pt);
 
 			this.cancelButton = new Button(
 				x: PANEL_X + 250,
@@ -54,7 +54,7 @@ namespace ChessCompStompWithHacksLibrary
 				text: "No",
 				textXOffset: 55,
 				textYOffset: 8,
-				font: ChessFont.ChessFont20Pt);
+				font: GameFont.GameFont20Pt);
 		}
 
 		public void ProcessExtraTime(int milliseconds)
@@ -74,18 +74,18 @@ namespace ChessCompStompWithHacksLibrary
 			return new HashSet<string>();
 		}
 
-		public IFrame<ChessImage, ChessFont, ChessSound, ChessMusic> GetNextFrame(
+		public IFrame<GameImage, GameFont, GameSound, GameMusic> GetNextFrame(
 			IKeyboard keyboardInput,
 			IMouse mouseInput,
 			IKeyboard previousKeyboardInput,
 			IMouse previousMouseInput,
-			IDisplayProcessing<ChessImage> displayProcessing,
-			ISoundOutput<ChessSound> soundOutput,
+			IDisplayProcessing<GameImage> displayProcessing,
+			ISoundOutput<GameSound> soundOutput,
 			IMusicProcessing musicProcessing)
 		{
 			if (keyboardInput.IsPressed(Key.Esc) && !previousKeyboardInput.IsPressed(Key.Esc))
 			{
-				soundOutput.PlaySound(ChessSound.Click);
+				soundOutput.PlaySound(GameSound.Click);
 				return this.underlyingFrame;
 			}
 			
@@ -101,13 +101,13 @@ namespace ChessCompStompWithHacksLibrary
 			{
 				this.sessionState.CompleteGame(didPlayerWin: false);
 				this.globalState.SaveData(sessionState: this.sessionState, soundVolume: soundOutput.GetSoundVolume());
-				soundOutput.PlaySound(ChessSound.Click);
+				soundOutput.PlaySound(GameSound.Click);
 				return new HackSelectionScreenFrame(globalState: this.globalState, sessionState: this.sessionState);
 			}
 
 			if (isCancelClicked)
 			{
-				soundOutput.PlaySound(ChessSound.Click);
+				soundOutput.PlaySound(GameSound.Click);
 				return this.underlyingFrame;
 			}
 
@@ -119,15 +119,15 @@ namespace ChessCompStompWithHacksLibrary
 			this.underlyingFrame.ProcessMusic();
 		}
 
-		public void Render(IDisplayOutput<ChessImage, ChessFont> displayOutput)
+		public void Render(IDisplayOutput<GameImage, GameFont> displayOutput)
 		{
 			this.underlyingFrame.Render(display: displayOutput);
 
 			displayOutput.DrawRectangle(
 				x: 0,
 				y: 0,
-				width: ChessCompStompWithHacks.WINDOW_WIDTH,
-				height: ChessCompStompWithHacks.WINDOW_HEIGHT,
+				width: GlobalConstants.WINDOW_WIDTH,
+				height: GlobalConstants.WINDOW_HEIGHT,
 				color: new DTColor(r: 0, g: 0, b: 0, alpha: 64),
 				fill: true);
 
@@ -151,14 +151,14 @@ namespace ChessCompStompWithHacksLibrary
 				x: PANEL_X + 16,
 				y: PANEL_Y + 122,
 				text: "Are you sure you want to resign?",
-				font: ChessFont.ChessFont20Pt,
+				font: GameFont.GameFont20Pt,
 				color: DTColor.Black());
 
 			this.confirmButton.Render(displayOutput: displayOutput);
 			this.cancelButton.Render(displayOutput: displayOutput);
 		}
 
-		public void RenderMusic(IMusicOutput<ChessMusic> musicOutput)
+		public void RenderMusic(IMusicOutput<GameMusic> musicOutput)
 		{
 			this.underlyingFrame.RenderMusic(musicOutput: musicOutput);
 		}

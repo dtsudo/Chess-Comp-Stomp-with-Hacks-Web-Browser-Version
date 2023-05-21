@@ -35,13 +35,13 @@ namespace ChessCompStompWithHacksLibrary
 			return completedHiddenObjectives;
 		}
 
-		public void Render(IDisplayOutput<ChessImage, ChessFont> displayOutput)
+		public void Render(IDisplayOutput<GameImage, GameFont> displayOutput)
 		{
 			displayOutput.DrawText(
 				x: 389,
 				y: 675,
 				text: "Objectives",
-				font: ChessFont.ChessFont32Pt,
+				font: GameFont.GameFont32Pt,
 				color: DTColor.Black());
 
 			int row1Y;

@@ -39,7 +39,7 @@ namespace ChessCompStompWithHacksLibrary
 			return this.musicVolumePicker.GetCurrentMusicVolume();
 		}
 
-		public void Render(IDisplayOutput<ChessImage, ChessFont> displayOutput)
+		public void Render(IDisplayOutput<GameImage, GameFont> displayOutput)
 		{
 			this.soundVolumePicker.Render(displayOutput: displayOutput);
 			this.musicVolumePicker.Render(displayOutput: displayOutput);

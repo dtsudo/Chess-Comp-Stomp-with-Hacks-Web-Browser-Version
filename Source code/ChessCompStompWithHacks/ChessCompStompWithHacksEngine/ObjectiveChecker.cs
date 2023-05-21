@@ -108,6 +108,7 @@ namespace ChessCompStompWithHacksEngine
 				isPlayerWhite: true,
 				isWhiteTurn: true,
 				previousPawnMoveFileForEnPassant: null,
+				previousPawnMoveRankForEnPassant: null,
 				castlingRights: new GameState.CastlingRights(
 					canWhiteCastleKingside: false,
 					canWhiteCastleQueenside: false,

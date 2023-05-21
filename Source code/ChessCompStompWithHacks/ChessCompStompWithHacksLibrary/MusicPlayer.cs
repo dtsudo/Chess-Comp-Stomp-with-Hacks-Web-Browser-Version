@@ -11,12 +11,12 @@ namespace ChessCompStompWithHacksLibrary
 		/// This may not be the same as intendedMusic since it takes a while
 		/// to fade out an existing music and fade in a new one
 		/// </summary>
-		private ChessMusic? currentMusic;
+		private GameMusic? currentMusic;
 
 		/// <summary>
 		/// The intended music that should eventually play, or null if we should fade out all music
 		/// </summary>
-		private ChessMusic? intendedMusic;
+		private GameMusic? intendedMusic;
 		
 		/// <summary>
 		/// From 0 to 100 * 1024 (both inclusive)
@@ -123,7 +123,7 @@ namespace ChessCompStompWithHacksLibrary
 			this.IncreaseCurrentFadeInAndOutVolumeMillis();
 		}
 
-		public void SetMusic(ChessMusic music, int volume)
+		public void SetMusic(GameMusic music, int volume)
 		{
 			this.intendedMusic = music;
 			this.intendedMusicVolume = volume;
@@ -135,7 +135,7 @@ namespace ChessCompStompWithHacksLibrary
 		}
 		
 		public void RenderMusic(
-			IMusicOutput<ChessMusic> musicOutput,
+			IMusicOutput<GameMusic> musicOutput,
 			// From 0 to 100
 			int userVolume)
 		{

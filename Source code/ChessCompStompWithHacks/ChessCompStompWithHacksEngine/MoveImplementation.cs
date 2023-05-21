@@ -29,18 +29,28 @@ namespace ChessCompStompWithHacksEngine
 			}
 
 			int? previousPawnMoveFileForEnPassant;
+			int? previousPawnMoveRankForEnPassant;
 			if (move.IsNuke)
+			{
 				previousPawnMoveFileForEnPassant = null;
+				previousPawnMoveRankForEnPassant = null;
+			}
 			else
 			{
 				ChessSquarePiece pieceThatMoved = gameState.Board.GetPiece(file: move.StartingFile.Value, rank: move.StartingRank.Value);
 				bool pieceWasPawnAndMovedTwoSpaces = pieceThatMoved.IsPawn() && move.StartingFile.Value == move.EndingFile && Math.Abs(move.StartingRank.Value - move.EndingRank) == 2;
 				bool pieceWasPawnAndMovedTwoSpacesFromSecondRank = pieceWasPawnAndMovedTwoSpaces && (move.StartingRank.Value == 1 || move.StartingRank.Value == 6);
 
-				if (pieceWasPawnAndMovedTwoSpacesFromSecondRank)
+				if (pieceWasPawnAndMovedTwoSpaces && (pieceWasPawnAndMovedTwoSpacesFromSecondRank || !gameState.IsPlayerTurn()))
+				{
 					previousPawnMoveFileForEnPassant = move.StartingFile.Value;
+					previousPawnMoveRankForEnPassant = move.EndingRank;
+				}
 				else
+				{
 					previousPawnMoveFileForEnPassant = null;
+					previousPawnMoveRankForEnPassant = null;
+				}
 			}
 
 			return new GameState(
@@ -51,6 +61,7 @@ namespace ChessCompStompWithHacksEngine
 				isPlayerWhite: gameState.IsPlayerWhite,
 				isWhiteTurn: !gameState.IsWhiteTurn,
 				previousPawnMoveFileForEnPassant: previousPawnMoveFileForEnPassant,
+				previousPawnMoveRankForEnPassant: previousPawnMoveRankForEnPassant,
 				castlingRights: ComputeNewCastlingRights(gameState: gameState, newBoard: newBoard),
 				playerAbilities: gameState.Abilities);
 		}

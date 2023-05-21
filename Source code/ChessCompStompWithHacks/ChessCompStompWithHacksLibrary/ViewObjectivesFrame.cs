@@ -4,7 +4,7 @@ namespace ChessCompStompWithHacksLibrary
 	using DTLibrary;
 	using System.Collections.Generic;
 
-	public class ViewObjectivesFrame : IFrame<ChessImage, ChessFont, ChessSound, ChessMusic>
+	public class ViewObjectivesFrame : IFrame<GameImage, GameFont, GameSound, GameMusic>
 	{
 		private GlobalState globalState;
 		private SessionState sessionState;
@@ -35,7 +35,7 @@ namespace ChessCompStompWithHacksLibrary
 				text: "Back to game",
 				textXOffset: 113,
 				textYOffset: 27,
-				font: ChessFont.ChessFont20Pt);
+				font: GameFont.GameFont20Pt);
 		}
 
 		public void ProcessExtraTime(int milliseconds)
@@ -55,32 +55,32 @@ namespace ChessCompStompWithHacksLibrary
 			return new HashSet<string>();
 		}
 
-		public IFrame<ChessImage, ChessFont, ChessSound, ChessMusic> GetNextFrame(
+		public IFrame<GameImage, GameFont, GameSound, GameMusic> GetNextFrame(
 			IKeyboard keyboardInput,
 			IMouse mouseInput,
 			IKeyboard previousKeyboardInput,
 			IMouse previousMouseInput,
-			IDisplayProcessing<ChessImage> displayProcessing,
-			ISoundOutput<ChessSound> soundOutput,
+			IDisplayProcessing<GameImage> displayProcessing,
+			ISoundOutput<GameSound> soundOutput,
 			IMusicProcessing musicProcessing)
 		{
 			bool clickedSettingsIcon = this.settingsIcon.ProcessFrame(mouseInput: mouseInput, previousMouseInput: previousMouseInput, ignoreMouse: false, displayProcessing: displayProcessing).HasClicked;
 			if (clickedSettingsIcon)
 			{
-				soundOutput.PlaySound(ChessSound.Click);
+				soundOutput.PlaySound(GameSound.Click);
 				return new SettingsMenuFrame(globalState: this.globalState, sessionState: this.sessionState, underlyingFrame: this, showPausedText: false);
 			}
 
 			if (keyboardInput.IsPressed(Key.Esc) && !previousKeyboardInput.IsPressed(Key.Esc))
 			{
-				soundOutput.PlaySound(ChessSound.Click);
+				soundOutput.PlaySound(GameSound.Click);
 				return new ChessFrame(globalState: this.globalState, sessionState: this.sessionState);
 			}
 			
 			bool clickedBackToGameButton = this.backToGameButton.ProcessFrame(mouseInput: mouseInput, previousMouseInput: previousMouseInput);
 			if (clickedBackToGameButton)
 			{
-				soundOutput.PlaySound(ChessSound.Click);
+				soundOutput.PlaySound(GameSound.Click);
 				return new ChessFrame(globalState: this.globalState, sessionState: this.sessionState);
 			}
 
@@ -92,13 +92,13 @@ namespace ChessCompStompWithHacksLibrary
 			this.globalState.ProcessMusic();
 		}
 
-		public void Render(IDisplayOutput<ChessImage, ChessFont> displayOutput)
+		public void Render(IDisplayOutput<GameImage, GameFont> displayOutput)
 		{
 			displayOutput.DrawRectangle(
 				x: 0,
 				y: 0,
-				width: ChessCompStompWithHacks.WINDOW_WIDTH,
-				height: ChessCompStompWithHacks.WINDOW_HEIGHT,
+				width: GlobalConstants.WINDOW_WIDTH,
+				height: GlobalConstants.WINDOW_HEIGHT,
 				color: new DTColor(223, 220, 217),
 				fill: true);
 
@@ -109,7 +109,7 @@ namespace ChessCompStompWithHacksLibrary
 			this.objectivesScreenDisplay.Render(displayOutput: displayOutput);
 		}
 
-		public void RenderMusic(IMusicOutput<ChessMusic> musicOutput)
+		public void RenderMusic(IMusicOutput<GameMusic> musicOutput)
 		{
 			this.globalState.RenderMusic(musicOutput: musicOutput);
 		}

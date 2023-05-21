@@ -170,6 +170,7 @@ namespace ChessCompStompWithHacksEngine
 			bool isPlayerWhite,
 			bool isWhiteTurn,
 			int? previousPawnMoveFileForEnPassant,
+			int? previousPawnMoveRankForEnPassant,
 			CastlingRights castlingRights,
 			PlayerAbilities playerAbilities)
 		{
@@ -180,6 +181,7 @@ namespace ChessCompStompWithHacksEngine
 			this.IsPlayerWhite = isPlayerWhite;
 			this.IsWhiteTurn = isWhiteTurn;
 			this.PreviousPawnMoveFileForEnPassant = previousPawnMoveFileForEnPassant;
+			this.PreviousPawnMoveRankForEnPassant = previousPawnMoveRankForEnPassant;
 			this.Castling = castlingRights;
 			this.Abilities = playerAbilities;
 
@@ -198,6 +200,7 @@ namespace ChessCompStompWithHacksEngine
 		public bool IsWhiteTurn { get; private set; }
 
 		public int? PreviousPawnMoveFileForEnPassant { get; private set; }
+		public int? PreviousPawnMoveRankForEnPassant { get; private set; }
 
 		public CastlingRights Castling { get; private set; }
 
@@ -253,6 +256,11 @@ namespace ChessCompStompWithHacksEngine
 					|| this.PreviousPawnMoveFileForEnPassant.HasValue && other.PreviousPawnMoveFileForEnPassant.HasValue && this.PreviousPawnMoveFileForEnPassant.Value != other.PreviousPawnMoveFileForEnPassant.Value)
 				return false;
 
+			if (this.PreviousPawnMoveRankForEnPassant.HasValue && !other.PreviousPawnMoveRankForEnPassant.HasValue
+					|| !this.PreviousPawnMoveRankForEnPassant.HasValue && other.PreviousPawnMoveRankForEnPassant.HasValue
+					|| this.PreviousPawnMoveRankForEnPassant.HasValue && other.PreviousPawnMoveRankForEnPassant.HasValue && this.PreviousPawnMoveRankForEnPassant.Value != other.PreviousPawnMoveRankForEnPassant.Value)
+				return false;
+
 			if (!this.UnmovedPawns.Equals(other.UnmovedPawns))
 				return false;
 
@@ -292,6 +300,11 @@ namespace ChessCompStompWithHacksEngine
 				? this.PreviousPawnMoveFileForEnPassant.Value + 1
 				: 0;
 			hashCode = unchecked(hashCode * 17 + previousPawnMoveFileForEnPassantHashCode);
+
+			int previousPawnMoveRankForEnPassantHashCode = this.PreviousPawnMoveRankForEnPassant.HasValue
+				? this.PreviousPawnMoveRankForEnPassant.Value + 1
+				: 0;
+			hashCode = unchecked(hashCode * 17 + previousPawnMoveRankForEnPassantHashCode);
 
 			int turnCountHashCode = this.TurnCount;
 			hashCode = unchecked(hashCode * 17 + turnCountHashCode);

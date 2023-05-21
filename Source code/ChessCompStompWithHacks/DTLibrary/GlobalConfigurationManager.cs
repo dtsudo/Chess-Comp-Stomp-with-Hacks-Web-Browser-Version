@@ -24,9 +24,9 @@ namespace DTLibrary
 		/// <summary>
 		/// If no saved configuration is found (or the saved configuration is invalid), returns a default GlobalConfiguration.
 		/// </summary>
-		public static GlobalConfiguration GetGlobalConfiguration(IFileIO fileIO, int fileId)
+		public static GlobalConfiguration GetGlobalConfiguration(IFileIO fileIO, int fileId, VersionInfo versionInfo)
 		{
-			ByteList byteList = fileIO.FetchData(fileId: fileId);
+			ByteList byteList = fileIO.FetchData(fileId: fileId, versionInfo: versionInfo);
 
 			if (byteList == null)
 				return new GlobalConfiguration(fps: GlobalConfiguration.DEFAULT_FPS, debugMode: GlobalConfiguration.DEFAULT_DEBUG_MODE);
@@ -81,7 +81,7 @@ namespace DTLibrary
 			return new GlobalConfiguration(fps: fps, debugMode: debugMode);
 		}
 
-		public static void SaveGlobalConfiguration(GlobalConfiguration globalConfiguration, IFileIO fileIO, int fileId)
+		public static void SaveGlobalConfiguration(GlobalConfiguration globalConfiguration, IFileIO fileIO, int fileId, VersionInfo versionInfo)
 		{
 			ByteList.Builder builder = new ByteList.Builder();
 
@@ -95,7 +95,7 @@ namespace DTLibrary
 
 			SerializeAsciiLineOfInput(asciiString: debugModeString, byteListBuilder: builder);
 
-			fileIO.PersistData(fileId: fileId, data: builder.ToByteList());
+			fileIO.PersistData(fileId: fileId, versionInfo: versionInfo, data: builder.ToByteList());
 		}
 
 		/// <summary>

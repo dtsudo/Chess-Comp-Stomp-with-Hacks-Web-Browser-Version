@@ -4,7 +4,7 @@ namespace ChessCompStompWithHacksLibrary
 	using DTLibrary;
 	using System.Collections.Generic;
 
-	public class TestingKeyboardFrame : IFrame<ChessImage, ChessFont, ChessSound, ChessMusic>
+	public class TestingKeyboardFrame : IFrame<GameImage, GameFont, GameSound, GameMusic>
 	{
 		private GlobalState globalState;
 		private SessionState sessionState;
@@ -35,13 +35,13 @@ namespace ChessCompStompWithHacksLibrary
 			return new HashSet<string>();
 		}
 
-		public IFrame<ChessImage, ChessFont, ChessSound, ChessMusic> GetNextFrame(
+		public IFrame<GameImage, GameFont, GameSound, GameMusic> GetNextFrame(
 			IKeyboard keyboardInput,
 			IMouse mouseInput,
 			IKeyboard previousKeyboardInput,
 			IMouse previousMouseInput,
-			IDisplayProcessing<ChessImage> displayProcessing,
-			ISoundOutput<ChessSound> soundOutput,
+			IDisplayProcessing<GameImage> displayProcessing,
+			ISoundOutput<GameSound> soundOutput,
 			IMusicProcessing musicProcessing)
 		{
 			if (keyboardInput.IsPressed(Key.Esc) && !previousKeyboardInput.IsPressed(Key.Esc))
@@ -60,12 +60,12 @@ namespace ChessCompStompWithHacksLibrary
 
 			if (this.x < 0)
 				this.x = 0;
-			if (this.x > ChessCompStompWithHacks.WINDOW_WIDTH)
-				this.x = ChessCompStompWithHacks.WINDOW_WIDTH;
+			if (this.x > GlobalConstants.WINDOW_WIDTH)
+				this.x = GlobalConstants.WINDOW_WIDTH;
 			if (this.y < 0)
 				this.y = 0;
-			if (this.y > ChessCompStompWithHacks.WINDOW_HEIGHT)
-				this.y = ChessCompStompWithHacks.WINDOW_HEIGHT;
+			if (this.y > GlobalConstants.WINDOW_HEIGHT)
+				this.y = GlobalConstants.WINDOW_HEIGHT;
 
 			return this;
 		}
@@ -75,7 +75,7 @@ namespace ChessCompStompWithHacksLibrary
 			this.globalState.ProcessMusic();
 		}
 
-		public void Render(IDisplayOutput<ChessImage, ChessFont> displayOutput)
+		public void Render(IDisplayOutput<GameImage, GameFont> displayOutput)
 		{
 			displayOutput.DrawRectangle(
 				x: this.x - 5,
@@ -86,7 +86,7 @@ namespace ChessCompStompWithHacksLibrary
 				fill: true);
 		}
 
-		public void RenderMusic(IMusicOutput<ChessMusic> musicOutput)
+		public void RenderMusic(IMusicOutput<GameMusic> musicOutput)
 		{
 			this.globalState.RenderMusic(musicOutput: musicOutput);
 		}

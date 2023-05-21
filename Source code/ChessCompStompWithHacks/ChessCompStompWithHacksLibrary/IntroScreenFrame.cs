@@ -5,7 +5,7 @@ namespace ChessCompStompWithHacksLibrary
 	using System;
 	using System.Collections.Generic;
 
-	public class IntroScreenFrame : IFrame<ChessImage, ChessFont, ChessSound, ChessMusic>
+	public class IntroScreenFrame : IFrame<GameImage, GameFont, GameSound, GameMusic>
 	{
 		private GlobalState globalState;
 		private SessionState sessionState;
@@ -26,7 +26,7 @@ namespace ChessCompStompWithHacksLibrary
 
 			int buttonWidth = 150;
 			this.continueButton = new Button(
-				x: (ChessCompStompWithHacks.WINDOW_WIDTH - buttonWidth) / 2,
+				x: (GlobalConstants.WINDOW_WIDTH - buttonWidth) / 2,
 				y: 300,
 				width: buttonWidth,
 				height: 50,
@@ -36,7 +36,7 @@ namespace ChessCompStompWithHacksLibrary
 				text: "Begin",
 				textXOffset: 38,
 				textYOffset: 13,
-				font: ChessFont.ChessFont20Pt);
+				font: GameFont.GameFont20Pt);
 		}
 
 		public void ProcessExtraTime(int milliseconds)
@@ -53,13 +53,13 @@ namespace ChessCompStompWithHacksLibrary
 			return new HashSet<string>();
 		}
 
-		public IFrame<ChessImage, ChessFont, ChessSound, ChessMusic> GetNextFrame(
+		public IFrame<GameImage, GameFont, GameSound, GameMusic> GetNextFrame(
 			IKeyboard keyboardInput,
 			IMouse mouseInput,
 			IKeyboard previousKeyboardInput,
 			IMouse previousMouseInput,
-			IDisplayProcessing<ChessImage> displayProcessing,
-			ISoundOutput<ChessSound> soundOutput,
+			IDisplayProcessing<GameImage> displayProcessing,
+			ISoundOutput<GameSound> soundOutput,
 			IMusicProcessing musicProcessing)
 		{
 			this.elapsedTimeMicros += this.globalState.ElapsedMicrosPerFrame;
@@ -68,7 +68,7 @@ namespace ChessCompStompWithHacksLibrary
 
 			if (keyboardInput.IsPressed(Key.Esc) && !previousKeyboardInput.IsPressed(Key.Esc))
 			{
-				soundOutput.PlaySound(ChessSound.Click);
+				soundOutput.PlaySound(GameSound.Click);
 				return new SettingsMenuFrame(globalState: this.globalState, sessionState: this.sessionState, underlyingFrame: this, showPausedText: false);
 			}
 
@@ -76,7 +76,7 @@ namespace ChessCompStompWithHacksLibrary
 			
 			if (settingsIconStatus.HasClicked)
 			{
-				soundOutput.PlaySound(ChessSound.Click);
+				soundOutput.PlaySound(GameSound.Click);
 				return new SettingsMenuFrame(globalState: this.globalState, sessionState: this.sessionState, underlyingFrame: this, showPausedText: false);
 			}
 
@@ -86,10 +86,10 @@ namespace ChessCompStompWithHacksLibrary
 				if (clickedContinueButton)
 				{
 					this.sessionState.StartNewSession();
-					ChessMusic music = ChessMusic.Level1;
+					GameMusic music = GameMusic.Level1;
 					this.globalState.MusicPlayer.SetMusic(music: music, volume: 100);
 					this.globalState.SaveData(sessionState: this.sessionState, soundVolume: soundOutput.GetSoundVolume());
-					soundOutput.PlaySound(ChessSound.Click);
+					soundOutput.PlaySound(GameSound.Click);
 					return new HackSelectionScreenFrame(globalState: this.globalState, sessionState: this.sessionState);
 				}
 			}
@@ -100,7 +100,7 @@ namespace ChessCompStompWithHacksLibrary
 					|| mouseInput.IsLeftMouseButtonPressed() && !previousMouseInput.IsLeftMouseButtonPressed() && !settingsIconStatus.IsHover)
 			{
 				if (this.elapsedTimeMicros <= TOTAL_TIME_TO_DISPLAY_TEXT)
-					soundOutput.PlaySound(ChessSound.Click);
+					soundOutput.PlaySound(GameSound.Click);
 				this.elapsedTimeMicros = TOTAL_TIME_TO_DISPLAY_TEXT + 1;
 			}
 			
@@ -112,13 +112,13 @@ namespace ChessCompStompWithHacksLibrary
 			this.globalState.ProcessMusic();
 		}
 
-		public void Render(IDisplayOutput<ChessImage, ChessFont> displayOutput)
+		public void Render(IDisplayOutput<GameImage, GameFont> displayOutput)
 		{
 			displayOutput.DrawRectangle(
 				x: 0,
 				y: 0,
-				width: ChessCompStompWithHacks.WINDOW_WIDTH,
-				height: ChessCompStompWithHacks.WINDOW_HEIGHT,
+				width: GlobalConstants.WINDOW_WIDTH,
+				height: GlobalConstants.WINDOW_HEIGHT,
 				color: new DTColor(223, 220, 217),
 				fill: true);
 
@@ -126,7 +126,7 @@ namespace ChessCompStompWithHacksLibrary
 				x: 406,
 				y: 675,
 				text: "Welcome",
-				font: ChessFont.ChessFont32Pt,
+				font: GameFont.GameFont32Pt,
 				color: DTColor.Black());
 
 			string text = "Today, you're playing against a Powerful Chess AI." + "\n"
@@ -143,7 +143,7 @@ namespace ChessCompStompWithHacksLibrary
 				x: 100,
 				y: 500,
 				text: index >= text.Length ? text : text.Substring(0, index),
-				font: ChessFont.ChessFont20Pt,
+				font: GameFont.GameFont20Pt,
 				color: DTColor.Black());
 			
 			if (this.elapsedTimeMicros >= TOTAL_TIME_TO_DISPLAY_TEXT)
@@ -152,7 +152,7 @@ namespace ChessCompStompWithHacksLibrary
 			this.settingsIcon.Render(displayOutput: displayOutput);
 		}
 
-		public void RenderMusic(IMusicOutput<ChessMusic> musicOutput)
+		public void RenderMusic(IMusicOutput<GameMusic> musicOutput)
 		{
 			this.globalState.RenderMusic(musicOutput: musicOutput);
 		}

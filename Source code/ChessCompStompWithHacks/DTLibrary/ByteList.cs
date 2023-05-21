@@ -78,6 +78,17 @@ namespace DTLibrary
 				this.list.Add((byte)b8);
 			}
 
+			public void AddNullableInt(int? i)
+			{
+				if (i == null)
+					this.AddBool(false);
+				else
+				{
+					this.AddBool(true);
+					this.AddInt(i.Value);
+				}
+			}
+
 			public void AddNullableLong(long? l)
 			{
 				if (l == null)
@@ -120,6 +131,25 @@ namespace DTLibrary
 				List<int> list = new List<int>(set);
 				list.Sort();
 				this.AddIntList(list);
+			}
+
+			public void AddString(string str)
+			{
+				if (str == null)
+				{
+					this.AddBool(false);
+					return;
+				}
+
+				this.AddBool(true);
+
+				this.AddInt(str.Length);
+
+				foreach (char c in str)
+				{
+					int cAsInt = c;
+					this.AddInt(cAsInt);
+				}
 			}
 		}
 
@@ -244,6 +274,19 @@ namespace DTLibrary
 			/// <summary>
 			/// Can possibly throw DTDeserializationException
 			/// </summary>
+			public int? TryPopNullableInt()
+			{
+				bool b = this.TryPopBool();
+
+				if (!b)
+					return null;
+
+				return this.TryPopInt();
+			}
+
+			/// <summary>
+			/// Can possibly throw DTDeserializationException
+			/// </summary>
 			public long? TryPopNullableLong()
 			{
 				bool b = this.TryPopBool();
@@ -290,6 +333,29 @@ namespace DTLibrary
 					throw new DTDeserializationException();
 				
 				return new HashSet<int>(list);
+			}
+
+			/// <summary>
+			/// Can possibly throw DTDeserializationException
+			/// </summary>
+			public string TryPopString()
+			{
+				bool b = this.TryPopBool();
+
+				if (!b)
+					return null;
+
+				int count = this.TryPopInt();
+
+				char[] array = new char[count];
+
+				for (int i = 0; i < count; i++)
+				{
+					int cAsInt = this.TryPopInt();
+					array[i] = (char)cAsInt;
+				}
+
+				return new string(array);
 			}
 		}
 

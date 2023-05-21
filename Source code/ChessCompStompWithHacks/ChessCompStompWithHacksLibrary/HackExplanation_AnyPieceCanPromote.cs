@@ -317,7 +317,7 @@ namespace ChessCompStompWithHacksLibrary
 				throw new Exception();
 		}
 				
-		public void ProcessFrame(IMouse mouseInput, IMouse previousMouseInput, IDisplayProcessing<ChessImage> displayProcessing, int elapsedMicrosPerFrame)
+		public void ProcessFrame(IMouse mouseInput, IMouse previousMouseInput, IDisplayProcessing<GameImage> displayProcessing, int elapsedMicrosPerFrame)
 		{
 			if (this.chessPiecesRendererFadeOutFadeIn != null)
 			{
@@ -389,13 +389,13 @@ namespace ChessCompStompWithHacksLibrary
 				elapsedMicrosPerFrame: elapsedMicrosPerFrame);
 		}
 
-		public void Render(IDisplayOutput<ChessImage, ChessFont> displayOutput)
+		public void Render(IDisplayOutput<GameImage, GameFont> displayOutput)
 		{
 			displayOutput.DrawText(
 				x: 305,
 				y: HackExplanationFrameUtil.TITLE_TEXT_Y_OFFSET,
 				text: Hack.AnyPieceCanPromote.GetHackNameForHackExplanationPanel(),
-				font: ChessFont.ChessFont20Pt,
+				font: GameFont.GameFont20Pt,
 				color: DTColor.Black());
 
 			string explanation = "Your rooks, knights, bishops," + "\n"
@@ -406,18 +406,18 @@ namespace ChessCompStompWithHacksLibrary
 				x: HackExplanationFrameUtil.EXPLANATION_TEXT_X_OFFSET,
 				y: HackExplanationFrameUtil.EXPLANATION_TEXT_Y_OFFSET,
 				text: explanation,
-				font: ChessFont.ChessFont16Pt,
+				font: GameFont.GameFont16Pt,
 				color: DTColor.Black());
 
 			this.chessPiecesRenderer.Render(
-				displayOutput: new TranslatedDisplayOutput<ChessImage, ChessFont>(
+				displayOutput: new TranslatedDisplayOutput<GameImage, GameFont>(
 					display: displayOutput, 
 					xOffsetInPixels: HackExplanationFrameUtil.CHESS_PIECES_RENDERER_X_OFFSET,
 					yOffsetInPixels: HackExplanationFrameUtil.CHESS_PIECES_RENDERER_Y_OFFSET),
 				chessPiecesRendererPieceAnimation: this.chessPiecesRendererPieceAnimation);
 
 			if (this.chessPiecesRendererFadeOutFadeIn != null)
-				this.chessPiecesRendererFadeOutFadeIn.Render(displayOutput: new TranslatedDisplayOutput<ChessImage, ChessFont>(
+				this.chessPiecesRendererFadeOutFadeIn.Render(displayOutput: new TranslatedDisplayOutput<GameImage, GameFont>(
 					display: displayOutput,
 					xOffsetInPixels: HackExplanationFrameUtil.CHESS_PIECES_RENDERER_X_OFFSET,
 					yOffsetInPixels: HackExplanationFrameUtil.CHESS_PIECES_RENDERER_Y_OFFSET));

@@ -37,7 +37,7 @@ namespace ChessCompStompWithHacksLibrary
 				text: "Reset hacks",
 				textXOffset: 18,
 				textYOffset: 9,
-				font: ChessFont.ChessFont16Pt);
+				font: GameFont.GameFont16Pt);
 
 			this.hackDisplays = new List<HackDisplay>();
 
@@ -99,8 +99,8 @@ namespace ChessCompStompWithHacksLibrary
 		public Hack? ProcessFrame(
 			IMouse mouseInput,
 			IMouse previousMouseInput,
-			IDisplayProcessing<ChessImage> displayProcessing,
-			ISoundOutput<ChessSound> soundOutput)
+			IDisplayProcessing<GameImage> displayProcessing,
+			ISoundOutput<GameSound> soundOutput)
 		{
 			Hack? rightClickedHack = null;
 
@@ -121,7 +121,7 @@ namespace ChessCompStompWithHacksLibrary
 				bool clickedResetHacksButton = this.resetHacksButton.ProcessFrame(mouseInput: mouseInput, previousMouseInput: previousMouseInput);
 				if (clickedResetHacksButton)
 				{
-					soundOutput.PlaySound(ChessSound.Click);
+					soundOutput.PlaySound(GameSound.Click);
 					this.sessionState.ResetResearchedHacks();
 				}
 			}
@@ -129,13 +129,13 @@ namespace ChessCompStompWithHacksLibrary
 			return rightClickedHack;
 		}
 
-		public void RenderButtons(IDisplayOutput<ChessImage, ChessFont> displayOutput)
+		public void RenderButtons(IDisplayOutput<GameImage, GameFont> displayOutput)
 		{
 			displayOutput.DrawText(
 				x: 436,
 				y: 675,
 				text: "Hacks",
-				font: ChessFont.ChessFont32Pt,
+				font: GameFont.GameFont32Pt,
 				color: DTColor.Black());
 
 			DTColor gray = new DTColor(150, 150, 150);
@@ -168,21 +168,21 @@ namespace ChessCompStompWithHacksLibrary
 				x: 122,
 				y: 590,
 				text: "Tactics",
-				font: ChessFont.ChessFont20Pt,
+				font: GameFont.GameFont20Pt,
 				color: DTColor.Black());
 			
 			displayOutput.DrawText(
 				x: 435,
 				y: 590,
 				text: "Eliteness",
-				font: ChessFont.ChessFont20Pt,
+				font: GameFont.GameFont20Pt,
 				color: DTColor.Black());
 			
 			displayOutput.DrawText(
 				x: 740,
 				y: 590,
 				text: "Rule warping",
-				font: ChessFont.ChessFont20Pt,
+				font: GameFont.GameFont20Pt,
 				color: DTColor.Black());
 
 			foreach (HackDisplay hackDisplay in this.hackDisplays)
@@ -196,14 +196,14 @@ namespace ChessCompStompWithHacksLibrary
 					text: "Hack points remaining: " + this.sessionState.GetUnusedHackPoints().ToStringCultureInvariant() + "\n"
 						+ "Get more hack points by winning games" + "\n"
 						+ "and completing objectives!",
-					font: ChessFont.ChessFont16Pt,
+					font: GameFont.GameFont16Pt,
 					color: DTColor.Black());
 
 				this.resetHacksButton.Render(displayOutput: displayOutput);
 			}
 		}
 
-		public void RenderHoverDisplay(IDisplayOutput<ChessImage, ChessFont> displayOutput)
+		public void RenderHoverDisplay(IDisplayOutput<GameImage, GameFont> displayOutput)
 		{
 			foreach (HackDisplay hackDisplay in this.hackDisplays)
 				hackDisplay.RenderHoverDisplay(displayOutput: displayOutput);

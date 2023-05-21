@@ -6,11 +6,11 @@ namespace ChessCompStompWithHacksLibrary
 	using System;
 	using System.Collections.Generic;
 
-	public class AIMessageFrame : IFrame<ChessImage, ChessFont, ChessSound, ChessMusic>
+	public class AIMessageFrame : IFrame<GameImage, GameFont, GameSound, GameMusic>
 	{
 		private GlobalState globalState;
 		private SessionState sessionState;
-		private IFrame<ChessImage, ChessFont, ChessSound, ChessMusic> underlyingFrame;
+		private IFrame<GameImage, GameFont, GameSound, GameMusic> underlyingFrame;
 		private string message;
 		private int messageXOffset;
 		private int messageYOffset;
@@ -20,10 +20,10 @@ namespace ChessCompStompWithHacksLibrary
 		private const int PANEL_WIDTH = 480;
 		private const int PANEL_HEIGHT = 200;
 
-		private const int PANEL_X = (ChessCompStompWithHacks.WINDOW_WIDTH - PANEL_WIDTH) / 2;
-		private const int PANEL_Y = (ChessCompStompWithHacks.WINDOW_HEIGHT - PANEL_HEIGHT) / 2;
+		private const int PANEL_X = (GlobalConstants.WINDOW_WIDTH - PANEL_WIDTH) / 2;
+		private const int PANEL_Y = (GlobalConstants.WINDOW_HEIGHT - PANEL_HEIGHT) / 2;
 
-		public static IFrame<ChessImage, ChessFont, ChessSound, ChessMusic> GetAIHackMessageFrame(
+		public static IFrame<GameImage, GameFont, GameSound, GameMusic> GetAIHackMessageFrame(
 			GlobalState globalState,
 			SessionState sessionState)
 		{
@@ -36,7 +36,7 @@ namespace ChessCompStompWithHacksLibrary
 				messageYOffset: 114);
 		}
 
-		public static IFrame<ChessImage, ChessFont, ChessSound, ChessMusic> GetFinalBattleMessageFrame(
+		public static IFrame<GameImage, GameFont, GameSound, GameMusic> GetFinalBattleMessageFrame(
 			GlobalState globalState,
 			SessionState sessionState)
 		{
@@ -52,7 +52,7 @@ namespace ChessCompStompWithHacksLibrary
 		private AIMessageFrame(
 			GlobalState globalState, 
 			SessionState sessionState, 
-			IFrame<ChessImage, ChessFont, ChessSound, ChessMusic> underlyingFrame, 
+			IFrame<GameImage, GameFont, GameSound, GameMusic> underlyingFrame, 
 			string message,
 			int messageXOffset,
 			int messageYOffset)
@@ -77,7 +77,7 @@ namespace ChessCompStompWithHacksLibrary
 				text: "OK",
 				textXOffset: 57,
 				textYOffset: 8,
-				font: ChessFont.ChessFont20Pt);
+				font: GameFont.GameFont20Pt);
 		}
 
 		public string GetClickUrl()
@@ -94,16 +94,16 @@ namespace ChessCompStompWithHacksLibrary
 		{
 		}
 
-		public IFrame<ChessImage, ChessFont, ChessSound, ChessMusic> GetNextFrame(
+		public IFrame<GameImage, GameFont, GameSound, GameMusic> GetNextFrame(
 			IKeyboard keyboardInput,
 			IMouse mouseInput,
 			IKeyboard previousKeyboardInput,
 			IMouse previousMouseInput,
-			IDisplayProcessing<ChessImage> displayProcessing,
-			ISoundOutput<ChessSound> soundOutput,
+			IDisplayProcessing<GameImage> displayProcessing,
+			ISoundOutput<GameSound> soundOutput,
 			IMusicProcessing musicProcessing)
 		{
-			ChessMusic music = ChessMusicUtil.GetChessMusic(colorTheme: this.sessionState.GetColorTheme());
+			GameMusic music = GameMusicUtil.GetGameMusic(colorTheme: this.sessionState.GetColorTheme());
 			this.globalState.MusicPlayer.SetMusic(music: music, volume: 100);
 
 			bool isConfirmClicked = this.confirmButton.ProcessFrame(
@@ -112,7 +112,7 @@ namespace ChessCompStompWithHacksLibrary
 
 			if (isConfirmClicked)
 			{
-				soundOutput.PlaySound(sound: ChessSound.Click);
+				soundOutput.PlaySound(sound: GameSound.Click);
 				return this.underlyingFrame;
 			}
 			
@@ -124,15 +124,15 @@ namespace ChessCompStompWithHacksLibrary
 			this.underlyingFrame.ProcessMusic();
 		}
 
-		public void Render(IDisplayOutput<ChessImage, ChessFont> displayOutput)
+		public void Render(IDisplayOutput<GameImage, GameFont> displayOutput)
 		{
 			this.underlyingFrame.Render(display: displayOutput);
 
 			displayOutput.DrawRectangle(
 				x: 0,
 				y: 0,
-				width: ChessCompStompWithHacks.WINDOW_WIDTH,
-				height: ChessCompStompWithHacks.WINDOW_HEIGHT,
+				width: GlobalConstants.WINDOW_WIDTH,
+				height: GlobalConstants.WINDOW_HEIGHT,
 				color: new DTColor(r: 0, g: 0, b: 0, alpha: 64),
 				fill: true);
 
@@ -156,20 +156,20 @@ namespace ChessCompStompWithHacksLibrary
 				x: PANEL_X + 104,
 				y: PANEL_Y + 172,
 				text: "Message from the AI",
-				font: ChessFont.ChessFont20Pt,
+				font: GameFont.GameFont20Pt,
 				color: DTColor.Black());
 
 			displayOutput.DrawText(
 				x: PANEL_X + this.messageXOffset,
 				y: PANEL_Y + this.messageYOffset,
 				text: this.message,
-				font: ChessFont.ChessFont14Pt,
+				font: GameFont.GameFont14Pt,
 				color: DTColor.Black());
 
 			this.confirmButton.Render(displayOutput: displayOutput);
 		}
 
-		public void RenderMusic(IMusicOutput<ChessMusic> musicOutput)
+		public void RenderMusic(IMusicOutput<GameMusic> musicOutput)
 		{
 			this.underlyingFrame.RenderMusic(musicOutput: musicOutput);
 		}

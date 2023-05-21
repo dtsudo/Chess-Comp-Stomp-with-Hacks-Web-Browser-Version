@@ -84,12 +84,12 @@ namespace ChessCompStompWithHacksLibrary
 			return this._currentVolume;
 		}
 
-		public void Render(IDisplayOutput<ChessImage, ChessFont> displayOutput)
+		public void Render(IDisplayOutput<GameImage, GameFont> displayOutput)
 		{
 			if (this._currentVolume > 0)
-				displayOutput.DrawImage(ChessImage.SoundOn, this._xPos, this._yPos);
+				displayOutput.DrawImage(GameImage.SoundOn, this._xPos, this._yPos);
 			else
-				displayOutput.DrawImage(ChessImage.SoundOff, this._xPos, this._yPos);
+				displayOutput.DrawImage(GameImage.SoundOff, this._xPos, this._yPos);
 
 			displayOutput.DrawRectangle(
 				x: this._xPos + 50,

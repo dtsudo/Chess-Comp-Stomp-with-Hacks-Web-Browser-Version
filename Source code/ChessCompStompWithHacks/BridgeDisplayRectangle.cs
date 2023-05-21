@@ -1,18 +1,18 @@
 
 namespace ChessCompStompWithHacks
 {
+	using Bridge;
 	using ChessCompStompWithHacksLibrary;
 	using DTLibrary;
 	using System;
 	using System.Collections.Generic;
-	using Bridge;
 	
 	public class BridgeDisplayRectangle
 	{
 		public BridgeDisplayRectangle()
 		{
 			Script.Eval(@"
-				window.ChessCompStompWithHacksBridgeDisplayRectangleJavascript = ((function () {
+				window.BridgeDisplayRectangleJavascript = ((function () {
 					'use strict';
 					
 					var canvas = null;
@@ -21,10 +21,10 @@ namespace ChessCompStompWithHacks
 					var drawRectangle = function (x, y, width, height, red, green, blue, alpha, fill) {
 								
 						if (canvas === null) {
-							canvas = document.getElementById('chessCompStompWithHacksCanvas');		
+							canvas = document.getElementById('bridgeCanvas');		
 							if (canvas === null)
 								return;	
-							context = canvas.getContext('2d');
+							context = canvas.getContext('2d', { alpha: false });
 						}
 						
 						context.fillStyle = 'rgba(' + red.toString() + ', ' + green.toString() + ', ' + blue.toString() + ', ' + (alpha / 255).toString() + ')';
@@ -45,14 +45,14 @@ namespace ChessCompStompWithHacks
 		
 		public void DrawRectangle(int x, int y, int width, int height, DTColor color, bool fill)
 		{
-			y = ChessCompStompWithHacks.WINDOW_HEIGHT - y - height;
+			y = GlobalConstants.WINDOW_HEIGHT - y - height;
 			
 			int red = color.R;
 			int green = color.G;
 			int blue = color.B;
 			int alpha = color.Alpha;
 					
-			Script.Call("window.ChessCompStompWithHacksBridgeDisplayRectangleJavascript.drawRectangle", x, y, width, height, red, green, blue, alpha, fill);
+			Script.Call("window.BridgeDisplayRectangleJavascript.drawRectangle", x, y, width, height, red, green, blue, alpha, fill);
 		}
 	}
 }

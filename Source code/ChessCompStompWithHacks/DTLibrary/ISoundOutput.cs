@@ -15,6 +15,8 @@ namespace DTLibrary
 		/// </summary>
 		void SetSoundVolume(int volume);
 
+		void SetSoundVolumeImmediately(int volume);
+
 		int GetSoundVolume();
 
 		/// <summary>

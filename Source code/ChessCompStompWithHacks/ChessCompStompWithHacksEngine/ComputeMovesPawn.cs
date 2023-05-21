@@ -119,7 +119,6 @@ namespace ChessCompStompWithHacksEngine
 			bool hasSuperEnPassant = gameState.IsPlayerTurn() && gameState.Abilities.CanSuperEnPassant;
 
 			int nextRank = gameState.IsWhiteTurn ? (j + 1) : (j - 1);
-			bool isOnCorrectRankForNormalEnPassant = gameState.IsWhiteTurn ? (j == 4) : (j == 3);
 
 			List<int> endingFiles = new List<int>();
 			if (i >= 1)
@@ -149,7 +148,8 @@ namespace ChessCompStompWithHacksEngine
 				{
 					if (gameState.PreviousPawnMoveFileForEnPassant.HasValue
 						&& gameState.PreviousPawnMoveFileForEnPassant.Value == endingFile
-						&& isOnCorrectRankForNormalEnPassant
+						&& gameState.PreviousPawnMoveRankForEnPassant.HasValue
+						&& gameState.PreviousPawnMoveRankForEnPassant.Value == j
 						&& enPassantSquare.IsPawn()
 						&& capturingSquare == ChessSquarePiece.Empty)
 					{

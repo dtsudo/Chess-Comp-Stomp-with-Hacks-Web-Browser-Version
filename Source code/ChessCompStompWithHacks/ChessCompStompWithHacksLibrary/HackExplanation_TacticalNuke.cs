@@ -32,7 +32,7 @@ namespace ChessCompStompWithHacksLibrary
 			return TacticalNukeUtil.NumberOfMovesPlayedBeforeNukeIsAvailable + 1;
 		}
 
-		public void ProcessFrame(IMouse mouseInput, IMouse previousMouseInput, IDisplayProcessing<ChessImage> displayProcessing, int elapsedMicrosPerFrame)
+		public void ProcessFrame(IMouse mouseInput, IMouse previousMouseInput, IDisplayProcessing<GameImage> displayProcessing, int elapsedMicrosPerFrame)
 		{
 			this.nukeRenderer = this.nukeRenderer.ProcessFrame(
 				hasUsedNuke: false,
@@ -42,13 +42,13 @@ namespace ChessCompStompWithHacksLibrary
 				elapsedMicrosPerFrame: elapsedMicrosPerFrame);
 		}
 
-		public void Render(IDisplayOutput<ChessImage, ChessFont> displayOutput)
+		public void Render(IDisplayOutput<GameImage, GameFont> displayOutput)
 		{
 			displayOutput.DrawText(
 				x: 359,
 				y: HackExplanationFrameUtil.TITLE_TEXT_Y_OFFSET,
 				text: Hack.TacticalNuke.GetHackNameForHackExplanationPanel(),
-				font: ChessFont.ChessFont20Pt,
+				font: GameFont.GameFont20Pt,
 				color: DTColor.Black());
 
 			string explanation = "You start each game with a" + "\n"
@@ -64,10 +64,10 @@ namespace ChessCompStompWithHacksLibrary
 				x: HackExplanationFrameUtil.EXPLANATION_TEXT_X_OFFSET,
 				y: HackExplanationFrameUtil.EXPLANATION_TEXT_Y_OFFSET,
 				text: explanation,
-				font: ChessFont.ChessFont16Pt,
+				font: GameFont.GameFont16Pt,
 				color: DTColor.Black());
 			
-			this.nukeRenderer.Render(displayOutput: new TranslatedDisplayOutput<ChessImage, ChessFont>(
+			this.nukeRenderer.Render(displayOutput: new TranslatedDisplayOutput<GameImage, GameFont>(
 				display: displayOutput,
 				xOffsetInPixels: 532,
 				yOffsetInPixels: 40));

@@ -196,7 +196,7 @@ namespace ChessCompStompWithHacksLibrary
 			}
 		}
 
-		public void Render(IDisplayOutput<ChessImage, ChessFont> displayOutput)
+		public void Render(IDisplayOutput<GameImage, GameFont> displayOutput)
 		{
 			List<Tuple<MoveDisplay, MoveTracker.MoveInfo>> moveDisplayMapping = GetMoveDisplayMapping(moveTracker: this.moveTracker);
 
@@ -247,7 +247,7 @@ namespace ChessCompStompWithHacksLibrary
 						x: moveDisplay.X + 2,
 						y: moveDisplay.Y + 28,
 						text: moveInfo.MoveName,
-						font: ChessFont.ChessFont14Pt,
+						font: GameFont.GameFont14Pt,
 						color: DTColor.Black());
 			}
 		}

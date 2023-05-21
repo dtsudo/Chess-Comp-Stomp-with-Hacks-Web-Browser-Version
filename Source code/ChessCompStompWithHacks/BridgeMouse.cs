@@ -1,34 +1,42 @@
 
 namespace ChessCompStompWithHacks
 {
-	using ChessCompStompWithHacksLibrary;
-	using DTLibrary;
 	using Bridge;
+	using DTLibrary;
 	
 	public class BridgeMouse : IMouse
 	{
 		public BridgeMouse()
 		{
 			Script.Eval(@"
-				window.ChessCompStompWithHacksBridgeMouseJavascript = ((function () {
+				window.BridgeMouseJavascript = ((function () {
 					'use strict';
 					
-					var mouseXPosition = 0;
-					var mouseYPosition = 0;
+					var mouseXPosition = -50;
+					var mouseYPosition = -50;
 					
 					var canvas = null;
 					
 					var mouseMoveHandler = function (e) {
 					
 						if (canvas === null) {
-							canvas = document.getElementById('chessCompStompWithHacksCanvas');
+							canvas = document.getElementById('bridgeCanvas');
 							
 							if (canvas === null)
 								return;
 						}
 						
+						var canvasCssWidth = canvas.offsetWidth;
+						var canvasCssHeight = canvas.offsetHeight;
+						
 						var xPosition = (e.pageX !== null && e.pageX !== undefined ? e.pageX : e.clientX) - canvas.offsetLeft;
-												
+						
+						var canvasXScaling = canvasCssWidth / canvas.width;
+						if (canvasXScaling < 0.001)
+							canvasXScaling = 0.001;
+						
+						xPosition = Math.round(xPosition / canvasXScaling);
+									
 						if (xPosition < -5)
 							xPosition = -5;
 						
@@ -36,6 +44,12 @@ namespace ChessCompStompWithHacks
 							xPosition = canvas.width + 5;
 						
 						var yPosition = (e.pageY !== null && e.pageY !== undefined ? e.pageY : e.clientY) - canvas.offsetTop;
+						
+						var canvasYScaling = canvasCssHeight / canvas.height;
+						if (canvasYScaling < 0.001)
+							canvasYScaling = 0.001;
+						
+						yPosition = Math.round(yPosition / canvasYScaling);
 						
 						if (yPosition < -5)
 							yPosition = -5;
@@ -65,7 +79,7 @@ namespace ChessCompStompWithHacks
 					var disableContextMenu;
 					disableContextMenu = function () {
 						if (canvas === null) {
-							canvas = document.getElementById('chessCompStompWithHacksCanvas');
+							canvas = document.getElementById('bridgeCanvas');
 							
 							if (canvas === null) {
 								setTimeout(disableContextMenu, 50);
@@ -93,22 +107,22 @@ namespace ChessCompStompWithHacks
 		
 		public int GetX()
 		{
-			return Script.Write<int>("window.ChessCompStompWithHacksBridgeMouseJavascript.getMouseX()");
+			return Script.Write<int>("window.BridgeMouseJavascript.getMouseX()");
 		}
 
 		public int GetY()
 		{
-			return Script.Write<int>("window.ChessCompStompWithHacksBridgeMouseJavascript.getMouseY()");
+			return Script.Write<int>("window.BridgeMouseJavascript.getMouseY()");
 		}
 
 		public bool IsLeftMouseButtonPressed()
 		{
-			return Script.Write<bool>("window.ChessCompStompWithHacksBridgeMouseJavascript.isLeftMouseButtonPressed()");
+			return Script.Write<bool>("window.BridgeMouseJavascript.isLeftMouseButtonPressed()");
 		}
 
 		public bool IsRightMouseButtonPressed()
 		{
-			return Script.Write<bool>("window.ChessCompStompWithHacksBridgeMouseJavascript.isRightMouseButtonPressed()");
+			return Script.Write<bool>("window.BridgeMouseJavascript.isRightMouseButtonPressed()");
 		}
 	}
 }

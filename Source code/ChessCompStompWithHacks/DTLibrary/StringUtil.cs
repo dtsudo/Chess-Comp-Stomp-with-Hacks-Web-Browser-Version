@@ -22,20 +22,84 @@ namespace DTLibrary
 
 		public static int? TryParseInt(string str)
 		{
-			long? result = TryParseLong(str);
-
-			if (result == null)
+			if (str == null)
 				return null;
 
-			long minAllowedValue = int.MinValue;
-			long maxAllowedValue = int.MaxValue;
-
-			if (result.Value < minAllowedValue)
-				return null;
-			if (result.Value > maxAllowedValue)
+			if (str == "")
 				return null;
 
-			return (int)result.Value;
+			if (str[0] != '-' && !IsDigit(str[0]))
+				return null;
+
+			if (str == "-")
+				return null;
+
+			for (int i = 1; i < str.Length; i++)
+			{
+				if (!IsDigit(str[i]))
+					return null;
+			}
+
+			if (str == "-2147483648")
+				return int.MinValue;
+
+			if (str[0] == '-')
+			{
+				int? result = TryParseInt(str.Substring(1));
+				if (result == null)
+					return null;
+				return -(result.Value);
+			}
+
+			return TryParseIntHelper(str);
+		}
+
+		private static int? TryParseIntHelper(string str)
+		{
+			if (str.Length == 1)
+			{
+				if (str == "0") return 0;
+				if (str == "1") return 1;
+				if (str == "2") return 2;
+				if (str == "3") return 3;
+				if (str == "4") return 4;
+				if (str == "5") return 5;
+				if (str == "6") return 6;
+				if (str == "7") return 7;
+				if (str == "8") return 8;
+				if (str == "9") return 9;
+			}
+
+			int? leastSignificantDigit = TryParseIntHelper(str.Substring(str.Length - 1));
+			int? restOfNumber = TryParseIntHelper(str.Substring(0, str.Length - 1));
+
+			if (leastSignificantDigit == null || restOfNumber == null)
+				return null;
+
+			try
+			{
+				int number = checked(leastSignificantDigit.Value + 10 * restOfNumber.Value);
+				return number;
+			}
+			catch (OverflowException)
+			{
+				return null;
+			}
+		}
+
+		public static int ParseAsIntCultureInvariant(this string str)
+		{
+			return ParseInt(str);
+		}
+
+		public static int ParseInt(string str)
+		{
+			int? val = TryParseInt(str);
+
+			if (val == null)
+				throw new Exception("str does not represent an int: " + str);
+
+			return val.Value;
 		}
 
 		/// <summary>
@@ -101,6 +165,23 @@ namespace DTLibrary
 			{
 				return null;
 			}
+		}
+
+		public static string ToUpperCaseCultureInvariant(this string str)
+		{
+			char[] array = new char[str.Length];
+
+			for (int i = 0; i < array.Length; i++)
+			{
+				char c = str[i];
+
+				if (c < 'a' || c > 'z')
+					array[i] = c;
+				else
+					array[i] = (char) (c - 32);
+			}
+
+			return new string(array);
 		}
 		
 		public static string ToStringCultureInvariant(this int i)

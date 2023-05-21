@@ -14,8 +14,7 @@ namespace ChessCompStompWithHacksLibrary
 			IDTLogger logger,
 			ITimer timer,
 			IFileIO fileIO,
-			bool isWebBrowserVersion,
-			bool isWebPortalVersion,
+			BuildType buildType,
 			bool debugMode,
 			bool useDebugAI,
 			int? initialMusicVolume)
@@ -25,8 +24,8 @@ namespace ChessCompStompWithHacksLibrary
 			this.GuidGenerator = guidGenerator;
 			this.Logger = logger;
 			this.Timer = timer;
-			this.IsWebBrowserVersion = isWebBrowserVersion;
-			this.IsWebPortalVersion = isWebPortalVersion;
+			this.FileIO = fileIO;
+			this.BuildType = buildType;
 			this.DebugMode = debugMode;
 			this.desiredMusicVolume = initialMusicVolume ?? GlobalState.DEFAULT_VOLUME;
 			this.currentMusicVolume = this.desiredMusicVolume;
@@ -36,7 +35,7 @@ namespace ChessCompStompWithHacksLibrary
 			this.MusicPlayer = new MusicPlayer(elapsedMicrosPerFrame: elapsedMicrosPerFrame);
 			this.ElapsedMicrosPerFrame = elapsedMicrosPerFrame;
 
-			this.saveAndLoadData = new SaveAndLoadData(fileIO: fileIO);
+			this.saveAndLoadData = new SaveAndLoadData(fileIO: fileIO, versionInfo: VersionHistory.GetVersionInfo());
 
 			this.UseDebugAI = useDebugAI;
 		}
@@ -46,8 +45,10 @@ namespace ChessCompStompWithHacksLibrary
 		public GuidGenerator GuidGenerator { get; private set; }
 		public IDTLogger Logger { get; private set; }
 		public ITimer Timer { get; private set; }
-		public bool IsWebBrowserVersion { get; private set; }
-		public bool IsWebPortalVersion { get; private set; }
+		public IFileIO FileIO { get; private set; }
+
+		public BuildType BuildType { get; private set; }
+
 		public bool DebugMode { get; private set; }
 
 		private SaveAndLoadData saveAndLoadData;
@@ -75,7 +76,7 @@ namespace ChessCompStompWithHacksLibrary
 				desiredVolume: this.desiredMusicVolume);
 		}
 
-		public void RenderMusic(IMusicOutput<ChessMusic> musicOutput)
+		public void RenderMusic(IMusicOutput<GameMusic> musicOutput)
 		{
 			this.MusicPlayer.RenderMusic(musicOutput: musicOutput, userVolume: this.currentMusicVolume);
 		}
@@ -100,7 +101,10 @@ namespace ChessCompStompWithHacksLibrary
 			int? musicVolume = this.saveAndLoadData.LoadMusicVolume();
 
 			if (musicVolume.HasValue)
+			{
 				this.desiredMusicVolume = musicVolume.Value;
+				this.currentMusicVolume = musicVolume.Value;
+			}
 		}
 	}
 }

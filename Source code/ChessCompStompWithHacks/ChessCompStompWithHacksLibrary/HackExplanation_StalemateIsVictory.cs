@@ -150,6 +150,7 @@ namespace ChessCompStompWithHacksLibrary
 				isPlayerWhite: true,
 				isWhiteTurn: true,
 				previousPawnMoveFileForEnPassant: null,
+				previousPawnMoveRankForEnPassant: null,
 				castlingRights: new GameState.CastlingRights(canWhiteCastleKingside: false, canWhiteCastleQueenside: false, canBlackCastleKingside: false, canBlackCastleQueenside: false),
 				playerAbilities: new GameState.PlayerAbilities(
 					canPawnsMoveThreeSpacesInitially: false,
@@ -174,7 +175,7 @@ namespace ChessCompStompWithHacksLibrary
 		public void ProcessFrame(
 			IMouse mouseInput, 
 			IMouse previousMouseInput, 
-			IDisplayProcessing<ChessImage> displayProcessing, 
+			IDisplayProcessing<GameImage> displayProcessing, 
 			int elapsedMicrosPerFrame)
 		{
 			if (this.chessPiecesRendererFadeOutFadeIn != null)
@@ -298,13 +299,13 @@ namespace ChessCompStompWithHacksLibrary
 				elapsedMicrosPerFrame: elapsedMicrosPerFrame);
 		}
 
-		public void Render(IDisplayOutput<ChessImage, ChessFont> displayOutput)
+		public void Render(IDisplayOutput<GameImage, GameFont> displayOutput)
 		{
 			displayOutput.DrawText(
 				x: 349,
 				y: HackExplanationFrameUtil.TITLE_TEXT_Y_OFFSET,
 				text: Hack.StalemateIsVictory.GetHackNameForHackExplanationPanel(),
-				font: ChessFont.ChessFont20Pt,
+				font: GameFont.GameFont20Pt,
 				color: DTColor.Black());
 
 			string explanation = "If it is your turn and you have" + "\n"
@@ -320,11 +321,11 @@ namespace ChessCompStompWithHacksLibrary
 				x: HackExplanationFrameUtil.EXPLANATION_TEXT_X_OFFSET,
 				y: HackExplanationFrameUtil.EXPLANATION_TEXT_Y_OFFSET,
 				text: explanation,
-				font: ChessFont.ChessFont16Pt,
+				font: GameFont.GameFont16Pt,
 				color: DTColor.Black());
 
 			this.chessPiecesRenderer.Render(
-				displayOutput: new TranslatedDisplayOutput<ChessImage, ChessFont>(
+				displayOutput: new TranslatedDisplayOutput<GameImage, GameFont>(
 					display: displayOutput,
 					xOffsetInPixels: HackExplanationFrameUtil.CHESS_PIECES_RENDERER_X_OFFSET,
 					yOffsetInPixels: HackExplanationFrameUtil.CHESS_PIECES_RENDERER_Y_OFFSET),
@@ -352,12 +353,12 @@ namespace ChessCompStompWithHacksLibrary
 					x: (HackExplanationFrameUtil.CHESS_PIECES_RENDERER_X_OFFSET + 99) + 65,
 					y: (HackExplanationFrameUtil.CHESS_PIECES_RENDERER_Y_OFFSET + 240) + 85,
 					text: "Victory!",
-					font: ChessFont.ChessFont32Pt,
+					font: GameFont.GameFont32Pt,
 					color: DTColor.Black());
 			}
 
 			if (this.chessPiecesRendererFadeOutFadeIn != null)
-				this.chessPiecesRendererFadeOutFadeIn.Render(displayOutput: new TranslatedDisplayOutput<ChessImage, ChessFont>(
+				this.chessPiecesRendererFadeOutFadeIn.Render(displayOutput: new TranslatedDisplayOutput<GameImage, GameFont>(
 					display: displayOutput,
 					xOffsetInPixels: HackExplanationFrameUtil.CHESS_PIECES_RENDERER_X_OFFSET,
 					yOffsetInPixels: HackExplanationFrameUtil.CHESS_PIECES_RENDERER_Y_OFFSET));

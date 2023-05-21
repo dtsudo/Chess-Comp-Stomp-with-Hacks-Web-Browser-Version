@@ -6,7 +6,7 @@ namespace ChessCompStompWithHacksLibrary
 	using System;
 	using System.Collections.Generic;
 
-	public class ChessFrame : IFrame<ChessImage, ChessFont, ChessSound, ChessMusic>
+	public class ChessFrame : IFrame<GameImage, GameFont, GameSound, GameMusic>
 	{
 		private GlobalState globalState;
 		private SessionState sessionState;
@@ -45,7 +45,7 @@ namespace ChessCompStompWithHacksLibrary
 				text: "Resign",
 				textXOffset: 14,
 				textYOffset: 9,
-				font: ChessFont.ChessFont16Pt);
+				font: GameFont.GameFont16Pt);
 
 			this.viewObjectivesButton = new Button(
 				x: 770,
@@ -58,7 +58,7 @@ namespace ChessCompStompWithHacksLibrary
 				text: "View objectives",
 				textXOffset: 16,
 				textYOffset: 9,
-				font: ChessFont.ChessFont16Pt);
+				font: GameFont.GameFont16Pt);
 
 			this.viewHacksButton = new Button(
 				x: 621,
@@ -71,7 +71,7 @@ namespace ChessCompStompWithHacksLibrary
 				text: "View hacks",
 				textXOffset: 16,
 				textYOffset: 9,
-				font: ChessFont.ChessFont16Pt);
+				font: GameFont.GameFont16Pt);
 		}
 
 		public string GetClickUrl()
@@ -91,18 +91,18 @@ namespace ChessCompStompWithHacksLibrary
 				gameLogic.ProcessExtraTime(milliseconds: milliseconds);
 		}
 
-		public IFrame<ChessImage, ChessFont, ChessSound, ChessMusic> GetNextFrame(
+		public IFrame<GameImage, GameFont, GameSound, GameMusic> GetNextFrame(
 			IKeyboard keyboardInput,
 			IMouse mouseInput,
 			IKeyboard previousKeyboardInput,
 			IMouse previousMouseInput,
-			IDisplayProcessing<ChessImage> displayProcessing,
-			ISoundOutput<ChessSound> soundOutput,
+			IDisplayProcessing<GameImage> displayProcessing,
+			ISoundOutput<GameSound> soundOutput,
 			IMusicProcessing musicProcessing)
 		{
 			if (this.finalBattleVictoryPanel == null)
 			{
-				ChessMusic music = ChessMusicUtil.GetChessMusic(colorTheme: this.sessionState.GetColorTheme());
+				GameMusic music = GameMusicUtil.GetGameMusic(colorTheme: this.sessionState.GetColorTheme());
 				this.globalState.MusicPlayer.SetMusic(music: music, volume: 100);
 			}
 
@@ -114,7 +114,7 @@ namespace ChessCompStompWithHacksLibrary
 				if (victoryStalemateOrDefeatPanelResult.HasClickedContinueButton)
 				{
 					this.globalState.SaveData(sessionState: this.sessionState, soundVolume: soundOutput.GetSoundVolume());
-					soundOutput.PlaySound(ChessSound.Click);
+					soundOutput.PlaySound(GameSound.Click);
 					return new HackSelectionScreenFrame(globalState: this.globalState, sessionState: this.sessionState);
 				}
 			}
@@ -123,13 +123,13 @@ namespace ChessCompStompWithHacksLibrary
 
 			if (this.finalBattleVictoryPanel != null)
 			{
-				this.globalState.MusicPlayer.SetMusic(music: ChessMusic.Ending, volume: 100);
+				this.globalState.MusicPlayer.SetMusic(music: GameMusic.Ending, volume: 100);
 
 				finalBattleVictoryPanelResult = this.finalBattleVictoryPanel.ProcessFrame(mouseInput: mouseInput, previousMouseInput: previousMouseInput);
 				if (finalBattleVictoryPanelResult.HasClickedContinueButton)
 				{
 					this.globalState.SaveData(sessionState: this.sessionState, soundVolume: soundOutput.GetSoundVolume());
-					soundOutput.PlaySound(ChessSound.Click);
+					soundOutput.PlaySound(GameSound.Click);
 					return new TitleScreenFrame(globalState: this.globalState, sessionState: this.sessionState);
 				}
 			}
@@ -176,7 +176,7 @@ namespace ChessCompStompWithHacksLibrary
 
 				if (this.delayBeforeShowingPanel.Value >= 1000 * 1000)
 				{
-					soundOutput.PlaySound(sound: didPlayerWin ? ChessSound.Win : ChessSound.StalemateOrDefeat);
+					soundOutput.PlaySound(sound: didPlayerWin ? GameSound.Win : GameSound.StalemateOrDefeat);
 
 					if (didPlayerWin && result.IsFinalBattle && !this.sessionState.HasShownFinalBattleVictoryPanel())
 					{
@@ -201,7 +201,7 @@ namespace ChessCompStompWithHacksLibrary
 			if (keyboardInput.IsPressed(Key.Esc) && !previousKeyboardInput.IsPressed(Key.Esc) && !isWaitingForFinalBattleVictoryPanel)
 			{
 				this.globalState.SaveData(sessionState: this.sessionState, soundVolume: soundOutput.GetSoundVolume());
-				soundOutput.PlaySound(ChessSound.Click);
+				soundOutput.PlaySound(GameSound.Click);
 				return new SettingsMenuFrame(globalState: this.globalState, sessionState: this.sessionState, underlyingFrame: this, showPausedText: true);
 			}
 
@@ -211,7 +211,7 @@ namespace ChessCompStompWithHacksLibrary
 
 				if (hasClickedResignButton)
 				{
-					soundOutput.PlaySound(ChessSound.Click);
+					soundOutput.PlaySound(GameSound.Click);
 					return new ResignConfirmationFrame(globalState: this.globalState, sessionState: this.sessionState, underlyingFrame: this);
 				}
 
@@ -219,7 +219,7 @@ namespace ChessCompStompWithHacksLibrary
 				if (hasClickedViewObjectivesButton)
 				{
 					this.globalState.SaveData(sessionState: this.sessionState, soundVolume: soundOutput.GetSoundVolume());
-					soundOutput.PlaySound(ChessSound.Click);
+					soundOutput.PlaySound(GameSound.Click);
 					return new ViewObjectivesFrame(globalState: this.globalState, sessionState: this.sessionState);
 				}
 
@@ -227,7 +227,7 @@ namespace ChessCompStompWithHacksLibrary
 				if (hasClickedViewHacksButton)
 				{
 					this.globalState.SaveData(sessionState: this.sessionState, soundVolume: soundOutput.GetSoundVolume());
-					soundOutput.PlaySound(ChessSound.Click);
+					soundOutput.PlaySound(GameSound.Click);
 					return new ViewHacksFrame(globalState: this.globalState, sessionState: this.sessionState);
 				}
 			}
@@ -237,7 +237,7 @@ namespace ChessCompStompWithHacksLibrary
 			if (hasClicked && !isWaitingForFinalBattleVictoryPanel)
 			{
 				this.globalState.SaveData(sessionState: this.sessionState, soundVolume: soundOutput.GetSoundVolume());
-				soundOutput.PlaySound(ChessSound.Click);
+				soundOutput.PlaySound(GameSound.Click);
 				return new SettingsMenuFrame(globalState: this.globalState, sessionState: this.sessionState, underlyingFrame: this, showPausedText: true);
 			}
 
@@ -255,20 +255,20 @@ namespace ChessCompStompWithHacksLibrary
 			this.globalState.ProcessMusic();
 		}
 
-		public void Render(IDisplayOutput<ChessImage, ChessFont> displayOutput)
+		public void Render(IDisplayOutput<GameImage, GameFont> displayOutput)
 		{
 			displayOutput.DrawRectangle(
 				x: 0,
 				y: 0,
-				width: ChessCompStompWithHacks.WINDOW_WIDTH,
-				height: ChessCompStompWithHacks.WINDOW_HEIGHT,
+				width: GlobalConstants.WINDOW_WIDTH,
+				height: GlobalConstants.WINDOW_HEIGHT,
 				color: new DTColor(223, 220, 217),
 				fill: true);
 
 			GameLogic gameLogic = this.sessionState.GetGameLogic();
 			if (gameLogic == null)
 				gameLogic = this.sessionState.GetMostRecentGameLogic();
-			gameLogic.Render(displayOutput: new TranslatedDisplayOutput<ChessImage, ChessFont>(display: displayOutput, xOffsetInPixels: GAME_LOGIC_X_OFFSET, yOffsetInPixels: GAME_LOGIC_Y_OFFSET));
+			gameLogic.Render(displayOutput: new TranslatedDisplayOutput<GameImage, GameFont>(display: displayOutput, xOffsetInPixels: GAME_LOGIC_X_OFFSET, yOffsetInPixels: GAME_LOGIC_Y_OFFSET));
 
 			if (this.delayBeforeShowingPanel == null)
 			{
@@ -286,7 +286,7 @@ namespace ChessCompStompWithHacksLibrary
 				this.finalBattleVictoryPanel.Render(displayOutput: displayOutput);
 		}
 
-		public void RenderMusic(IMusicOutput<ChessMusic> musicOutput)
+		public void RenderMusic(IMusicOutput<GameMusic> musicOutput)
 		{
 			this.globalState.RenderMusic(musicOutput: musicOutput);
 		}

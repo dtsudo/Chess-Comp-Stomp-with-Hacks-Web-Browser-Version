@@ -22,8 +22,8 @@ namespace ChessCompStompWithHacksLibrary
 
 		public FinalBattleVictoryPanel(ColorTheme colorTheme)
 		{
-			this.x = ChessCompStompWithHacks.WINDOW_WIDTH / 2 - WIDTH / 2;
-			this.y = ChessCompStompWithHacks.WINDOW_HEIGHT / 2 - HEIGHT / 2;
+			this.x = GlobalConstants.WINDOW_WIDTH / 2 - WIDTH / 2;
+			this.y = GlobalConstants.WINDOW_HEIGHT / 2 - HEIGHT / 2;
 			
 			this.mouseDragXStart = null;
 			this.mouseDragYStart = null;
@@ -41,7 +41,7 @@ namespace ChessCompStompWithHacksLibrary
 				text: "OK",
 				textXOffset: 57,
 				textYOffset: 8,
-				font: ChessFont.ChessFont20Pt);
+				font: GameFont.GameFont20Pt);
 		}
 
 		public class Result
@@ -98,11 +98,11 @@ namespace ChessCompStompWithHacksLibrary
 				if (this.y < 0)
 					this.y = 0;
 
-				if (this.x > ChessCompStompWithHacks.WINDOW_WIDTH - WIDTH)
-					this.x = ChessCompStompWithHacks.WINDOW_WIDTH - WIDTH;
+				if (this.x > GlobalConstants.WINDOW_WIDTH - WIDTH)
+					this.x = GlobalConstants.WINDOW_WIDTH - WIDTH;
 
-				if (this.y > ChessCompStompWithHacks.WINDOW_HEIGHT - HEIGHT)
-					this.y = ChessCompStompWithHacks.WINDOW_HEIGHT - HEIGHT;
+				if (this.y > GlobalConstants.WINDOW_HEIGHT - HEIGHT)
+					this.y = GlobalConstants.WINDOW_HEIGHT - HEIGHT;
 			}
 
 			bool isClicked = this.continueButton.ProcessFrame(
@@ -114,7 +114,7 @@ namespace ChessCompStompWithHacksLibrary
 				isHoverOverPanel: isHoverOverPanel || this.mouseDragXStart != null);
 		}
 
-		public void Render(IDisplayOutput<ChessImage, ChessFont> displayOutput)
+		public void Render(IDisplayOutput<GameImage, GameFont> displayOutput)
 		{
 			displayOutput.DrawRectangle(
 				x: this.x,
@@ -136,17 +136,17 @@ namespace ChessCompStompWithHacksLibrary
 				x: this.x + 335,
 				y: this.y + 270,
 				text: "You Win!",
-				font: ChessFont.ChessFont32Pt,
+				font: GameFont.GameFont32Pt,
 				color: DTColor.Black());
 
 			displayOutput.DrawText(
 				x: this.x + 47,
 				y: this.y + 183,
 				text: "You've defeated the AI in the Final Battle." + "\n" + "You are an Elite Hacker and an Elite Chess Grandmaster!",
-				font: ChessFont.ChessFont20Pt,
+				font: GameFont.GameFont20Pt,
 				color: DTColor.Black());
 
-			this.continueButton.Render(displayOutput: new TranslatedDisplayOutput<ChessImage, ChessFont>(display: displayOutput, xOffsetInPixels: this.x, yOffsetInPixels: this.y));
+			this.continueButton.Render(displayOutput: new TranslatedDisplayOutput<GameImage, GameFont>(display: displayOutput, xOffsetInPixels: this.x, yOffsetInPixels: this.y));
 		}
 	}
 }

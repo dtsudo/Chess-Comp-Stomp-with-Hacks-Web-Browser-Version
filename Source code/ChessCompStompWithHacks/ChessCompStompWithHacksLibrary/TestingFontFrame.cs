@@ -4,7 +4,7 @@ namespace ChessCompStompWithHacksLibrary
 	using DTLibrary;
 	using System.Collections.Generic;
 
-	public class TestingFontFrame : IFrame<ChessImage, ChessFont, ChessSound, ChessMusic>
+	public class TestingFontFrame : IFrame<GameImage, GameFont, GameSound, GameMusic>
 	{
 		private GlobalState globalState;
 		private SessionState sessionState;
@@ -29,13 +29,13 @@ namespace ChessCompStompWithHacksLibrary
 			return new HashSet<string>();
 		}
 
-		public IFrame<ChessImage, ChessFont, ChessSound, ChessMusic> GetNextFrame(
+		public IFrame<GameImage, GameFont, GameSound, GameMusic> GetNextFrame(
 			IKeyboard keyboardInput,
 			IMouse mouseInput,
 			IKeyboard previousKeyboardInput,
 			IMouse previousMouseInput,
-			IDisplayProcessing<ChessImage> displayProcessing,
-			ISoundOutput<ChessSound> soundOutput,
+			IDisplayProcessing<GameImage> displayProcessing,
+			ISoundOutput<GameSound> soundOutput,
 			IMusicProcessing musicProcessing)
 		{
 			if (keyboardInput.IsPressed(Key.Esc) && !previousKeyboardInput.IsPressed(Key.Esc))
@@ -52,7 +52,7 @@ namespace ChessCompStompWithHacksLibrary
 			this.globalState.ProcessMusic();
 		}
 
-		public void Render(IDisplayOutput<ChessImage, ChessFont> displayOutput)
+		public void Render(IDisplayOutput<GameImage, GameFont> displayOutput)
 		{
 			DTColor red = new DTColor(255, 0, 0);
 
@@ -71,7 +71,7 @@ namespace ChessCompStompWithHacksLibrary
 					+ "\n" + "Line 2"
 					+ "\n" + "Line 3"
 					+ "\n" + "Line 4",
-				font: ChessFont.ChessFont12Pt,
+				font: GameFont.GameFont12Pt,
 				color: DTColor.Black());
 
 			displayOutput.DrawRectangle(
@@ -89,7 +89,7 @@ namespace ChessCompStompWithHacksLibrary
 					+ "\n" + "Line 2"
 					+ "\n" + "Line 3"
 					+ "\n" + "Line 4",
-				font: ChessFont.ChessFont14Pt,
+				font: GameFont.GameFont14Pt,
 				color: DTColor.Black());
 
 			displayOutput.DrawRectangle(
@@ -107,7 +107,7 @@ namespace ChessCompStompWithHacksLibrary
 					+ "\n" + "Line 2"
 					+ "\n" + "Line 3"
 					+ "\n" + "Line 4",
-				font: ChessFont.ChessFont16Pt,
+				font: GameFont.GameFont16Pt,
 				color: DTColor.Black());
 
 			displayOutput.DrawRectangle(
@@ -125,7 +125,7 @@ namespace ChessCompStompWithHacksLibrary
 					+ "\n" + "Line 2"
 					+ "\n" + "Line 3"
 					+ "\n" + "Line 4",
-				font: ChessFont.ChessFont18Pt,
+				font: GameFont.GameFont18Pt,
 				color: DTColor.Black());
 
 			displayOutput.DrawRectangle(
@@ -143,11 +143,11 @@ namespace ChessCompStompWithHacksLibrary
 					+ "\n" + "Line 2"
 					+ "\n" + "Line 3"
 					+ "\n" + "Line 4",
-				font: ChessFont.ChessFont20Pt,
+				font: GameFont.GameFont20Pt,
 				color: DTColor.Black());
 		}
 
-		public void RenderMusic(IMusicOutput<ChessMusic> musicOutput)
+		public void RenderMusic(IMusicOutput<GameMusic> musicOutput)
 		{
 			this.globalState.RenderMusic(musicOutput: musicOutput);
 		}

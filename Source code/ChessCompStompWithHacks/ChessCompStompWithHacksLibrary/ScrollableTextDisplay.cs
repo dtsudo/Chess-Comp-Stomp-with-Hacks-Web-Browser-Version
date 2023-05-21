@@ -14,7 +14,7 @@ namespace ChessCompStompWithHacksLibrary
 		private int height;
 		private int lineHeightInPixels;
 		private int maxLinesOfTextToRender;
-		private ChessFont font;
+		private GameFont font;
 		private DTColor color;
 
 		private Dictionary<int, int> lineIndexToPixelOffsetMapping;
@@ -37,7 +37,7 @@ namespace ChessCompStompWithHacksLibrary
 			int height,
 			int lineHeightInPixels,
 			int maxLinesOfTextToRender,
-			ChessFont font,
+			GameFont font,
 			DTColor color,
 			string text)
 		{
@@ -97,8 +97,8 @@ namespace ChessCompStompWithHacksLibrary
 			IMouse mouseInput,
 			IKeyboard previousKeyboardInput,
 			IMouse previousMouseInput,
-			IDisplayProcessing<ChessImage> displayProcessing,
-			ISoundOutput<ChessSound> soundOutput)
+			IDisplayProcessing<GameImage> displayProcessing,
+			ISoundOutput<GameSound> soundOutput)
 		{
 			if (this.textLines.Count > this.maxLinesOfTextToRender)
 			{
@@ -177,7 +177,7 @@ namespace ChessCompStompWithHacksLibrary
 			}
 		}
 
-		public void Render(IDisplayOutput<ChessImage, ChessFont> displayOutput)
+		public void Render(IDisplayOutput<GameImage, GameFont> displayOutput)
 		{
 			int lineIndex = this.indexOfFirstLineToRender;
 			int y = this.y + this.height;
@@ -200,14 +200,14 @@ namespace ChessCompStompWithHacksLibrary
 			if (this.textLines.Count > this.maxLinesOfTextToRender)
 			{
 				displayOutput.DrawImageRotatedClockwise(
-					image: ChessImage.Up,
+					image: GameImage.Up,
 					x: this.x + this.width - WIDTH_OF_ARROW,
 					y: this.y + this.height - HEIGHT_OF_ARROW,
 					degreesScaled: 0,
 					scalingFactorScaled: 128 / 2);
 
 				displayOutput.DrawImageRotatedClockwise(
-					image: ChessImage.Down,
+					image: GameImage.Down,
 					x: this.x + this.width - WIDTH_OF_ARROW,
 					y: this.y,
 					degreesScaled: 0,

@@ -29,5 +29,9 @@ namespace DTLibrary
 		/// as a newly created random number generator.
 		/// </summary>
 		void Reset();
+
+		string SerializeToString();
+
+		void DeserializeFromString(string str);
 	}
 }

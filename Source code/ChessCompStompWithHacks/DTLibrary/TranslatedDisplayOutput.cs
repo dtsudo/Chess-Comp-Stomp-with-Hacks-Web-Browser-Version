@@ -79,6 +79,20 @@ namespace DTLibrary
 				scalingFactorScaled: scalingFactorScaled);
 		}
 
+		public void DrawImageRotatedClockwise(ImageEnum image, int imageX, int imageY, int imageWidth, int imageHeight, int x, int y, int degreesScaled, int scalingFactorScaled)
+		{
+			this.display.DrawImageRotatedClockwise(
+				image: image,
+				imageX: imageX,
+				imageY: imageY,
+				imageWidth: imageWidth,
+				imageHeight: imageHeight,
+				x: x + this.xOffsetInPixels,
+				y: y + this.yOffsetInPixels,
+				degreesScaled: degreesScaled,
+				scalingFactorScaled: scalingFactorScaled);
+		}
+
 		public int GetWidth(ImageEnum image)
 		{
 			return this.display.GetWidth(image: image);

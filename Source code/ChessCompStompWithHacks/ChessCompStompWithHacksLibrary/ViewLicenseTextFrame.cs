@@ -4,7 +4,7 @@ namespace ChessCompStompWithHacksLibrary
 	using DTLibrary;
 	using System.Collections.Generic;
 
-	public class ViewLicenseTextFrame : IFrame<ChessImage, ChessFont, ChessSound, ChessMusic>
+	public class ViewLicenseTextFrame : IFrame<GameImage, GameFont, GameSound, GameMusic>
 	{
 		private GlobalState globalState;
 		private SessionState sessionState;
@@ -13,13 +13,13 @@ namespace ChessCompStompWithHacksLibrary
 
 		private Button backButton;
 
-		private IFrame<ChessImage, ChessFont, ChessSound, ChessMusic> underlyingFrame;
+		private IFrame<GameImage, GameFont, GameSound, GameMusic> underlyingFrame;
 
 		public ViewLicenseTextFrame(
 			GlobalState globalState,
 			SessionState sessionState,
 			string text,
-			IFrame<ChessImage, ChessFont, ChessSound, ChessMusic> underlyingFrame)
+			IFrame<GameImage, GameFont, GameSound, GameMusic> underlyingFrame)
 		{
 			this.globalState = globalState;
 			this.sessionState = sessionState;
@@ -28,11 +28,11 @@ namespace ChessCompStompWithHacksLibrary
 			this.scrollableTextDisplay = new ScrollableTextDisplay(
 				x: 23,
 				y: 23 + 100,
-				width: ChessCompStompWithHacks.WINDOW_WIDTH - 48,
-				height: ChessCompStompWithHacks.WINDOW_HEIGHT - 46 - 100,
+				width: GlobalConstants.WINDOW_WIDTH - 48,
+				height: GlobalConstants.WINDOW_HEIGHT - 46 - 100,
 				lineHeightInPixels: 16,
 				maxLinesOfTextToRender: 34,
-				font: ChessFont.ChessFont12Pt,
+				font: GameFont.GameFont12Pt,
 				color: DTColor.Black(),
 				text: text);
 
@@ -47,7 +47,7 @@ namespace ChessCompStompWithHacksLibrary
 				text: "Back",
 				textXOffset: 67,
 				textYOffset: 16,
-				font: ChessFont.ChessFont20Pt);
+				font: GameFont.GameFont20Pt);
 		}
 
 		public string GetClickUrl()
@@ -60,13 +60,13 @@ namespace ChessCompStompWithHacksLibrary
 			return new HashSet<string>();
 		}
 
-		public IFrame<ChessImage, ChessFont, ChessSound, ChessMusic> GetNextFrame(
+		public IFrame<GameImage, GameFont, GameSound, GameMusic> GetNextFrame(
 			IKeyboard keyboardInput,
 			IMouse mouseInput,
 			IKeyboard previousKeyboardInput, 
 			IMouse previousMouseInput, 
-			IDisplayProcessing<ChessImage> displayProcessing, 
-			ISoundOutput<ChessSound> soundOutput, 
+			IDisplayProcessing<GameImage> displayProcessing, 
+			ISoundOutput<GameSound> soundOutput, 
 			IMusicProcessing musicProcessing)
 		{
 			this.scrollableTextDisplay.ProcessFrame(
@@ -81,13 +81,13 @@ namespace ChessCompStompWithHacksLibrary
 
 			if (clickedBackButton)
 			{
-				soundOutput.PlaySound(ChessSound.Click);
+				soundOutput.PlaySound(GameSound.Click);
 				return this.underlyingFrame;
 			}
 
 			if (keyboardInput.IsPressed(Key.Esc) && !previousKeyboardInput.IsPressed(Key.Esc))
 			{
-				soundOutput.PlaySound(ChessSound.Click);
+				soundOutput.PlaySound(GameSound.Click);
 				return this.underlyingFrame;
 			}
 
@@ -104,31 +104,31 @@ namespace ChessCompStompWithHacksLibrary
 			this.globalState.ProcessMusic();
 		}
 
-		public void Render(IDisplayOutput<ChessImage, ChessFont> displayOutput)
+		public void Render(IDisplayOutput<GameImage, GameFont> displayOutput)
 		{
 			this.underlyingFrame.Render(display: displayOutput);
 
 			displayOutput.DrawRectangle(
 				x: 0,
 				y: 0,
-				width: ChessCompStompWithHacks.WINDOW_WIDTH,
-				height: ChessCompStompWithHacks.WINDOW_HEIGHT,
+				width: GlobalConstants.WINDOW_WIDTH,
+				height: GlobalConstants.WINDOW_HEIGHT,
 				color: new DTColor(r: 0, g: 0, b: 0, alpha: 64),
 				fill: true);
 
 			displayOutput.DrawRectangle(
 				x: 20,
 				y: 20,
-				width: ChessCompStompWithHacks.WINDOW_WIDTH - 41,
-				height: ChessCompStompWithHacks.WINDOW_HEIGHT - 41,
+				width: GlobalConstants.WINDOW_WIDTH - 41,
+				height: GlobalConstants.WINDOW_HEIGHT - 41,
 				color: DTColor.White(),
 				fill: true);
 
 			displayOutput.DrawRectangle(
 				x: 20,
 				y: 20,
-				width: ChessCompStompWithHacks.WINDOW_WIDTH - 40,
-				height: ChessCompStompWithHacks.WINDOW_HEIGHT - 40,
+				width: GlobalConstants.WINDOW_WIDTH - 40,
+				height: GlobalConstants.WINDOW_HEIGHT - 40,
 				color: DTColor.Black(),
 				fill: false);
 
@@ -137,7 +137,7 @@ namespace ChessCompStompWithHacksLibrary
 			this.backButton.Render(displayOutput: displayOutput);
 		}
 
-		public void RenderMusic(IMusicOutput<ChessMusic> musicOutput)
+		public void RenderMusic(IMusicOutput<GameMusic> musicOutput)
 		{
 			this.globalState.RenderMusic(musicOutput: musicOutput);
 		}

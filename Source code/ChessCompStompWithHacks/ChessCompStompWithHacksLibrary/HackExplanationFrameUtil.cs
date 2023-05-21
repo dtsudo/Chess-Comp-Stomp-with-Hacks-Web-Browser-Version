@@ -19,8 +19,8 @@ namespace ChessCompStompWithHacksLibrary
 		
 		public interface IHackExplanation
 		{
-			void ProcessFrame(IMouse mouseInput, IMouse previousMouseInput, IDisplayProcessing<ChessImage> displayProcessing, int elapsedMicrosPerFrame);
-			void Render(IDisplayOutput<ChessImage, ChessFont> displayOutput);
+			void ProcessFrame(IMouse mouseInput, IMouse previousMouseInput, IDisplayProcessing<GameImage> displayProcessing, int elapsedMicrosPerFrame);
+			void Render(IDisplayOutput<GameImage, GameFont> displayOutput);
 		}
 
 		public static IHackExplanation GetHackExplanation(Hack hack, ColorTheme colorTheme, IDTRandom random, bool hasExtraPawnFirstHack, ITimer timer, int elapsedMicrosPerFrame)

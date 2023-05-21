@@ -46,8 +46,8 @@ namespace ChessCompStompWithHacksLibrary
 			int width = GetWidth(newlyCompletedObjectives: newlyCompletedObjectives);
 			int height = GetHeight(newlyCompletedObjectives: newlyCompletedObjectives);
 
-			this.x = ChessCompStompWithHacks.WINDOW_WIDTH / 2 - width / 2;
-			this.y = ChessCompStompWithHacks.WINDOW_HEIGHT / 2 - height / 2;
+			this.x = GlobalConstants.WINDOW_WIDTH / 2 - width / 2;
+			this.y = GlobalConstants.WINDOW_HEIGHT / 2 - height / 2;
 			this.gameStatus = gameStatus;
 			this.isPlayerWhite = isPlayerWhite;
 			
@@ -67,7 +67,7 @@ namespace ChessCompStompWithHacksLibrary
 				text: "Continue",
 				textXOffset: 14,
 				textYOffset: 8,
-				font: ChessFont.ChessFont20Pt);
+				font: GameFont.GameFont20Pt);
 
 			this.objectiveDisplayUtil = new ObjectiveDisplayUtil();
 
@@ -156,11 +156,11 @@ namespace ChessCompStompWithHacksLibrary
 				if (this.y < 0)
 					this.y = 0;
 
-				if (this.x > ChessCompStompWithHacks.WINDOW_WIDTH - width)
-					this.x = ChessCompStompWithHacks.WINDOW_WIDTH - width;
+				if (this.x > GlobalConstants.WINDOW_WIDTH - width)
+					this.x = GlobalConstants.WINDOW_WIDTH - width;
 
-				if (this.y > ChessCompStompWithHacks.WINDOW_HEIGHT - height)
-					this.y = ChessCompStompWithHacks.WINDOW_HEIGHT - height;
+				if (this.y > GlobalConstants.WINDOW_HEIGHT - height)
+					this.y = GlobalConstants.WINDOW_HEIGHT - height;
 			}
 
 			bool isClicked = this.continueButton.ProcessFrame(
@@ -172,7 +172,7 @@ namespace ChessCompStompWithHacksLibrary
 				isHoverOverPanel: isHoverOverPanel || this.mouseDragXStart != null);
 		}
 
-		public void Render(IDisplayOutput<ChessImage, ChessFont> displayOutput)
+		public void Render(IDisplayOutput<GameImage, GameFont> displayOutput)
 		{
 			int width = GetWidth(newlyCompletedObjectives: this.newlyCompletedObjectives);
 			int height = GetHeight(newlyCompletedObjectives: this.newlyCompletedObjectives);
@@ -217,7 +217,7 @@ namespace ChessCompStompWithHacksLibrary
 				x: this.x + textXOffset,
 				y: this.y + height - 30,
 				text: text,
-				font: ChessFont.ChessFont32Pt,
+				font: GameFont.GameFont32Pt,
 				color: DTColor.Black());
 
 			if (this.newlyCompletedObjectives.Count > 0)
@@ -239,11 +239,11 @@ namespace ChessCompStompWithHacksLibrary
 					x: this.x + 40,
 					y: this.y + height - 95,
 					text: index >= objectivesText.Length ? objectivesText : objectivesText.Substring(0, index),
-					font: ChessFont.ChessFont18Pt,
+					font: GameFont.GameFont18Pt,
 					color: DTColor.Black());
 			}
 
-			this.continueButton.Render(displayOutput: new TranslatedDisplayOutput<ChessImage, ChessFont>(display: displayOutput, xOffsetInPixels: this.x, yOffsetInPixels: this.y));
+			this.continueButton.Render(displayOutput: new TranslatedDisplayOutput<GameImage, GameFont>(display: displayOutput, xOffsetInPixels: this.x, yOffsetInPixels: this.y));
 		}
 	}
 }

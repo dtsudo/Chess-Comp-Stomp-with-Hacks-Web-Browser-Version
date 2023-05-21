@@ -4,7 +4,7 @@ namespace ChessCompStompWithHacksLibrary
 	using DTLibrary;
 	using System.Collections.Generic;
 
-	public class TestingMusicFrame : IFrame<ChessImage, ChessFont, ChessSound, ChessMusic>
+	public class TestingMusicFrame : IFrame<GameImage, GameFont, GameSound, GameMusic>
 	{
 		private GlobalState globalState;
 		private SessionState sessionState;
@@ -33,13 +33,13 @@ namespace ChessCompStompWithHacksLibrary
 			return new HashSet<string>();
 		}
 
-		public IFrame<ChessImage, ChessFont, ChessSound, ChessMusic> GetNextFrame(
+		public IFrame<GameImage, GameFont, GameSound, GameMusic> GetNextFrame(
 			IKeyboard keyboardInput,
 			IMouse mouseInput,
 			IKeyboard previousKeyboardInput,
 			IMouse previousMouseInput,
-			IDisplayProcessing<ChessImage> displayProcessing,
-			ISoundOutput<ChessSound> soundOutput,
+			IDisplayProcessing<GameImage> displayProcessing,
+			ISoundOutput<GameSound> soundOutput,
 			IMusicProcessing musicProcessing)
 		{
 			if (keyboardInput.IsPressed(Key.Esc) && !previousKeyboardInput.IsPressed(Key.Esc))
@@ -57,17 +57,17 @@ namespace ChessCompStompWithHacksLibrary
 			soundOutput.SetSoundVolume(volume: this.volumePicker.GetCurrentSoundVolume());
 			this.globalState.MusicVolume = this.volumePicker.GetCurrentMusicVolume();
 			
-			ChessMusic? music = null;
+			GameMusic? music = null;
 			if (keyboardInput.IsPressed(Key.One) && !previousKeyboardInput.IsPressed(Key.One))
-				music = ChessMusic.TitleScreen;
+				music = GameMusic.TitleScreen;
 			if (keyboardInput.IsPressed(Key.Two) && !previousKeyboardInput.IsPressed(Key.Two))
-				music = ChessMusic.Level1;
+				music = GameMusic.Level1;
 			if (keyboardInput.IsPressed(Key.Three) && !previousKeyboardInput.IsPressed(Key.Three))
-				music = ChessMusic.Level2;
+				music = GameMusic.Level2;
 			if (keyboardInput.IsPressed(Key.Four) && !previousKeyboardInput.IsPressed(Key.Four))
-				music = ChessMusic.Level3;
+				music = GameMusic.Level3;
 			if (keyboardInput.IsPressed(Key.Five) && !previousKeyboardInput.IsPressed(Key.Five))
-				music = ChessMusic.Ending;
+				music = GameMusic.Ending;
 
 			if (music != null)
 				this.globalState.MusicPlayer.SetMusic(music: music.Value, volume: 100);
@@ -83,13 +83,13 @@ namespace ChessCompStompWithHacksLibrary
 			this.globalState.ProcessMusic();
 		}
 
-		public void Render(IDisplayOutput<ChessImage, ChessFont> displayOutput)
+		public void Render(IDisplayOutput<GameImage, GameFont> displayOutput)
 		{
 			displayOutput.DrawRectangle(
 				x: 0,
 				y: 0,
-				width: ChessCompStompWithHacks.WINDOW_WIDTH,
-				height: ChessCompStompWithHacks.WINDOW_HEIGHT,
+				width: GlobalConstants.WINDOW_WIDTH,
+				height: GlobalConstants.WINDOW_HEIGHT,
 				color: new DTColor(128, 128, 128),
 				fill: true);
 
@@ -98,13 +98,13 @@ namespace ChessCompStompWithHacksLibrary
 
 			displayOutput.DrawText(
 				x: 50,
-				y: ChessCompStompWithHacks.WINDOW_HEIGHT - 50,
+				y: GlobalConstants.WINDOW_HEIGHT - 50,
 				text: "Press 1/2/3/4/5 to switch music tracks." + "\n" + "Press 6 to stop music.",
-				font: ChessFont.ChessFont16Pt,
+				font: GameFont.GameFont16Pt,
 				color: DTColor.Black());
 		}
 
-		public void RenderMusic(IMusicOutput<ChessMusic> musicOutput)
+		public void RenderMusic(IMusicOutput<GameMusic> musicOutput)
 		{
 			this.globalState.RenderMusic(musicOutput: musicOutput);
 		}

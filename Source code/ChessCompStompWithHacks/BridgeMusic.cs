@@ -1,18 +1,24 @@
 
 namespace ChessCompStompWithHacks
 {
+	using Bridge;
 	using ChessCompStompWithHacksLibrary;
 	using DTLibrary;
 	using System;
 	using System.Collections.Generic;
-	using Bridge;
-	
-	public class BridgeMusic : IMusic<ChessMusic>
+
+	public class BridgeMusic : IMusic<GameMusic>
 	{
+		private GameMusic? currentGameMusic;
+		private int currentVolume;
+		
 		public BridgeMusic()
 		{
+			this.currentGameMusic = null;
+			this.currentVolume = 0;
+			
 			Script.Eval(@"
-				window.ChessCompStompWithHacksBridgeMusicJavascript = ((function () {
+				window.BridgeMusicJavascript = ((function () {
 					'use strict';
 						
 					var musicDictionary = {};
@@ -44,7 +50,11 @@ namespace ChessCompStompWithHacks
 						return numberOfAudioObjects === numberOfAudioObjectsLoaded;
 					};
 					
+					var musicCounter = 0;
+					
 					var playMusic = function (musicName, volume) {
+						musicCounter++;
+						var currentMusicCounter = musicCounter;
 						var music = musicDictionary[musicName];
 						
 						if (volume > 1.0)
@@ -59,7 +69,14 @@ namespace ChessCompStompWithHacks
 								audio.volume = volume;
 								var audioPromise = audio.play();
 								if (audioPromise) {
-									audioPromise.then(function () {}, function () {});
+									audioPromise.then(
+										function () {},
+										function () {
+											setTimeout(function () {
+												if (currentMusicCounter === musicCounter)
+													playMusic(musicName, volume);
+											}, 50);
+										});
 								}
 							} else {
 								audio.pause();
@@ -69,6 +86,7 @@ namespace ChessCompStompWithHacks
 					};
 					
 					var stopMusic = function () {
+						musicCounter++;
 						for (var musicName in musicDictionary) {
 							var audio = musicDictionary[musicName];
 							audio.pause();
@@ -89,37 +107,50 @@ namespace ChessCompStompWithHacks
 		{
 			string musicNames = "";
 			bool isFirst = true;
-			foreach (ChessMusic chessMusic in Enum.GetValues(typeof(ChessMusic)))
+			foreach (GameMusic gameMusic in Enum.GetValues(typeof(GameMusic)))
 			{
 				if (isFirst)
 					isFirst = false;
 				else
 					musicNames = musicNames + ",";
-				musicNames = musicNames + chessMusic.GetMusicFilename();
+				musicNames = musicNames + gameMusic.GetMusicFilename().DefaultFilename;
 			}
 			
 			if (musicNames == "")
 				return true;
 			
-			bool result = Script.Eval<bool>("window.ChessCompStompWithHacksBridgeMusicJavascript.loadMusic('" + musicNames + "')");
+			bool result = Script.Eval<bool>("window.BridgeMusicJavascript.loadMusic('" + musicNames + "')");
 			
 			return result;
 		}
 		
-		public void PlayMusic(ChessMusic music, int volume)
+		public void PlayMusic(GameMusic music, int volume)
 		{
+			if (this.currentGameMusic.HasValue
+					&& this.currentGameMusic.Value == music
+					&& this.currentVolume == volume)
+				return;
+			
+			this.currentGameMusic = music;
+			this.currentVolume = volume;
+			
 			double finalVolume = (music.GetMusicVolume() / 100.0) * (volume / 100.0);
 			if (finalVolume > 1.0)
 				finalVolume = 1.0;
 			if (finalVolume < 0.0)
 				finalVolume = 0.0;
 			
-			Script.Call("window.ChessCompStompWithHacksBridgeMusicJavascript.playMusic", music.GetMusicFilename(), finalVolume);
+			Script.Call("window.BridgeMusicJavascript.playMusic", music.GetMusicFilename().DefaultFilename, finalVolume);
 		}
 		
 		public void StopMusic()
 		{
-			Script.Call("window.ChessCompStompWithHacksBridgeMusicJavascript.stopMusic");
+			if (this.currentGameMusic == null)
+				return;
+			
+			this.currentGameMusic = null;
+			
+			Script.Call("window.BridgeMusicJavascript.stopMusic");
 		}
 		
 		public void DisposeMusic()

@@ -137,7 +137,7 @@ namespace ChessCompStompWithHacksLibrary
 			return false;
 		}
 
-		public void Render(IDisplayOutput<ChessImage, ChessFont> displayOutput)
+		public void Render(IDisplayOutput<GameImage, GameFont> displayOutput)
 		{
 			if (!this.hasNukeAbility)
 				return;
@@ -149,20 +149,20 @@ namespace ChessCompStompWithHacksLibrary
 				
 				bool isNukeAvailable = this.turnCount > TacticalNukeUtil.NumberOfMovesPlayedBeforeNukeIsAvailable;
 
-				ChessImage nukeImage;
+				GameImage nukeImage;
 
 				if (isNukeAvailable)
 				{
 					if (this.isNukeSelected)
-						nukeImage = ChessImage.Nuke_Selected;
+						nukeImage = GameImage.Nuke_Selected;
 					else if (this.isHoverOverNuke != null)
-						nukeImage = ChessImage.Nuke_Hover;
+						nukeImage = GameImage.Nuke_Hover;
 					else
-						nukeImage = ChessImage.Nuke_Ready;
+						nukeImage = GameImage.Nuke_Ready;
 				}
 				else
 				{
-					nukeImage = ChessImage.Nuke_NotReady;
+					nukeImage = GameImage.Nuke_NotReady;
 				}
 
 				displayOutput.DrawImageRotatedClockwise(
@@ -191,7 +191,7 @@ namespace ChessCompStompWithHacksLibrary
 						x: this.isHoverOverNuke.Item1 + 5,
 						y: this.isHoverOverNuke.Item2 + 19,
 						text: text,
-						font: ChessFont.ChessFont14Pt,
+						font: GameFont.GameFont14Pt,
 						color: DTColor.Black());
 				}
 			}
@@ -200,25 +200,25 @@ namespace ChessCompStompWithHacksLibrary
 				if (this.nukeAnimationElapsedMicros.Value >= ELAPSED_MICROS_TO_FLY_OFF_SCREEN)
 					return;
 
-				int rocketWidth = displayOutput.GetWidth(ChessImage.Nuke_Ready);
+				int rocketWidth = displayOutput.GetWidth(GameImage.Nuke_Ready);
 
 				int rocketFireScalingFactor = 256;
-				int rocketFireWidthOriginal = displayOutput.GetWidth(ChessImage.Nuke_RocketFire);
-				int rocketFireHeightOriginal = displayOutput.GetHeight(ChessImage.Nuke_RocketFire);
+				int rocketFireWidthOriginal = displayOutput.GetWidth(GameImage.Nuke_RocketFire);
+				int rocketFireHeightOriginal = displayOutput.GetHeight(GameImage.Nuke_RocketFire);
 				int rocketFireWidthScaled = rocketFireWidthOriginal * rocketFireScalingFactor / 128;
 				int rocketFireHeightScaled = rocketFireHeightOriginal * rocketFireScalingFactor / 128;
-				int endingY = ChessCompStompWithHacks.WINDOW_HEIGHT + rocketFireHeightScaled;
+				int endingY = GlobalConstants.WINDOW_HEIGHT + rocketFireHeightScaled;
 				int y = (int)(((long)this.nukeAnimationElapsedMicros.Value) * ((long)endingY) / ((long)ELAPSED_MICROS_TO_FLY_OFF_SCREEN));
 
 				displayOutput.DrawImageRotatedClockwise(
-					image: ChessImage.Nuke_Ready,
+					image: GameImage.Nuke_Ready,
 					x: 0,
 					y: y,
 					degreesScaled: 0,
 					scalingFactorScaled: 128);
 
 				displayOutput.DrawImageRotatedClockwise(
-					image: ChessImage.Nuke_RocketFire,
+					image: GameImage.Nuke_RocketFire,
 					x: (rocketWidth - rocketFireWidthScaled) / 2,
 					y: y - rocketFireHeightScaled,
 					degreesScaled: 0,

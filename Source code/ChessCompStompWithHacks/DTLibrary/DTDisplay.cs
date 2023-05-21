@@ -17,6 +17,7 @@ namespace DTLibrary
 		void DrawImage(ImageEnum image, int x, int y);
 		void DrawImageRotatedClockwise(ImageEnum image, int x, int y, int degreesScaled);
 		void DrawImageRotatedClockwise(ImageEnum image, int x, int y, int degreesScaled, int scalingFactorScaled);
+		void DrawImageRotatedClockwise(ImageEnum image, int imageX, int imageY, int imageWidth, int imageHeight, int x, int y, int degreesScaled, int scalingFactorScaled);
 		int GetWidth(ImageEnum image);
 		int GetHeight(ImageEnum image);
 	}
@@ -76,6 +77,8 @@ namespace DTLibrary
 		// Degrees = DegreesScaled / 128.0
 		// ScalingFactor = scalingFactorScaled / 128.0
 		public abstract void DrawImageRotatedClockwise(ImageEnum image, int x, int y, int degreesScaled, int scalingFactorScaled);
+
+		public abstract void DrawImageRotatedClockwise(ImageEnum image, int imageX, int imageY, int imageWidth, int imageHeight, int x, int y, int degreesScaled, int scalingFactorScaled);
 
 		public abstract int GetWidth(ImageEnum image);
 

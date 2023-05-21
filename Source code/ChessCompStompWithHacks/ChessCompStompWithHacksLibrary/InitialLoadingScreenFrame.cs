@@ -4,7 +4,7 @@ namespace ChessCompStompWithHacksLibrary
 	using DTLibrary;
 	using System.Collections.Generic;
 
-	public class InitialLoadingScreenFrame : IFrame<ChessImage, ChessFont, ChessSound, ChessMusic>
+	public class InitialLoadingScreenFrame : IFrame<GameImage, GameFont, GameSound, GameMusic>
 	{
 		private GlobalState globalState;
 
@@ -27,13 +27,13 @@ namespace ChessCompStompWithHacksLibrary
 			return new HashSet<string>();
 		}
 
-		public IFrame<ChessImage, ChessFont, ChessSound, ChessMusic> GetNextFrame(
+		public IFrame<GameImage, GameFont, GameSound, GameMusic> GetNextFrame(
 			IKeyboard keyboardInput,
 			IMouse mouseInput,
 			IKeyboard previousKeyboardInput,
 			IMouse previousMouseInput,
-			IDisplayProcessing<ChessImage> displayProcessing,
-			ISoundOutput<ChessSound> soundOutput,
+			IDisplayProcessing<GameImage> displayProcessing,
+			ISoundOutput<GameSound> soundOutput,
 			IMusicProcessing musicProcessing)
 		{
 			var returnValue = this.GetNextFrameHelper(displayProcessing: displayProcessing, soundOutput: soundOutput, musicProcessing: musicProcessing);
@@ -49,7 +49,7 @@ namespace ChessCompStompWithHacksLibrary
 			return this;
 		}
 
-		private IFrame<ChessImage, ChessFont, ChessSound, ChessMusic> GetNextFrameHelper(IDisplayProcessing<ChessImage> displayProcessing, ISoundOutput<ChessSound> soundOutput, IMusicProcessing musicProcessing)
+		private IFrame<GameImage, GameFont, GameSound, GameMusic> GetNextFrameHelper(IDisplayProcessing<GameImage> displayProcessing, ISoundOutput<GameSound> soundOutput, IMusicProcessing musicProcessing)
 		{
 			bool isDoneLoadingImages = displayProcessing.LoadImages();
 
@@ -72,11 +72,11 @@ namespace ChessCompStompWithHacksLibrary
 
 			int? soundVolume = this.globalState.LoadSoundVolume();
 			if (soundVolume.HasValue)
-				soundOutput.SetSoundVolume(soundVolume.Value);
+				soundOutput.SetSoundVolumeImmediately(soundVolume.Value);
 
 			this.globalState.LoadMusicVolume();
 			
-			ChessMusic music = ChessMusic.TitleScreen;
+			GameMusic music = GameMusic.TitleScreen;
 			this.globalState.MusicPlayer.SetMusic(music: music, volume: 100);
 
 			return new TitleScreenFrame(globalState: this.globalState, sessionState: sessionState);
@@ -86,13 +86,13 @@ namespace ChessCompStompWithHacksLibrary
 		{
 		}
 
-		public void Render(IDisplayOutput<ChessImage, ChessFont> displayOutput)
+		public void Render(IDisplayOutput<GameImage, GameFont> displayOutput)
 		{
 			displayOutput.DrawRectangle(
 				x: 0,
 				y: 0,
-				width: ChessCompStompWithHacks.WINDOW_WIDTH,
-				height: ChessCompStompWithHacks.WINDOW_HEIGHT,
+				width: GlobalConstants.WINDOW_WIDTH,
+				height: GlobalConstants.WINDOW_HEIGHT,
 				color: new DTColor(223, 220, 217),
 				fill: true);
 
@@ -100,11 +100,11 @@ namespace ChessCompStompWithHacksLibrary
 				x: 440,
 				y: 400,
 				text: "Loading...",
-				font: ChessFont.ChessFont20Pt,
+				font: GameFont.GameFont20Pt,
 				color: DTColor.Black());
 		}
 
-		public void RenderMusic(IMusicOutput<ChessMusic> musicOutput)
+		public void RenderMusic(IMusicOutput<GameMusic> musicOutput)
 		{
 		}
 	}

@@ -36,10 +36,10 @@ namespace ChessCompStompWithHacksLibrary
 				this.elapsedMicros = TIME_TO_FADE_OUT + TIME_TO_FADE_IN + 1;
 		}
 
-		public void Render(IDisplayOutput<ChessImage, ChessFont> displayOutput)
+		public void Render(IDisplayOutput<GameImage, GameFont> displayOutput)
 		{
-			int width = displayOutput.GetWidth(ChessImage.WhitePawn) * ChessImageUtil.ChessPieceScalingFactor / 128;
-			int height = displayOutput.GetHeight(ChessImage.WhitePawn) * ChessImageUtil.ChessPieceScalingFactor / 128;
+			int width = displayOutput.GetWidth(GameImage.WhitePawn) * GameImageUtil.ChessPieceScalingFactor / 128;
+			int height = displayOutput.GetHeight(GameImage.WhitePawn) * GameImageUtil.ChessPieceScalingFactor / 128;
 
 			DTColor darkSquareColor = ChessPiecesRenderer.GetDarkSquareColor(colorTheme: this.colorTheme);
 			DTColor lightSquareColor = ChessPiecesRenderer.GetLightSquareColor(colorTheme: this.colorTheme);

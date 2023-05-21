@@ -11,10 +11,12 @@ namespace ChessCompStompWithHacksLibrary
 		private int? musicVolume;
 
 		private IFileIO fileIO;
+		private VersionInfo versionInfo;
 
-		public SaveAndLoadData(IFileIO fileIO)
+		public SaveAndLoadData(IFileIO fileIO, VersionInfo versionInfo)
 		{
 			this.fileIO = fileIO;
+			this.versionInfo = versionInfo;
 
 			this.sessionStateByteList = null;
 			this.soundVolume = null;
@@ -41,7 +43,7 @@ namespace ChessCompStompWithHacksLibrary
 			listBuilder.AddInt(soundVolume);
 			listBuilder.AddInt(musicVolume);
 			
-			this.fileIO.PersistData(fileId: ChessCompStompWithHacks.FILE_ID_FOR_SOUND_AND_MUSIC_VOLUME, data: listBuilder.ToByteList());
+			this.fileIO.PersistData(fileId: GlobalConstants.FILE_ID_FOR_SOUND_AND_MUSIC_VOLUME, versionInfo: this.versionInfo, data: listBuilder.ToByteList());
 		}
 
 		private void SaveSessionState(SessionState sessionState)
@@ -56,12 +58,12 @@ namespace ChessCompStompWithHacksLibrary
 
 			this.sessionStateByteList = byteList;
 
-			this.fileIO.PersistData(fileId: ChessCompStompWithHacks.FILE_ID_FOR_SESSION_STATE, data: this.sessionStateByteList);
+			this.fileIO.PersistData(fileId: GlobalConstants.FILE_ID_FOR_SESSION_STATE, versionInfo: this.versionInfo, data: this.sessionStateByteList);
 		}
 
 		public void LoadSessionState(SessionState sessionState)
 		{
-			ByteList list = this.fileIO.FetchData(fileId: ChessCompStompWithHacks.FILE_ID_FOR_SESSION_STATE);
+			ByteList list = this.fileIO.FetchData(fileId: GlobalConstants.FILE_ID_FOR_SESSION_STATE, versionInfo: this.versionInfo);
 
 			if (list == null)
 			{
@@ -85,7 +87,7 @@ namespace ChessCompStompWithHacksLibrary
 
 		public int? LoadSoundVolume()
 		{
-			ByteList list = this.fileIO.FetchData(fileId: ChessCompStompWithHacks.FILE_ID_FOR_SOUND_AND_MUSIC_VOLUME);
+			ByteList list = this.fileIO.FetchData(fileId: GlobalConstants.FILE_ID_FOR_SOUND_AND_MUSIC_VOLUME, versionInfo: this.versionInfo);
 
 			if (list == null)
 				return null;
@@ -110,7 +112,7 @@ namespace ChessCompStompWithHacksLibrary
 
 		public int? LoadMusicVolume()
 		{
-			ByteList list = this.fileIO.FetchData(fileId: ChessCompStompWithHacks.FILE_ID_FOR_SOUND_AND_MUSIC_VOLUME);
+			ByteList list = this.fileIO.FetchData(fileId: GlobalConstants.FILE_ID_FOR_SOUND_AND_MUSIC_VOLUME, versionInfo: this.versionInfo);
 
 			if (list == null)
 				return null;

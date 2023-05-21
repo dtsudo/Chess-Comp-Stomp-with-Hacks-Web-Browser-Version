@@ -79,10 +79,10 @@ namespace ChessCompStompWithHacksLibrary
 			int promotionPanelX,
 			int promotionPanelY,
 			IMouse mouse,
-			IDisplayProcessing<ChessImage> displayProcessing)
+			IDisplayProcessing<GameImage> displayProcessing)
 		{
-			int imageWidth = displayProcessing.GetWidth(ChessImage.WhitePawn) * ChessImageUtil.ChessPieceScalingFactor / 128;
-			int imageHeight = displayProcessing.GetHeight(ChessImage.WhitePawn) * ChessImageUtil.ChessPieceScalingFactor / 128;
+			int imageWidth = displayProcessing.GetWidth(GameImage.WhitePawn) * GameImageUtil.ChessPieceScalingFactor / 128;
+			int imageHeight = displayProcessing.GetHeight(GameImage.WhitePawn) * GameImageUtil.ChessPieceScalingFactor / 128;
 
 			int mouseX = mouse.GetX();
 			int mouseY = mouse.GetY();
@@ -141,13 +141,13 @@ namespace ChessCompStompWithHacksLibrary
 			}
 		}
 
-		public void Render(IDisplayOutput<ChessImage, ChessFont> displayOutput)
+		public void Render(IDisplayOutput<GameImage, GameFont> displayOutput)
 		{
 			if (!this.isOpen)
 				return;
 
-			int imageWidth = displayOutput.GetWidth(ChessImage.WhitePawn) * ChessImageUtil.ChessPieceScalingFactor / 128;
-			int imageHeight = displayOutput.GetHeight(ChessImage.WhitePawn) * ChessImageUtil.ChessPieceScalingFactor / 128;
+			int imageWidth = displayOutput.GetWidth(GameImage.WhitePawn) * GameImageUtil.ChessPieceScalingFactor / 128;
+			int imageHeight = displayOutput.GetHeight(GameImage.WhitePawn) * GameImageUtil.ChessPieceScalingFactor / 128;
 
 			displayOutput.DrawRectangle(
 				x: this.x,
@@ -161,33 +161,33 @@ namespace ChessCompStompWithHacksLibrary
 				x: this.x + 90,
 				y: this.y - 10,
 				text: "Promote to:",
-				font: ChessFont.ChessFont14Pt,
+				font: GameFont.GameFont14Pt,
 				color: DTColor.Black());
 
 			displayOutput.DrawImageRotatedClockwise(
-				image: this.isWhite ? ChessImage.WhiteQueen : ChessImage.BlackQueen,
+				image: this.isWhite ? GameImage.WhiteQueen : GameImage.BlackQueen,
 				x: this.x + QUEEN_OFFSET_X,
 				y: this.y - PROMOTION_PANEL_HEIGHT + PIECE_OFFSET_Y,
 				degreesScaled: 0,
-				scalingFactorScaled: ChessImageUtil.ChessPieceScalingFactor);
+				scalingFactorScaled: GameImageUtil.ChessPieceScalingFactor);
 			displayOutput.DrawImageRotatedClockwise(
-				image: this.isWhite ? ChessImage.WhiteRook : ChessImage.BlackRook,
+				image: this.isWhite ? GameImage.WhiteRook : GameImage.BlackRook,
 				x: this.x + ROOK_OFFSET_X,
 				y: this.y - PROMOTION_PANEL_HEIGHT + PIECE_OFFSET_Y,
 				degreesScaled: 0,
-				scalingFactorScaled: ChessImageUtil.ChessPieceScalingFactor);
+				scalingFactorScaled: GameImageUtil.ChessPieceScalingFactor);
 			displayOutput.DrawImageRotatedClockwise(
-				image: this.isWhite ? ChessImage.WhiteKnight : ChessImage.BlackKnight,
+				image: this.isWhite ? GameImage.WhiteKnight : GameImage.BlackKnight,
 				x: this.x + KNIGHT_OFFSET_X,
 				y: this.y - PROMOTION_PANEL_HEIGHT + PIECE_OFFSET_Y,
 				degreesScaled: 0,
-				scalingFactorScaled: ChessImageUtil.ChessPieceScalingFactor);
+				scalingFactorScaled: GameImageUtil.ChessPieceScalingFactor);
 			displayOutput.DrawImageRotatedClockwise(
-				image: this.isWhite ? ChessImage.WhiteBishop : ChessImage.BlackBishop,
+				image: this.isWhite ? GameImage.WhiteBishop : GameImage.BlackBishop,
 				x: this.x + BISHOP_OFFSET_X,
 				y: this.y - PROMOTION_PANEL_HEIGHT + PIECE_OFFSET_Y,
 				degreesScaled: 0,
-				scalingFactorScaled: ChessImageUtil.ChessPieceScalingFactor);
+				scalingFactorScaled: GameImageUtil.ChessPieceScalingFactor);
 
 			if (this.hoverSquare != null && (this.selectedSquare == null || this.selectedSquare.Value != this.hoverSquare.Value))
 			{

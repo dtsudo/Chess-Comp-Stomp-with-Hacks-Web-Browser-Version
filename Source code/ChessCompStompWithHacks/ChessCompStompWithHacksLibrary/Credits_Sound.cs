@@ -11,13 +11,13 @@ namespace ChessCompStompWithHacksLibrary
 				+ "and are licensed under Creative Commons Zero.";
 		}
 
-		public static void Render(IDisplayOutput<ChessImage, ChessFont> displayOutput, int width, int height)
+		public static void Render(IDisplayOutput<GameImage, GameFont> displayOutput, int width, int height)
 		{
 			displayOutput.DrawText(
 				x: 10,
 				y: height - 10,
 				text: GetText(),
-				font: ChessFont.ChessFont20Pt,
+				font: GameFont.GameFont20Pt,
 				color: DTColor.Black());
 		}
 	}

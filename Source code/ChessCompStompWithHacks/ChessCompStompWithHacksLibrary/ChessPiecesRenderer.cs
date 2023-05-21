@@ -182,10 +182,10 @@ namespace ChessCompStompWithHacksLibrary
 		public static ChessSquare GetHoverSquare(
 			IMouse mouseInput, 
 			bool renderFromWhitePerspective,
-			IDisplayProcessing<ChessImage> displayProcessing)
+			IDisplayProcessing<GameImage> displayProcessing)
 		{
-			int width = displayProcessing.GetWidth(ChessImage.WhitePawn) * ChessImageUtil.ChessPieceScalingFactor / 128;
-			int height = displayProcessing.GetHeight(ChessImage.WhitePawn) * ChessImageUtil.ChessPieceScalingFactor / 128;
+			int width = displayProcessing.GetWidth(GameImage.WhitePawn) * GameImageUtil.ChessPieceScalingFactor / 128;
+			int height = displayProcessing.GetHeight(GameImage.WhitePawn) * GameImageUtil.ChessPieceScalingFactor / 128;
 
 			int mouseX = mouseInput.GetX();
 			int mouseY = mouseInput.GetY();
@@ -259,10 +259,10 @@ namespace ChessCompStompWithHacksLibrary
 			}
 		}
 
-		public void Render(IDisplayOutput<ChessImage, ChessFont> displayOutput, ChessPiecesRendererPieceAnimation chessPiecesRendererPieceAnimation)
+		public void Render(IDisplayOutput<GameImage, GameFont> displayOutput, ChessPiecesRendererPieceAnimation chessPiecesRendererPieceAnimation)
 		{
-			int width = displayOutput.GetWidth(ChessImage.WhitePawn) * ChessImageUtil.ChessPieceScalingFactor / 128;
-			int height = displayOutput.GetHeight(ChessImage.WhitePawn) * ChessImageUtil.ChessPieceScalingFactor / 128;
+			int width = displayOutput.GetWidth(GameImage.WhitePawn) * GameImageUtil.ChessPieceScalingFactor / 128;
+			int height = displayOutput.GetHeight(GameImage.WhitePawn) * GameImageUtil.ChessPieceScalingFactor / 128;
 
 			DTColor darkSquareColor = GetDarkSquareColor(colorTheme: this.colorTheme);
 			DTColor lightSquareColor = GetLightSquareColor(colorTheme: this.colorTheme);
@@ -327,11 +327,11 @@ namespace ChessCompStompWithHacksLibrary
 						continue;
 
 					displayOutput.DrawImageRotatedClockwise(
-						image: ChessImageUtil.GetImage(piece: square),
+						image: GameImageUtil.GetImage(piece: square),
 						x: renderSquare.File * width,
 						y: renderSquare.Rank * height,
 						degreesScaled: 0,
-						scalingFactorScaled: ChessImageUtil.ChessPieceScalingFactor);
+						scalingFactorScaled: GameImageUtil.ChessPieceScalingFactor);
 				}
 			}
 
@@ -357,11 +357,11 @@ namespace ChessCompStompWithHacksLibrary
 					int renderY = (int) (originY + (destinationY - originY) * ((long)pieceAnimations[i][j].ElapsedMicros) / ((long)ChessPiecesRendererPieceAnimation.PieceAnimation.ANIMATION_DURATION_MICROS));
 
 					displayOutput.DrawImageRotatedClockwise(
-						image: ChessImageUtil.GetImage(piece: pieceAnimations[i][j].Piece),
+						image: GameImageUtil.GetImage(piece: pieceAnimations[i][j].Piece),
 						x: renderX,
 						y: renderY,
 						degreesScaled: 0,
-						scalingFactorScaled: ChessImageUtil.ChessPieceScalingFactor);
+						scalingFactorScaled: GameImageUtil.ChessPieceScalingFactor);
 				}
 			}
 
@@ -429,23 +429,23 @@ namespace ChessCompStompWithHacksLibrary
 			if (this.hoverPieceInfo != null)
 			{
 				displayOutput.DrawImageRotatedClockwise(
-					image: ChessImageUtil.GetImage(piece: this.hoverPieceInfo.ChessSquarePiece),
+					image: GameImageUtil.GetImage(piece: this.hoverPieceInfo.ChessSquarePiece),
 					x: this.hoverPieceInfo.X - width / 2,
 					y: this.hoverPieceInfo.Y - height / 2,
 					degreesScaled: 0,
-					scalingFactorScaled: ChessImageUtil.ChessPieceScalingFactor);
+					scalingFactorScaled: GameImageUtil.ChessPieceScalingFactor);
 			}
 			
 			this.RenderNukeAnimation(displayOutput: displayOutput);
 		}
 		
-		private void RenderNukeAnimation(IDisplayOutput<ChessImage, ChessFont> displayOutput)
+		private void RenderNukeAnimation(IDisplayOutput<GameImage, GameFont> displayOutput)
 		{
 			if (this.nukeAnimationMicroseconds == null)
 				return;
 			
-			int width = displayOutput.GetWidth(ChessImage.WhitePawn) * ChessImageUtil.ChessPieceScalingFactor / 128;
-			int height = displayOutput.GetHeight(ChessImage.WhitePawn) * ChessImageUtil.ChessPieceScalingFactor / 128;
+			int width = displayOutput.GetWidth(GameImage.WhitePawn) * GameImageUtil.ChessPieceScalingFactor / 128;
+			int height = displayOutput.GetHeight(GameImage.WhitePawn) * GameImageUtil.ChessPieceScalingFactor / 128;
 
 			if (this.nukeAnimationMicroseconds.Value <= NUKE_IMPACT_MICROSECONDS)
 			{
@@ -453,31 +453,31 @@ namespace ChessCompStompWithHacksLibrary
 				{
 					ChessSquare nukeRenderCenter = GetRenderSquare(this.nukeCenter.File, this.nukeCenter.Rank, this.renderFromWhitePerspective);
 
-					int rocketWidth = displayOutput.GetWidth(ChessImage.Nuke_Ready);
+					int rocketWidth = displayOutput.GetWidth(GameImage.Nuke_Ready);
 
 					int rocketFireScalingFactor = 256;
-					int rocketFireWidthOriginal = displayOutput.GetWidth(ChessImage.Nuke_RocketFire);
-					int rocketFireHeightOriginal = displayOutput.GetHeight(ChessImage.Nuke_RocketFire);
+					int rocketFireWidthOriginal = displayOutput.GetWidth(GameImage.Nuke_RocketFire);
+					int rocketFireHeightOriginal = displayOutput.GetHeight(GameImage.Nuke_RocketFire);
 					int rocketFireWidthScaled = rocketFireWidthOriginal * rocketFireScalingFactor / 128;
 					int rocketFireHeightScaled = rocketFireHeightOriginal * rocketFireScalingFactor / 128;
 					int endingY = nukeRenderCenter.Rank * height + height / 2;
-					int startingY = endingY + ChessCompStompWithHacks.WINDOW_HEIGHT;
+					int startingY = endingY + GlobalConstants.WINDOW_HEIGHT;
 					int totalDistanceY = startingY - endingY;
 					int y = (int)((((long)NUKE_IMPACT_MICROSECONDS) - ((long)this.nukeAnimationMicroseconds.Value)) * ((long)totalDistanceY) / (((long)NUKE_IMPACT_MICROSECONDS) - ((long)NUKE_BEGIN_LANDING_MICROSECONDS)) + ((long)endingY));
 
 					int x = nukeRenderCenter.File * width + width / 2;
 
 					displayOutput.DrawImageRotatedClockwise(
-						image: ChessImage.Nuke_Ready,
-						x: x - (displayOutput.GetWidth(ChessImage.Nuke_Ready) >> 1),
+						image: GameImage.Nuke_Ready,
+						x: x - (displayOutput.GetWidth(GameImage.Nuke_Ready) >> 1),
 						y: y,
 						degreesScaled: 180 * 128,
 						scalingFactorScaled: 128);
 
 					displayOutput.DrawImageRotatedClockwise(
-						image: ChessImage.Nuke_RocketFire,
-						x: x - (displayOutput.GetWidth(ChessImage.Nuke_Ready) >> 1) + (rocketWidth - rocketFireWidthScaled) / 2,
-						y: y + displayOutput.GetHeight(ChessImage.Nuke_Ready),
+						image: GameImage.Nuke_RocketFire,
+						x: x - (displayOutput.GetWidth(GameImage.Nuke_Ready) >> 1) + (rocketWidth - rocketFireWidthScaled) / 2,
+						y: y + displayOutput.GetHeight(GameImage.Nuke_Ready),
 						degreesScaled: 180 * 128,
 						scalingFactorScaled: rocketFireScalingFactor);
 				}
@@ -493,19 +493,19 @@ namespace ChessCompStompWithHacksLibrary
 				if (spriteNum > 9)
 					spriteNum = 9;
 
-				ChessImage explosionImage;
+				GameImage explosionImage;
 
 				switch (spriteNum)
 				{
-					case 1: explosionImage = ChessImage.Nuke_Explosion1; break;
-					case 2: explosionImage = ChessImage.Nuke_Explosion2; break;
-					case 3: explosionImage = ChessImage.Nuke_Explosion3; break;
-					case 4: explosionImage = ChessImage.Nuke_Explosion4; break;
-					case 5: explosionImage = ChessImage.Nuke_Explosion5; break;
-					case 6: explosionImage = ChessImage.Nuke_Explosion6; break;
-					case 7: explosionImage = ChessImage.Nuke_Explosion7; break;
-					case 8: explosionImage = ChessImage.Nuke_Explosion8; break;
-					case 9: explosionImage = ChessImage.Nuke_Explosion9; break;
+					case 1: explosionImage = GameImage.Nuke_Explosion1; break;
+					case 2: explosionImage = GameImage.Nuke_Explosion2; break;
+					case 3: explosionImage = GameImage.Nuke_Explosion3; break;
+					case 4: explosionImage = GameImage.Nuke_Explosion4; break;
+					case 5: explosionImage = GameImage.Nuke_Explosion5; break;
+					case 6: explosionImage = GameImage.Nuke_Explosion6; break;
+					case 7: explosionImage = GameImage.Nuke_Explosion7; break;
+					case 8: explosionImage = GameImage.Nuke_Explosion8; break;
+					case 9: explosionImage = GameImage.Nuke_Explosion9; break;
 					default: throw new Exception();
 				}
 

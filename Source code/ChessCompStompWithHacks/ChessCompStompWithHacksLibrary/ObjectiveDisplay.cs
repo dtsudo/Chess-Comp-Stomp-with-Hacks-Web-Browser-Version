@@ -26,7 +26,7 @@ namespace ChessCompStompWithHacksLibrary
 			int y,
 			Objective objective,
 			HashSet<Objective> completedObjectives,
-			IDisplayOutput<ChessImage, ChessFont> displayOutput)
+			IDisplayOutput<GameImage, GameFont> displayOutput)
 		{
 			bool hasCompletedObjective = completedObjectives.Contains(objective);
 			
@@ -55,21 +55,21 @@ namespace ChessCompStompWithHacksLibrary
 				x: x + 10,
 				y: y + 90,
 				text: objectiveDescription,
-				font: ChessFont.ChessFont16Pt,
+				font: GameFont.GameFont16Pt,
 				color: DTColor.Black());
 
 			displayOutput.DrawText(
 				x: x + 10,
 				y: y + 39,
 				text: SessionState.NUMBER_OF_HACK_POINTS_PER_OBJECTIVE.ToStringCultureInvariant() + " hack points",
-				font: ChessFont.ChessFont14Pt,
+				font: GameFont.GameFont14Pt,
 				color: new DTColor(128, 128, 128));
 
 			displayOutput.DrawText(
 				x: x + 10,
 				y: y + 20,
 				text: hasCompletedObjective ? "(completed)" : "(incomplete)",
-				font: ChessFont.ChessFont12Pt,
+				font: GameFont.GameFont12Pt,
 				color: new DTColor(128, 128, 128));
 		}
 
@@ -87,7 +87,7 @@ namespace ChessCompStompWithHacksLibrary
 			int x,
 			int y,
 			HashSet<Objective> completedObjectives,
-			IDisplayOutput<ChessImage, ChessFont> displayOutput)
+			IDisplayOutput<GameImage, GameFont> displayOutput)
 		{
 			bool hasCompletedObjective = completedObjectives.Contains(Objective.WinFinalBattle);
 
@@ -124,14 +124,14 @@ namespace ChessCompStompWithHacksLibrary
 					x: x + 10,
 					y: y + 90,
 					text: this.objectiveDisplayUtil.GetObjectiveDescription(objective: Objective.WinFinalBattle).DescriptionForObjectiveFrame,
-					font: ChessFont.ChessFont16Pt,
+					font: GameFont.GameFont16Pt,
 					color: DTColor.Black());
 
 				displayOutput.DrawText(
 					x: x + 10,
 					y: y + 30,
 					text: hasCompletedObjective ? "(completed)" : "(incomplete)",
-					font: ChessFont.ChessFont14Pt,
+					font: GameFont.GameFont14Pt,
 					color: new DTColor(128, 128, 128));
 			}
 			else
@@ -140,7 +140,7 @@ namespace ChessCompStompWithHacksLibrary
 					x: x + 237,
 					y: y + 76,
 					text: "?",
-					font: ChessFont.ChessFont32Pt,
+					font: GameFont.GameFont32Pt,
 					color: DTColor.Black());
 			}
 		}

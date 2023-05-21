@@ -1,21 +1,23 @@
 
 namespace ChessCompStompWithHacks
 {
+	using Bridge;
 	using ChessCompStompWithHacksLibrary;
 	using DTLibrary;
 	using System;
 	using System.Collections.Generic;
-	using Bridge;
 
 	public class BridgeKeyboard : IKeyboard
 	{
-		public BridgeKeyboard()
+		public BridgeKeyboard(bool disableArrowKeyScrolling)
 		{
 			Script.Eval(@"
-				window.ChessCompStompWithHacksBridgeKeyboardJavascript = ((function () {
+				window.BridgeKeyboardJavascript = ((function () {
 					'use strict';
 					
 					var keysBeingPressed = [];
+					
+					var disableArrowKeyScrolling = " + (disableArrowKeyScrolling ? "true" : "false") + @";
 					
 					var mapKeyToCanonicalKey = function (key) {
 						if (key === 'A')
@@ -95,6 +97,11 @@ namespace ChessCompStompWithHacks
 					};
 					
 					var keyDownHandler = function (e) {
+						
+						if (disableArrowKeyScrolling) {
+							if (e.key === 'ArrowRight' || e.key === 'ArrowLeft' || e.key === 'ArrowUp' || e.key === 'ArrowDown' || e.key === ' ')
+								e.preventDefault();
+						}
 						
 						var key = mapKeyToCanonicalKey(e.key);
 						
@@ -285,15 +292,8 @@ namespace ChessCompStompWithHacks
 				default:
 					throw new Exception();
 			}
-			
-			/*
-				None of the keycodes need to be escaped
-				(but this would be necessary if we had a key
-				such as backslash)
-			*/
-			var javascriptCode = "window.ChessCompStompWithHacksBridgeKeyboardJavascript.isKeyPressed('" + correspondingKeyCode + "')";
-			
-			bool result = Script.Eval<bool>(javascriptCode);
+						
+			bool result = Script.Call<bool>("window.BridgeKeyboardJavascript.isKeyPressed", correspondingKeyCode);
 			
 			if (result)
 				return true;

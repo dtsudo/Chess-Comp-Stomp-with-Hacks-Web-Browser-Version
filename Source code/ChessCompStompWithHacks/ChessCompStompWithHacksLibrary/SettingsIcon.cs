@@ -32,18 +32,18 @@ namespace ChessCompStompWithHacksLibrary
 			IMouse mouseInput,
 			IMouse previousMouseInput,
 			bool ignoreMouse,
-			IDisplayProcessing<ChessImage> displayProcessing)
+			IDisplayProcessing<GameImage> displayProcessing)
 		{
 			int mouseX = mouseInput.GetX();
 			int mouseY = mouseInput.GetY();
 
-			int settingsIconWidth = displayProcessing.GetWidth(ChessImage.Gear);
-			int settingsIconHeight = displayProcessing.GetHeight(ChessImage.Gear);
+			int settingsIconWidth = displayProcessing.GetWidth(GameImage.Gear);
+			int settingsIconHeight = displayProcessing.GetHeight(GameImage.Gear);
 
-			bool isHover = ChessCompStompWithHacks.WINDOW_WIDTH - settingsIconWidth <= mouseX
-				&& mouseX <= ChessCompStompWithHacks.WINDOW_WIDTH
-				&& ChessCompStompWithHacks.WINDOW_HEIGHT - settingsIconHeight <= mouseY
-				&& mouseY <= ChessCompStompWithHacks.WINDOW_HEIGHT;
+			bool isHover = GlobalConstants.WINDOW_WIDTH - settingsIconWidth <= mouseX
+				&& mouseX <= GlobalConstants.WINDOW_WIDTH
+				&& GlobalConstants.WINDOW_HEIGHT - settingsIconHeight <= mouseY
+				&& mouseY <= GlobalConstants.WINDOW_HEIGHT;
 
 			this.isHover = isHover && !ignoreMouse;
 
@@ -64,12 +64,12 @@ namespace ChessCompStompWithHacksLibrary
 			return new SettingsIconStatus(hasClicked: false, isHover: this.isHover);
 		}
 
-		public void Render(IDisplayOutput<ChessImage, ChessFont> displayOutput)
+		public void Render(IDisplayOutput<GameImage, GameFont> displayOutput)
 		{
 			displayOutput.DrawImage(
-				image: this.isClicked ? ChessImage.GearSelected : (this.isHover ? ChessImage.GearHover : ChessImage.Gear),
-				x: ChessCompStompWithHacks.WINDOW_WIDTH - displayOutput.GetWidth(ChessImage.Gear),
-				y: ChessCompStompWithHacks.WINDOW_HEIGHT - displayOutput.GetHeight(ChessImage.Gear));
+				image: this.isClicked ? GameImage.GearSelected : (this.isHover ? GameImage.GearHover : GameImage.Gear),
+				x: GlobalConstants.WINDOW_WIDTH - displayOutput.GetWidth(GameImage.Gear),
+				y: GlobalConstants.WINDOW_HEIGHT - displayOutput.GetHeight(GameImage.Gear));
 		}
 	}
 }
