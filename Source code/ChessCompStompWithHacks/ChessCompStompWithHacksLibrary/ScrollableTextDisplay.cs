@@ -204,14 +204,14 @@ namespace ChessCompStompWithHacksLibrary
 					x: this.x + this.width - WIDTH_OF_ARROW,
 					y: this.y + this.height - HEIGHT_OF_ARROW,
 					degreesScaled: 0,
-					scalingFactorScaled: 128 / 2);
+					scalingFactorScaled: 128 / 4);
 
 				displayOutput.DrawImageRotatedClockwise(
 					image: GameImage.Down,
 					x: this.x + this.width - WIDTH_OF_ARROW,
 					y: this.y,
 					degreesScaled: 0,
-					scalingFactorScaled: 128 / 2);
+					scalingFactorScaled: 128 / 4);
 
 				displayOutput.DrawRectangle(
 					x: this.x + this.width - WIDTH_OF_ARROW,

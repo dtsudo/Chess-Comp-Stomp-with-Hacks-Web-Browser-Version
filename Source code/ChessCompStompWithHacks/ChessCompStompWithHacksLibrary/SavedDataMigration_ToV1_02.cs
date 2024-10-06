@@ -7,12 +7,6 @@ namespace ChessCompStompWithHacksLibrary
 
 	public class SavedDataMigration_ToV1_02
 	{
-		public static void MigrateAllDataFromOlderVersionsToV1_02IfNeeded(IFileIO fileIO)
-		{
-			MigrateSessionStateDataFromOlderVersionsToV1_02IfNeeded(fileIO: fileIO);
-			MigrateSoundAndMusicVolumeDataFromOlderVersionsToV1_02IfNeeded(fileIO: fileIO);
-		}
-
 		public static void MigrateSessionStateDataFromOlderVersionsToV1_02IfNeeded(IFileIO fileIO)
 		{
 			List<VersionInfo> versionHistory = VersionHistory.GetVersionHistory();

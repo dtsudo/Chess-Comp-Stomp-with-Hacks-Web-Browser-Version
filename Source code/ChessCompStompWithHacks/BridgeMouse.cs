@@ -6,7 +6,7 @@ namespace ChessCompStompWithHacks
 	
 	public class BridgeMouse : IMouse
 	{
-		public BridgeMouse()
+		public BridgeMouse(int canvasScalingFactor)
 		{
 			Script.Eval(@"
 				window.BridgeMouseJavascript = ((function () {
@@ -57,23 +57,43 @@ namespace ChessCompStompWithHacks
 						if (yPosition > canvas.height + 5)
 							yPosition = canvas.height + 5;
 						
-						mouseXPosition = xPosition;
-						mouseYPosition = canvas.height - yPosition - 1;
+						let canvasScalingFactor = " + canvasScalingFactor.ToStringCultureInvariant() + @";
+						mouseXPosition = Math.floor(xPosition / canvasScalingFactor);
+						mouseYPosition = Math.floor((canvas.height - yPosition - 1) / canvasScalingFactor);
 					};
 					
 					var isLeftMouseButtonPressed = false;
 					var isRightMouseButtonPressed = false;
 					
+					var previousIsLeftMouseButtonPressed = false;
+					var previousIsRightMouseButtonPressed = false;
+
+					var shouldProcessLeftMouseButtonPress = false;
+					var shouldProcessRightMouseButtonPress = false;
+					
 					var checkMouseButtonHandler = function (e) {
-						if ((e.buttons & 1) === 1)
+						if ((e.buttons & 1) === 1) {
 							isLeftMouseButtonPressed = true;
-						else
+							if (!previousIsLeftMouseButtonPressed)
+								shouldProcessLeftMouseButtonPress = true;
+						} else {
 							isLeftMouseButtonPressed = false;
+						}
 						
-						if ((e.buttons & 2) === 2)
+						if ((e.buttons & 2) === 2) {
 							isRightMouseButtonPressed = true;
-						else
+							if (!previousIsRightMouseButtonPressed)
+								shouldProcessRightMouseButtonPress = true;
+						} else {
 							isRightMouseButtonPressed = false;
+						}
+					};
+
+					var processedInputs = function () {
+						previousIsLeftMouseButtonPressed = isLeftMouseButtonPressed || shouldProcessLeftMouseButtonPress;
+						previousIsRightMouseButtonPressed = isRightMouseButtonPressed || shouldProcessRightMouseButtonPress;
+						shouldProcessLeftMouseButtonPress = false;
+						shouldProcessRightMouseButtonPress = false;
 					};
 										
 					var disableContextMenu;
@@ -91,15 +111,17 @@ namespace ChessCompStompWithHacks
 					};
 					disableContextMenu();
 					
-					document.addEventListener('mousemove', function (e) { mouseMoveHandler(e); checkMouseButtonHandler(e); }, false);
-					document.addEventListener('mousedown', function (e) { checkMouseButtonHandler(e); }, false);
-					document.addEventListener('mouseup', function (e) { checkMouseButtonHandler(e); }, false);
+					document.addEventListener('pointermove', function (e) { mouseMoveHandler(e); checkMouseButtonHandler(e); });
+					document.addEventListener('pointerdown', function (e) { mouseMoveHandler(e); checkMouseButtonHandler(e); });
+					document.addEventListener('pointerup', function (e) { mouseMoveHandler(e); checkMouseButtonHandler(e); });
+					document.addEventListener('pointercancel', function (e) { mouseMoveHandler(e); checkMouseButtonHandler(e); });
 					
 					return {
-						isLeftMouseButtonPressed: function () { return isLeftMouseButtonPressed; },
-						isRightMouseButtonPressed: function () { return isRightMouseButtonPressed; },
+						isLeftMouseButtonPressed: function () { return isLeftMouseButtonPressed || shouldProcessLeftMouseButtonPress; },
+						isRightMouseButtonPressed: function () { return isRightMouseButtonPressed || shouldProcessRightMouseButtonPress; },
 						getMouseX: function () { return Math.round(mouseXPosition); },
-						getMouseY: function () { return Math.round(mouseYPosition); }
+						getMouseY: function () { return Math.round(mouseYPosition); },
+						processedInputs: processedInputs
 					};
 				})());
 			");
@@ -123,6 +145,11 @@ namespace ChessCompStompWithHacks
 		public bool IsRightMouseButtonPressed()
 		{
 			return Script.Write<bool>("window.BridgeMouseJavascript.isRightMouseButtonPressed()");
+		}
+
+		public void ProcessedInputs()
+		{
+			Script.Write("window.BridgeMouseJavascript.processedInputs()");
 		}
 	}
 }

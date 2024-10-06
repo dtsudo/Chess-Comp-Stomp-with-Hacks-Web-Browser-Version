@@ -8,11 +8,13 @@ namespace ChessCompStompWithHacksLibrary
 	{
 		private SoundVolumePicker soundVolumePicker;
 		private MusicVolumePicker musicVolumePicker;
-
-		public SoundAndMusicVolumePicker(int xPos, int yPos, int initialSoundVolume, int initialMusicVolume, int elapsedMicrosPerFrame)
+		private int scalingFactor;
+		
+		public SoundAndMusicVolumePicker(int xPos, int yPos, int initialSoundVolume, int initialMusicVolume, int elapsedMicrosPerFrame, int scalingFactor)
 		{
-			this.soundVolumePicker = new SoundVolumePicker(xPos: xPos, yPos: yPos + 50, initialVolume: initialSoundVolume);
-			this.musicVolumePicker = new MusicVolumePicker(xPos: xPos, yPos: yPos, initialVolume: initialMusicVolume);
+			this.soundVolumePicker = new SoundVolumePicker(xPos: xPos, yPos: yPos + 50 * scalingFactor, initialVolume: initialSoundVolume, scalingFactor: scalingFactor);
+			this.musicVolumePicker = new MusicVolumePicker(xPos: xPos, yPos: yPos, initialVolume: initialMusicVolume, scalingFactor: scalingFactor);
+			this.scalingFactor = scalingFactor;
 		}
 
 		public void ProcessFrame(
@@ -23,6 +25,18 @@ namespace ChessCompStompWithHacksLibrary
 			this.musicVolumePicker.ProcessFrame(mouseInput: mouseInput, previousMouseInput: previousMouseInput);
 		}
 		
+		public void SetX(int x)
+		{
+			this.soundVolumePicker.SetX(x: x);
+			this.musicVolumePicker.SetX(x: x);
+		}
+
+		public void SetY(int y)
+		{
+			this.soundVolumePicker.SetY(y: y + 50 * scalingFactor);
+			this.musicVolumePicker.SetY(y: y);
+		}
+
 		/// <summary>
 		/// Returns a number from 0 to 100 (both inclusive)
 		/// </summary>

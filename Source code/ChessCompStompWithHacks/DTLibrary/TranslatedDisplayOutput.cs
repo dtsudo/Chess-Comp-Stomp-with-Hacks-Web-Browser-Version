@@ -102,5 +102,15 @@ namespace DTLibrary
 		{
 			return this.display.GetHeight(image: image);
 		}
+
+		public int GetMobileScreenWidth()
+		{
+			return this.display.GetMobileScreenWidth();
+		}
+
+		public int GetMobileScreenHeight()
+		{
+			return this.display.GetMobileScreenHeight();
+		}
 	}
 }

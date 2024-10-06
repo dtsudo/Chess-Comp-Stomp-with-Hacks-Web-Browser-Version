@@ -27,6 +27,8 @@ namespace ChessCompStompWithHacksLibrary
 
 				this.ObjectivesThatWereAlreadyCompletedPriorToCurrentGame = new HashSet<Objective>();
 
+				this.HackSelectionScreenMobileTab = HackSelectionScreenMobileTab.Tactics;
+
 				this.ColorTheme = ColorTheme.Initial;
 			}
 
@@ -45,6 +47,8 @@ namespace ChessCompStompWithHacksLibrary
 			public HashSet<Hack> ResearchedHacks;
 			public HashSet<Objective> CompletedObjectives;
 			public HashSet<Objective> ObjectivesThatWereAlreadyCompletedPriorToCurrentGame;
+
+			public HackSelectionScreenMobileTab HackSelectionScreenMobileTab;
 
 			public ColorTheme ColorTheme;
 
@@ -113,6 +117,12 @@ namespace ChessCompStompWithHacksLibrary
 
 				data.ColorTheme = colorTheme.Value;
 
+				HackSelectionScreenMobileTab? tab = HackSelectionScreenMobileTabUtil.GetTabFromTabId(tabId: iterator.TryPopInt());
+				if (tab == null)
+					throw new DTDeserializationException();
+
+				data.HackSelectionScreenMobileTab = tab.Value;
+
 				return data;
 			}
 
@@ -145,6 +155,8 @@ namespace ChessCompStompWithHacksLibrary
 				list.AddIntSet(completedObjectiveIds);
 
 				list.AddInt(this.ColorTheme.GetColorThemeId());
+
+				list.AddInt(this.HackSelectionScreenMobileTab.GetTabId());
 			}
 		}
 
@@ -275,6 +287,16 @@ namespace ChessCompStompWithHacksLibrary
 			this.data.ResearchedHacks.Add(hack);
 		}
 
+		public HackSelectionScreenMobileTab GetHackSelectionScreenMobileTab()
+		{
+			return this.data.HackSelectionScreenMobileTab;
+		}
+
+		public void SetHackSelectionScreenMobileTab(HackSelectionScreenMobileTab tab)
+		{
+			this.data.HackSelectionScreenMobileTab = tab;
+		}
+
 		/// <summary>
 		/// Includes both used and unused hack points
 		/// </summary>
@@ -337,11 +359,20 @@ namespace ChessCompStompWithHacksLibrary
 			return !this.data.WasPlayerWhiteInPreviousGame.Value;
 		}
 
-		public IFrame<GameImage, GameFont, GameSound, GameMusic> StartGame(bool isFinalBattle, GlobalState globalState, AIHackLevel? aiHackLevelOverride)
+		public IFrame<GameImage, GameFont, GameSound, GameMusic> StartGame(bool isFinalBattle, GlobalState globalState, AIHackLevel? aiHackLevelOverride, IDisplayProcessing<GameImage> display, bool isMobileDisplayType)
 		{
 			this.data.ObjectivesThatWereAlreadyCompletedPriorToCurrentGame = new HashSet<Objective>(this.data.CompletedObjectives);
 
 			bool isPlayerWhite = this.WillPlayerBeWhiteNextGame();
+
+			DisplayType displayType;
+
+			if (!isMobileDisplayType)
+				displayType = DisplayType.Desktop;
+			else if (display.IsMobileInLandscapeOrientation())
+				displayType = DisplayType.MobileLandscape;
+			else
+				displayType = DisplayType.MobilePortrait;
 
 			if (isFinalBattle)
 			{
@@ -352,15 +383,23 @@ namespace ChessCompStompWithHacksLibrary
 					isPlayerWhite: isPlayerWhite,
 					researchedHacks: new DTImmutableList<Hack>(this.data.ResearchedHacks),
 					aiHackLevel: AIHackLevel.FinalBattle,
-					colorTheme: this.data.ColorTheme);
+					colorTheme: this.data.ColorTheme,
+					displayType: displayType);
 				this.data.MostRecentGameLogic = this.data.GameLogic;
 
 				this.data.WasPlayerWhiteInPreviousGame = isPlayerWhite;
 				if (this.data.HasShownFinalBattleMessage)
-					return new ChessFrame(globalState: globalState, sessionState: this);
+				{
+					if (isMobileDisplayType)
+						return new ChessMobileFrame(globalState: globalState, sessionState: this, display: display);
+					else
+						return new ChessDesktopFrame(globalState: globalState, sessionState: this);
+				}
 
 				this.data.HasShownFinalBattleMessage = true;
-				return AIMessageFrame.GetFinalBattleMessageFrame(globalState: globalState, sessionState: this);
+				return isMobileDisplayType
+					? AIMessageMobileFrame.GetFinalBattleMessageFrame(globalState: globalState, sessionState: this, display: display)
+					: AIMessageDesktopFrame.GetFinalBattleMessageFrame(globalState: globalState, sessionState: this);
 			}
 
 			AIHackLevel aiHackLevel;
@@ -397,7 +436,8 @@ namespace ChessCompStompWithHacksLibrary
 				isPlayerWhite: isPlayerWhite,
 				researchedHacks: new DTImmutableList<Hack>(this.data.ResearchedHacks),
 				aiHackLevel: aiHackLevel,
-				colorTheme: this.data.ColorTheme);
+				colorTheme: this.data.ColorTheme,
+				displayType: displayType);
 			this.data.MostRecentGameLogic = this.data.GameLogic;
 			
 			this.data.WasPlayerWhiteInPreviousGame = isPlayerWhite;
@@ -405,10 +445,15 @@ namespace ChessCompStompWithHacksLibrary
 			if (aiHackLevel != AIHackLevel.Initial && !this.data.HasShownAIHackMessage)
 			{
 				this.data.HasShownAIHackMessage = true;
-				return AIMessageFrame.GetAIHackMessageFrame(globalState: globalState, sessionState: this);
+				return isMobileDisplayType
+					? AIMessageMobileFrame.GetAIHackMessageFrame(globalState: globalState, sessionState: this, display: display)
+					: AIMessageDesktopFrame.GetAIHackMessageFrame(globalState: globalState, sessionState: this);
 			}
 
-			return new ChessFrame(globalState: globalState, sessionState: this);
+			if (isMobileDisplayType)
+				return new ChessMobileFrame(globalState: globalState, sessionState: this, display: display);
+			else
+				return new ChessDesktopFrame(globalState: globalState, sessionState: this);
 		}
 	}
 }

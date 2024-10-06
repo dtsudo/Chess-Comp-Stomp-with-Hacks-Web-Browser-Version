@@ -4,8 +4,14 @@ namespace DTLibrary
 	public interface IDisplayProcessing<ImageEnum>
 	{
 		bool LoadImages();
+		int GetNumElementsLoaded();
+		int? GetNumTotalElementsToLoad();
 		int GetWidth(ImageEnum image);
 		int GetHeight(ImageEnum image);
+		int GetMobileScreenWidth();
+		int GetMobileScreenHeight();
+
+		string Debug_GetBrowserInfo(string stringToEval);
 	}
 
 	public interface IDisplayOutput<ImageEnum, FontEnum>
@@ -20,6 +26,8 @@ namespace DTLibrary
 		void DrawImageRotatedClockwise(ImageEnum image, int imageX, int imageY, int imageWidth, int imageHeight, int x, int y, int degreesScaled, int scalingFactorScaled);
 		int GetWidth(ImageEnum image);
 		int GetHeight(ImageEnum image);
+		int GetMobileScreenWidth();
+		int GetMobileScreenHeight();
 	}
 
 	public interface IDisplayCleanup
@@ -58,6 +66,10 @@ namespace DTLibrary
 		/// </summary>
 		public abstract bool LoadImages();
 
+		public abstract int GetNumElementsLoaded();
+
+		public abstract int? GetNumTotalElementsToLoad();
+
 		public void DrawImage(ImageEnum image, int x, int y)
 		{
 			this.DrawImageRotatedClockwise(image: image, x: x, y: y, degreesScaled: 0, scalingFactorScaled: 128);
@@ -91,6 +103,11 @@ namespace DTLibrary
 		/// This function must be idempotent (and not fail if called multiple times).
 		/// </summary>
 		public abstract void DisposeImages();
+
+		public abstract int GetMobileScreenWidth();
+		public abstract int GetMobileScreenHeight();
+
+		public abstract string Debug_GetBrowserInfo(string stringToEval);
 	}
 
 	public static class DisplayExtensions
@@ -104,6 +121,16 @@ namespace DTLibrary
 
 			if (fill)
 				displayOutput.DrawRectangle(x, y, width, height, color, true);
+		}
+
+		public static bool IsMobileInLandscapeOrientation<ImageEnum, FontEnum>(this IDisplayOutput<ImageEnum, FontEnum> displayOutput)
+		{
+			return displayOutput.GetMobileScreenWidth() > displayOutput.GetMobileScreenHeight();
+		}
+
+		public static bool IsMobileInLandscapeOrientation<ImageEnum>(this IDisplayProcessing<ImageEnum> displayProcessing)
+		{
+			return displayProcessing.GetMobileScreenWidth() > displayProcessing.GetMobileScreenHeight();
 		}
 	}
 }

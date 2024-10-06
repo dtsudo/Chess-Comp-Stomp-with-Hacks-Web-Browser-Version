@@ -12,8 +12,9 @@ namespace ChessCompStompWithHacksLibrary
 		private int _unmuteVolume;
 
 		private bool _isDraggingVolumeSlider;
-		
-		public MusicVolumePicker(int xPos, int yPos, int initialVolume)
+		private int _scalingFactor;
+
+		public MusicVolumePicker(int xPos, int yPos, int initialVolume, int scalingFactor)
 		{
 			this._xPos = xPos;
 			this._yPos = yPos;
@@ -22,6 +23,8 @@ namespace ChessCompStompWithHacksLibrary
 			this._unmuteVolume = this._currentVolume;
 
 			this._isDraggingVolumeSlider = false;
+
+			this._scalingFactor = scalingFactor;
 		}
 
 		public void ProcessFrame(
@@ -34,9 +37,9 @@ namespace ChessCompStompWithHacksLibrary
 			if (mouseInput.IsLeftMouseButtonPressed()
 				&& !previousMouseInput.IsLeftMouseButtonPressed()
 				&& this._xPos <= mouseX
-				&& mouseX <= this._xPos + 40
+				&& mouseX <= this._xPos + 40 * this._scalingFactor
 				&& this._yPos <= mouseY
-				&& mouseY <= this._yPos + 50)
+				&& mouseY <= this._yPos + 50 * this._scalingFactor)
 			{
 				if (this._currentVolume == 0)
 				{
@@ -52,17 +55,17 @@ namespace ChessCompStompWithHacksLibrary
 
 			if (mouseInput.IsLeftMouseButtonPressed()
 				&& !previousMouseInput.IsLeftMouseButtonPressed()
-				&& this._xPos + 50 <= mouseX
-				&& mouseX <= this._xPos + 150
-				&& this._yPos + 10 <= mouseY
-				&& mouseY <= this._yPos + 40)
+				&& this._xPos + 50 * this._scalingFactor <= mouseX
+				&& mouseX <= this._xPos + 150 * this._scalingFactor
+				&& this._yPos + 10 * this._scalingFactor <= mouseY
+				&& mouseY <= this._yPos + 40 * this._scalingFactor)
 			{
 				this._isDraggingVolumeSlider = true;
 			}
 
 			if (this._isDraggingVolumeSlider && mouseInput.IsLeftMouseButtonPressed())
 			{
-				int volume = mouseX - (this._xPos + 50);
+				int volume = (mouseX - (this._xPos + 50 * this._scalingFactor)) / this._scalingFactor;
 				if (volume < 0)
 					volume = 0;
 				if (volume > 100)
@@ -76,6 +79,16 @@ namespace ChessCompStompWithHacksLibrary
 				this._isDraggingVolumeSlider = false;
 		}
 
+		public void SetX(int x)
+		{
+			this._xPos = x;
+		}
+
+		public void SetY(int y)
+		{
+			this._yPos = y;
+		}
+
 		/// <summary>
 		/// Returns a number from 0 to 100 (both inclusive)
 		/// </summary>
@@ -87,24 +100,24 @@ namespace ChessCompStompWithHacksLibrary
 		public void Render(IDisplayOutput<GameImage, GameFont> displayOutput)
 		{
 			if (this._currentVolume > 0)
-				displayOutput.DrawImage(GameImage.MusicOn, this._xPos, this._yPos);
+				displayOutput.DrawImageRotatedClockwise(GameImage.MusicOn, x: this._xPos, y: this._yPos, degreesScaled: 0, scalingFactorScaled: 128 * this._scalingFactor / 2);
 			else
-				displayOutput.DrawImage(GameImage.MusicOff, this._xPos, this._yPos);
+				displayOutput.DrawImageRotatedClockwise(GameImage.MusicOff, x: this._xPos, y: this._yPos, degreesScaled: 0, scalingFactorScaled: 128 * this._scalingFactor / 2);
 
 			displayOutput.DrawRectangle(
-				x: this._xPos + 50,
-				y: this._yPos + 10,
-				width: 101,
-				height: 31,
+				x: this._xPos + 50 * this._scalingFactor,
+				y: this._yPos + 10 * this._scalingFactor,
+				width: 100 * this._scalingFactor,
+				height: 30 * this._scalingFactor + 1,
 				color: DTColor.Black(),
 				fill: false);
 
 			if (this._currentVolume > 0)
 				displayOutput.DrawRectangle(
-					x: this._xPos + 50,
-					y: this._yPos + 10,
-					width: this._currentVolume,
-					height: 31,
+					x: this._xPos + 50 * this._scalingFactor,
+					y: this._yPos + 10 * this._scalingFactor,
+					width: this._currentVolume * this._scalingFactor,
+					height: 30 * this._scalingFactor + 1,
 					color: DTColor.Black(),
 					fill: true);
 		}

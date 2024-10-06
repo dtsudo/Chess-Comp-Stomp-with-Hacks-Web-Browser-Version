@@ -299,27 +299,39 @@ namespace ChessCompStompWithHacksLibrary
 				elapsedMicrosPerFrame: elapsedMicrosPerFrame);
 		}
 
-		public void Render(IDisplayOutput<GameImage, GameFont> displayOutput)
+		public void Render(IDisplayOutput<GameImage, GameFont> displayOutput, bool isMobileDisplayType)
 		{
+			bool isMobilePortrait = isMobileDisplayType && !displayOutput.IsMobileInLandscapeOrientation();
+
 			displayOutput.DrawText(
-				x: 349,
-				y: HackExplanationFrameUtil.TITLE_TEXT_Y_OFFSET,
+				x: isMobilePortrait ? 199 : 349,
+				y: isMobilePortrait ? HackExplanationFrameUtil.TITLE_TEXT_Y_OFFSET_MOBILE_PORTRAIT : HackExplanationFrameUtil.TITLE_TEXT_Y_OFFSET_DESKTOP_AND_MOBILE_LANDSCAPE,
 				text: Hack.StalemateIsVictory.GetHackNameForHackExplanationPanel(),
 				font: GameFont.GameFont20Pt,
 				color: DTColor.Black());
 
-			string explanation = "If it is your turn and you have" + "\n"
-				+ "no legal moves, you win the" + "\n"
-				+ "game." + "\n"
-				+ "\n"
-				+ "If it is your opponent's turn" + "\n"
-				+ "and your opponent has no" + "\n"
-				+ "legal moves, you win the" + "\n"
-				+ "game.";
+			string explanation;
+
+			if (isMobilePortrait)
+				explanation = "If it is your turn and you have no legal moves," + "\n"
+					+ "you win the game." + "\n"
+					+ "\n"
+					+ "If it is your opponent's turn and your" + "\n"
+					+ "opponent has no legal moves, you win the" + "\n"
+					+ "game.";
+			else
+				explanation = "If it is your turn and you have" + "\n"
+					+ "no legal moves, you win the" + "\n"
+					+ "game." + "\n"
+					+ "\n"
+					+ "If it is your opponent's turn" + "\n"
+					+ "and your opponent has no" + "\n"
+					+ "legal moves, you win the" + "\n"
+					+ "game.";
 
 			displayOutput.DrawText(
-				x: HackExplanationFrameUtil.EXPLANATION_TEXT_X_OFFSET,
-				y: HackExplanationFrameUtil.EXPLANATION_TEXT_Y_OFFSET,
+				x: isMobilePortrait ? HackExplanationFrameUtil.EXPLANATION_TEXT_X_OFFSET_MOBILE_PORTRAIT : HackExplanationFrameUtil.EXPLANATION_TEXT_X_OFFSET_DESKTOP_AND_MOBILE_LANDSCAPE,
+				y: isMobilePortrait ? HackExplanationFrameUtil.EXPLANATION_TEXT_Y_OFFSET_MOBILE_PORTRAIT : HackExplanationFrameUtil.EXPLANATION_TEXT_Y_OFFSET_DESKTOP_AND_MOBILE_LANDSCAPE,
 				text: explanation,
 				font: GameFont.GameFont16Pt,
 				color: DTColor.Black());
@@ -327,41 +339,48 @@ namespace ChessCompStompWithHacksLibrary
 			this.chessPiecesRenderer.Render(
 				displayOutput: new TranslatedDisplayOutput<GameImage, GameFont>(
 					display: displayOutput,
-					xOffsetInPixels: HackExplanationFrameUtil.CHESS_PIECES_RENDERER_X_OFFSET,
-					yOffsetInPixels: HackExplanationFrameUtil.CHESS_PIECES_RENDERER_Y_OFFSET),
-				chessPiecesRendererPieceAnimation: this.chessPiecesRendererPieceAnimation);
+					xOffsetInPixels: isMobilePortrait ? HackExplanationFrameUtil.CHESS_PIECES_RENDERER_X_OFFSET_MOBILE_PORTRAIT : HackExplanationFrameUtil.CHESS_PIECES_RENDERER_X_OFFSET_DESKTOP_AND_MOBILE_LANDSCAPE,
+					yOffsetInPixels: isMobilePortrait ? HackExplanationFrameUtil.CHESS_PIECES_RENDERER_Y_OFFSET_MOBILE_PORTRAIT : HackExplanationFrameUtil.CHESS_PIECES_RENDERER_Y_OFFSET_DESKTOP_AND_MOBILE_LANDSCAPE),
+				chessPiecesRendererPieceAnimation: this.chessPiecesRendererPieceAnimation,
+				chessPieceScalingFactor: GameImageUtil.HackExplanationChessPieceScalingFactor,
+				isMobileDisplayType: isMobileDisplayType);
 
 			if (this.status == Status.Finished)
 			{
+				int chessPiecesRendererXOffset = isMobilePortrait ? HackExplanationFrameUtil.CHESS_PIECES_RENDERER_X_OFFSET_MOBILE_PORTRAIT : HackExplanationFrameUtil.CHESS_PIECES_RENDERER_X_OFFSET_DESKTOP_AND_MOBILE_LANDSCAPE;
+				int chessPiecesRendererYOffset = isMobilePortrait ? HackExplanationFrameUtil.CHESS_PIECES_RENDERER_Y_OFFSET_MOBILE_PORTRAIT : HackExplanationFrameUtil.CHESS_PIECES_RENDERER_Y_OFFSET_DESKTOP_AND_MOBILE_LANDSCAPE;
+
 				displayOutput.DrawRectangle(
-					x: HackExplanationFrameUtil.CHESS_PIECES_RENDERER_X_OFFSET + 99,
-					y: HackExplanationFrameUtil.CHESS_PIECES_RENDERER_Y_OFFSET + 240,
+					x: chessPiecesRendererXOffset + 99,
+					y: chessPiecesRendererYOffset + 240,
 					width: 299,
 					height: 119,
 					color: DTColor.White(),
 					fill: true);
 
 				displayOutput.DrawRectangle(
-					x: HackExplanationFrameUtil.CHESS_PIECES_RENDERER_X_OFFSET + 99,
-					y: HackExplanationFrameUtil.CHESS_PIECES_RENDERER_Y_OFFSET + 240,
+					x: chessPiecesRendererXOffset + 99,
+					y: chessPiecesRendererYOffset + 240,
 					width: 300,
 					height: 120,
 					color: DTColor.Black(),
 					fill: false);
 
 				displayOutput.DrawText(
-					x: (HackExplanationFrameUtil.CHESS_PIECES_RENDERER_X_OFFSET + 99) + 65,
-					y: (HackExplanationFrameUtil.CHESS_PIECES_RENDERER_Y_OFFSET + 240) + 85,
+					x: (chessPiecesRendererXOffset + 99) + 65,
+					y: (chessPiecesRendererYOffset + 240) + 85,
 					text: "Victory!",
 					font: GameFont.GameFont32Pt,
 					color: DTColor.Black());
 			}
 
 			if (this.chessPiecesRendererFadeOutFadeIn != null)
-				this.chessPiecesRendererFadeOutFadeIn.Render(displayOutput: new TranslatedDisplayOutput<GameImage, GameFont>(
-					display: displayOutput,
-					xOffsetInPixels: HackExplanationFrameUtil.CHESS_PIECES_RENDERER_X_OFFSET,
-					yOffsetInPixels: HackExplanationFrameUtil.CHESS_PIECES_RENDERER_Y_OFFSET));
+				this.chessPiecesRendererFadeOutFadeIn.Render(
+					displayOutput: new TranslatedDisplayOutput<GameImage, GameFont>(
+						display: displayOutput,
+						xOffsetInPixels: isMobilePortrait ? HackExplanationFrameUtil.CHESS_PIECES_RENDERER_X_OFFSET_MOBILE_PORTRAIT : HackExplanationFrameUtil.CHESS_PIECES_RENDERER_X_OFFSET_DESKTOP_AND_MOBILE_LANDSCAPE,
+						yOffsetInPixels: isMobilePortrait ? HackExplanationFrameUtil.CHESS_PIECES_RENDERER_Y_OFFSET_MOBILE_PORTRAIT : HackExplanationFrameUtil.CHESS_PIECES_RENDERER_Y_OFFSET_DESKTOP_AND_MOBILE_LANDSCAPE),
+					chessPieceScalingFactor: GameImageUtil.HackExplanationChessPieceScalingFactor);
 		}
 	}
 }

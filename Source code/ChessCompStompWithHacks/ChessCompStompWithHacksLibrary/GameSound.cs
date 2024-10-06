@@ -19,28 +19,28 @@ namespace ChessCompStompWithHacksLibrary
 	{
 		public class SoundFilenameInfo
 		{
-			public SoundFilenameInfo(string defaultFilename, string wavFilename)
+			public SoundFilenameInfo(string oggFilename, string flacFilename)
 			{
-				this.DefaultFilename = defaultFilename;
-				this.WavFilename = wavFilename;
+				this.OggFilename = oggFilename;
+				this.FlacFilename = flacFilename;
 			}
 
-			public string DefaultFilename { get; private set; }
-			public string WavFilename { get; private set; }
+			public string OggFilename { get; private set; }
+			public string FlacFilename { get; private set; }
 		}
 
 		public static SoundFilenameInfo GetSoundFilename(this GameSound sound)
 		{
 			switch (sound)
 			{
-				case GameSound.PlayerMove: return new SoundFilenameInfo(defaultFilename: "Kenney/jingles_STEEL16.ogg", wavFilename: "Kenney/jingles_STEEL16.wav");
-				case GameSound.AIMove: return new SoundFilenameInfo(defaultFilename: "Kenney/jingles_STEEL00.ogg", wavFilename: "Kenney/jingles_STEEL00.wav");
-				case GameSound.Win: return new SoundFilenameInfo(defaultFilename: "Kenney/jingles_STEEL10.ogg", wavFilename: "Kenney/jingles_STEEL10.wav");
-				case GameSound.StalemateOrDefeat: return new SoundFilenameInfo(defaultFilename: "Kenney/jingles_STEEL14.ogg", wavFilename: "Kenney/jingles_STEEL14.wav");
-				case GameSound.NukeLaunch: return new SoundFilenameInfo(defaultFilename: "Kenney/rumble3.ogg", wavFilename: "Kenney/rumble3.wav");
-				case GameSound.NukeExplosion: return new SoundFilenameInfo(defaultFilename: "Kenney/rumble1.ogg", wavFilename: "Kenney/rumble1.wav");
-				case GameSound.Click: return new SoundFilenameInfo(defaultFilename: "Kenney/click3_Modified.wav", wavFilename: "Kenney/click3_Modified.wav");
-				case GameSound.Woosh: return new SoundFilenameInfo(defaultFilename: "Kenney/woosh2_Modified.wav", wavFilename: "Kenney/woosh2_Modified.wav");
+				case GameSound.PlayerMove: return new SoundFilenameInfo(oggFilename: "Kenney/jingles_STEEL16.ogg", flacFilename: "Kenney/jingles_STEEL16.flac");
+				case GameSound.AIMove: return new SoundFilenameInfo(oggFilename: "Kenney/jingles_STEEL00.ogg", flacFilename: "Kenney/jingles_STEEL00.flac");
+				case GameSound.Win: return new SoundFilenameInfo(oggFilename: "Kenney/jingles_STEEL10.ogg", flacFilename: "Kenney/jingles_STEEL10.flac");
+				case GameSound.StalemateOrDefeat: return new SoundFilenameInfo(oggFilename: "Kenney/jingles_STEEL14.ogg", flacFilename: "Kenney/jingles_STEEL14.flac");
+				case GameSound.NukeLaunch: return new SoundFilenameInfo(oggFilename: "Kenney/rumble3.ogg", flacFilename: "Kenney/rumble3.flac");
+				case GameSound.NukeExplosion: return new SoundFilenameInfo(oggFilename: "Kenney/rumble1.ogg", flacFilename: "Kenney/rumble1.flac");
+				case GameSound.Click: return new SoundFilenameInfo(oggFilename: "Kenney/click3_Modified.ogg", flacFilename: "Kenney/click3_Modified.flac");
+				case GameSound.Woosh: return new SoundFilenameInfo(oggFilename: "Kenney/woosh2_Modified.ogg", flacFilename: "Kenney/woosh2_Modified.flac");
 				default: throw new Exception();
 			}
 		}

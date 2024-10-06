@@ -7,20 +7,27 @@ namespace ChessCompStompWithHacksLibrary
 
 	public class HackExplanationFrameUtil
 	{
-		public const int CHESS_PIECES_RENDERER_X_OFFSET = 350;
-		public const int CHESS_PIECES_RENDERER_Y_OFFSET = 25;
+		public const int CHESS_PIECES_RENDERER_X_OFFSET_DESKTOP_AND_MOBILE_LANDSCAPE = 350;
+		public const int CHESS_PIECES_RENDERER_Y_OFFSET_DESKTOP_AND_MOBILE_LANDSCAPE = 25;
 
-		public const int TITLE_TEXT_Y_OFFSET = 580;
-
-		public const int EXPLANATION_TEXT_X_OFFSET = 15;
-		public const int EXPLANATION_TEXT_Y_OFFSET = 519;
+		public const int CHESS_PIECES_RENDERER_X_OFFSET_MOBILE_PORTRAIT = 52;
+		public const int CHESS_PIECES_RENDERER_Y_OFFSET_MOBILE_PORTRAIT = 325;
+		
+		public const int TITLE_TEXT_Y_OFFSET_DESKTOP_AND_MOBILE_LANDSCAPE = 580;
+		public const int TITLE_TEXT_Y_OFFSET_MOBILE_PORTRAIT = 880;
+		
+		public const int EXPLANATION_TEXT_X_OFFSET_DESKTOP_AND_MOBILE_LANDSCAPE = 15;
+		public const int EXPLANATION_TEXT_Y_OFFSET_DESKTOP_AND_MOBILE_LANDSCAPE = 519;
+		
+		public const int EXPLANATION_TEXT_X_OFFSET_MOBILE_PORTRAIT = 52;
+		public const int EXPLANATION_TEXT_Y_OFFSET_MOBILE_PORTRAIT = 300; 
 
 		public const int ELAPSED_MICROS_BEFORE_PIECE_MOVES = 1500 * 1000;
 		
 		public interface IHackExplanation
 		{
 			void ProcessFrame(IMouse mouseInput, IMouse previousMouseInput, IDisplayProcessing<GameImage> displayProcessing, int elapsedMicrosPerFrame);
-			void Render(IDisplayOutput<GameImage, GameFont> displayOutput);
+			void Render(IDisplayOutput<GameImage, GameFont> displayOutput, bool isMobileDisplayType);
 		}
 
 		public static IHackExplanation GetHackExplanation(Hack hack, ColorTheme colorTheme, IDTRandom random, bool hasExtraPawnFirstHack, ITimer timer, int elapsedMicrosPerFrame)

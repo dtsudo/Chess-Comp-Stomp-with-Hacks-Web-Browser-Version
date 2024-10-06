@@ -12,99 +12,238 @@ namespace ChessCompStompWithHacks
 		private int desiredSoundVolume;
 		private int currentSoundVolume;
 		private int elapsedMicrosPerFrame;
-	
+		
 		public BridgeSoundOutput(int elapsedMicrosPerFrame)
 		{
 			this.desiredSoundVolume = GlobalState.DEFAULT_VOLUME;
 			this.currentSoundVolume = this.desiredSoundVolume;
 			this.elapsedMicrosPerFrame = elapsedMicrosPerFrame;
-			Script.Eval(@"
-				window.BridgeSoundOutputJavascript = ((function () {
-					'use strict';
-						
-					var soundDictionary = {};
+
+			if (BridgeUtil.IsMobileSafari())
+			{
+				Script.Write(@"
+					window.BridgeSoundOutputJavascript = ((function () {
+						'use strict';
+
+						let soundDictionary = {};
+										
+						let audioContext = new AudioContext();
 					
-					var numberOfAudioObjectsLoaded = 0;
-					
-					var loadSounds = function (soundNames) {
-						var soundNamesArray = soundNames.split(',');
+						let numberOfAudioObjectsLoaded = 0;
+						let numberOfAudioObjects = null;
+
+						let loadSounds = function (oggSoundNames, flacSoundNames) {
+							let oggSoundNamesArray = oggSoundNames.split(',');
+							let flacSoundNamesArray = flacSoundNames.split(',');
 						
-						var numberOfAudioObjects = soundNamesArray.length * 4;
-						
-						for (var i = 0; i < soundNamesArray.length; i++) {
-							var soundName = soundNamesArray[i];
+							numberOfAudioObjects = oggSoundNamesArray.length;
+
+							for (let i = 0; i < oggSoundNamesArray.length; i++) {
+								let soundName = oggSoundNamesArray[i];
+								let flacSoundName = flacSoundNamesArray[i];
 							
-							if (soundDictionary[soundName])
-								continue;
+								if (soundDictionary[soundName])
+									continue;
 							
-							soundDictionary[soundName] = [];
+								soundDictionary[soundName] = { audioBuffer: null };
+
+								numberOfAudioObjectsLoaded++;
 							
-							var soundPath = 'Data/Sound/' + soundName + '?doNotCache=' + Date.now().toString();
-							for (var j = 0; j < 4; j++) {
-								var audio = new Audio(soundPath);
-								audio.addEventListener('canplaythrough', function () {
-									numberOfAudioObjectsLoaded++;
-								});
-								
-								soundDictionary[soundName].push(audio);
+								let soundPath = 'Data/Sound/' + flacSoundName + '?doNotCache=' + Date.now().toString();
+
+								fetch(soundPath)
+									.then(response => response.blob())
+									.then(blob => blob.arrayBuffer())
+									.then(arrayBuffer => audioContext.decodeAudioData(arrayBuffer))
+									.then(audioBuffer => { soundDictionary[soundName].audioBuffer = audioBuffer; });
 							}
-						}
 						
-						return numberOfAudioObjects === numberOfAudioObjectsLoaded;
-					};
+							return true;
+						};
+
+						let getNumElementsLoaded = function () {
+							return numberOfAudioObjectsLoaded;
+						};
+
+						let getNumTotalElementsToLoad = function () {
+							return numberOfAudioObjects;
+						};
 					
-					var playSound = function (soundName, volume) {
-						var sound = soundDictionary[soundName];
+						let playSound = function (soundName, volume) {
+							if (volume > 1.0)
+								volume = 1.0;
+							if (volume < 0.0)
+								volume = 0.0;
 						
-						if (volume > 1.0)
-							volume = 1.0;
-						if (volume < 0.0)
-							volume = 0.0;
-						
-						var audio = sound[0];
-						
-						for (var i = 0; i < sound.length; i++) {
-							if (i === sound.length - 1)
-								sound[i] = audio;
-							else
-								sound[i] = sound[i+1];
-						}
-						
-						audio.volume = volume;
-						audio.play();
-					};
+							if (volume <= 0.0)
+								return;
+
+							let audioBuffer = soundDictionary[soundName].audioBuffer;
+
+							if (audioBuffer === null)
+								return;
+
+							let source = audioContext.createBufferSource();
+							source.buffer = audioBuffer;
+							let gainNode = new GainNode(audioContext, { gain: volume });
+							source.connect(gainNode);
+							gainNode.connect(audioContext.destination);
+							source.start();
+						};
 					
-					return {
-						loadSounds: loadSounds,
-						playSound: playSound
-					};
-				})());
-			");
+						return {
+							loadSounds: loadSounds,
+							getNumElementsLoaded: getNumElementsLoaded,
+							getNumTotalElementsToLoad: getNumTotalElementsToLoad,
+							playSound: playSound
+						};
+					})());
+				");
+			}
+			else
+			{
+				Script.Write(@"
+					window.BridgeSoundOutputJavascript = ((function () {
+						'use strict';
+
+						let soundDictionary = {};
+					
+						let numberOfAudioObjectsLoaded = 0;
+						let numberOfAudioObjects = null;
+					
+						let loadSounds = function (oggSoundNames, flacSoundNames) {
+							let oggSoundNamesArray = oggSoundNames.split(',');
+							let flacSoundNamesArray = flacSoundNames.split(',');
+						
+							numberOfAudioObjects = oggSoundNamesArray.length * 4;
+						
+							for (let i = 0; i < oggSoundNamesArray.length; i++) {
+								let soundName = oggSoundNamesArray[i];
+								let flacSoundName = flacSoundNamesArray[i];
+							
+								if (soundDictionary[soundName])
+									continue;
+							
+								soundDictionary[soundName] = [];
+							
+								let soundPath = 'Data/Sound/' + soundName + '?doNotCache=' + Date.now().toString();
+								for (let j = 0; j < 4; j++) {
+									let hasAudioLoadingSucceeded = false;
+									let audio = new Audio();
+									audio.addEventListener('canplaythrough', function () {
+										if (!hasAudioLoadingSucceeded) {
+											numberOfAudioObjectsLoaded++;
+										}
+
+										hasAudioLoadingSucceeded = true;
+									});
+
+									audio.src = soundPath;
+									audio.load();
+
+									let checkForError;
+									checkForError = function () {
+										if (hasAudioLoadingSucceeded)
+											return;
+										if (audio.error !== null) {
+											audio.src = 'Data/Sound/' + flacSoundName + '?doNotCache=' + Date.now().toString();
+											audio.load();
+											return;
+										}
+
+										setTimeout(checkForError, 50 /* arbitrary */);
+									};
+									setTimeout(checkForError, 0);
+
+									soundDictionary[soundName].push(audio);
+								}
+							}
+						
+							return numberOfAudioObjects === numberOfAudioObjectsLoaded;
+						};
+
+						let getNumElementsLoaded = function () {
+							return numberOfAudioObjectsLoaded;
+						};
+
+						let getNumTotalElementsToLoad = function () {
+							return numberOfAudioObjects;
+						};
+					
+						var playSound = function (soundName, volume) {
+							var sound = soundDictionary[soundName];
+						
+							if (volume > 1.0)
+								volume = 1.0;
+							if (volume < 0.0)
+								volume = 0.0;
+						
+							var audio = sound[0];
+						
+							for (var i = 0; i < sound.length; i++) {
+								if (i === sound.length - 1)
+									sound[i] = audio;
+								else
+									sound[i] = sound[i+1];
+							}
+						
+							audio.volume = volume;
+							audio.play();
+						};
+					
+						return {
+							loadSounds: loadSounds,
+							getNumElementsLoaded: getNumElementsLoaded,
+							getNumTotalElementsToLoad: getNumTotalElementsToLoad,
+							playSound: playSound
+						};
+					})());
+				");
+			}
 		}
 	
 		public bool LoadSounds()
 		{			
-			string soundNames = "";
+			string oggSoundNames = "";
+			string flacSoundNames = "";
 			bool isFirst = true;
 			foreach (GameSound gameSound in Enum.GetValues(typeof(GameSound)))
 			{
 				if (isFirst)
+				{
 					isFirst = false;
+				}
 				else
-					soundNames = soundNames + ",";
+				{
+					oggSoundNames = oggSoundNames + ",";
+					flacSoundNames = flacSoundNames + ",";
+				}
 				
-				string soundFilename = gameSound.GetSoundFilename().DefaultFilename;
-				soundNames = soundNames + soundFilename;
+				string oggSoundFilename = gameSound.GetSoundFilename().OggFilename;
+				oggSoundNames = oggSoundNames + oggSoundFilename;
+
+				string flacSoundFilename = gameSound.GetSoundFilename().FlacFilename;
+				flacSoundNames = flacSoundNames + flacSoundFilename;
 			}
 			
-			if (soundNames == "")
+			if (oggSoundNames == "")
 				return true;
 			
-			bool result = Script.Eval<bool>("window.BridgeSoundOutputJavascript.loadSounds('" + soundNames + "')");
+			bool result = Script.Eval<bool>("window.BridgeSoundOutputJavascript.loadSounds('" + oggSoundNames + "', '" + flacSoundNames + "')");
 			
 			return result;
 		}
-		
+
+		public int GetNumElementsLoaded()
+		{
+			return Script.Call<int>("window.BridgeSoundOutputJavascript.getNumElementsLoaded");
+		}
+
+		public int? GetNumTotalElementsToLoad()
+		{
+			return Script.Call<int?>("window.BridgeSoundOutputJavascript.getNumTotalElementsToLoad");
+		}
+
 		/// <summary>
 		/// Volume ranges from 0 to 100 (both inclusive)
 		/// </summary>
@@ -154,7 +293,7 @@ namespace ChessCompStompWithHacks
 			
 			if (finalVolume > 0.0)
 			{
-				string soundFilename = sound.GetSoundFilename().DefaultFilename;
+				string soundFilename = sound.GetSoundFilename().OggFilename;
 				Script.Call("window.BridgeSoundOutputJavascript.playSound", soundFilename, finalVolume);
 			}
 		}

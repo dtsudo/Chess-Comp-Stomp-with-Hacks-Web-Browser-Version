@@ -6,7 +6,7 @@ namespace ChessCompStompWithHacks
 	using DTLibrary;
 	using System;
 	using System.Collections.Generic;
-
+	
 	public class BridgeKeyboard : IKeyboard
 	{
 		public BridgeKeyboard(bool disableArrowKeyScrolling)
@@ -16,6 +16,7 @@ namespace ChessCompStompWithHacks
 					'use strict';
 					
 					var keysBeingPressed = [];
+					var keyPressesThatNeedToBeProcessed = [];
 					
 					var disableArrowKeyScrolling = " + (disableArrowKeyScrolling ? "true" : "false") + @";
 					
@@ -105,12 +106,23 @@ namespace ChessCompStompWithHacks
 						
 						var key = mapKeyToCanonicalKey(e.key);
 						
-						for (var i = 0; i < keysBeingPressed.length; i++) {
-							if (keysBeingPressed[i] === key)
+						var shouldAdd = true;
+						for (let i = 0; i < keysBeingPressed.length; i++) {
+							if (keysBeingPressed[i] === key) {
+								shouldAdd = false;
+								break;
+							}
+						}
+						
+						if (shouldAdd)
+							keysBeingPressed.push(key);
+						
+						for (let i = 0; i < keyPressesThatNeedToBeProcessed.length; i++) {
+							if (keyPressesThatNeedToBeProcessed[i] === key)
 								return;
 						}
 						
-						keysBeingPressed.push(key);
+						keyPressesThatNeedToBeProcessed.push(key);
 					};
 					
 					var keyUpHandler = function (e) {
@@ -126,12 +138,21 @@ namespace ChessCompStompWithHacks
 						keysBeingPressed = newArray;
 					};
 					
+					var processedInputs = function () {
+						keyPressesThatNeedToBeProcessed = [];
+					};
+
 					document.addEventListener('keydown', function (e) { keyDownHandler(e); }, false);
 					document.addEventListener('keyup', function (e) { keyUpHandler(e); }, false);
 					
 					var isKeyPressed = function (k) {
-						for (var i = 0; i < keysBeingPressed.length; i++) {
+						for (let i = 0; i < keysBeingPressed.length; i++) {
 							if (keysBeingPressed[i] === k)
+								return true;
+						}
+
+						for (let i = 0; i < keyPressesThatNeedToBeProcessed.length; i++) {
+							if (keyPressesThatNeedToBeProcessed[i] === k)
 								return true;
 						}
 						
@@ -139,10 +160,16 @@ namespace ChessCompStompWithHacks
 					};
 					
 					return {
-						isKeyPressed: isKeyPressed
+						isKeyPressed: isKeyPressed,
+						processedInputs: processedInputs
 					};
 				})());
 			");
+		}
+
+		public void ProcessedInputs()
+		{
+			Script.Write("window.BridgeKeyboardJavascript.processedInputs()");
 		}
 		
 		public bool IsPressed(Key key)

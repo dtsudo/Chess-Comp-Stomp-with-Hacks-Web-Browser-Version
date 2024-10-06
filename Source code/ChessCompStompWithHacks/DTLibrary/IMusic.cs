@@ -17,6 +17,10 @@ namespace DTLibrary
 		/// Must be repeatedly invoked until it returns true before invoking PlayMusic() or StopMusic()
 		/// </summary>
 		bool LoadMusic();
+
+		int GetNumElementsLoaded();
+
+		int? GetNumTotalElementsToLoad();
 	}
 
 	public interface IMusicCleanup

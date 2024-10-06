@@ -11,7 +11,7 @@ namespace ChessCompStompWithHacks
 	{
 		public BridgeFileIO()
 		{
-			Script.Eval(@"
+			Script.Write(@"
 				window.BridgeFileIOJavascript = ((function () {
 					'use strict';
 					

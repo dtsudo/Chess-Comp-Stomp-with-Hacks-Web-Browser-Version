@@ -22,6 +22,8 @@ namespace ChessCompStompWithHacksLibrary
 		private bool isHover;
 		private bool isClicked;
 
+		private bool isMobileDisplayType;
+
 		private IMouse previousMouseInput;
 
 		public Button(
@@ -35,7 +37,8 @@ namespace ChessCompStompWithHacksLibrary
 			string text,
 			int textXOffset,
 			int textYOffset,
-			GameFont font)
+			GameFont font,
+			bool isMobileDisplayType)
 		{
 			this.x = x;
 			this.y = y;
@@ -53,6 +56,48 @@ namespace ChessCompStompWithHacksLibrary
 			this.isClicked = false;
 
 			this.previousMouseInput = null;
+
+			this.isMobileDisplayType = isMobileDisplayType;
+		}
+
+		public void SetX(int x)
+		{
+			this.x = x;
+		}
+
+		public void SetY(int y)
+		{
+			this.y = y;
+		}
+
+		public void SetWidth(int width)
+		{
+			this.width = width;
+		}
+
+		public void SetHeight(int height)
+		{
+			this.height = height;
+		}
+
+		public void SetText(string text)
+		{
+			this.text = text;
+		}
+
+		public void SetTextXOffset(int textXOffset)
+		{
+			this.textXOffset = textXOffset;
+		}
+
+		public void SetTextYOffset(int textYOffset)
+		{
+			this.textYOffset = textYOffset;
+		}
+
+		public void SetIsMobileDisplayType(bool isMobileDisplayType)
+		{
+			this.isMobileDisplayType = isMobileDisplayType;
 		}
 
 		public bool IsHover(IMouse mouseInput)
@@ -100,9 +145,9 @@ namespace ChessCompStompWithHacksLibrary
 			displayOutput.DrawRectangle(
 				x: this.x,
 				y: this.y,
-				width: this.width - 1,
-				height: this.height - 1,
-				color: this.isClicked ? this.clickColor : (this.isHover ? this.hoverColor : this.backgroundColor),
+				width: this.width,
+				height: this.height,
+				color: this.isClicked ? this.clickColor : ((this.isHover && !this.isMobileDisplayType) ? this.hoverColor : this.backgroundColor),
 				fill: true);
 
 			displayOutput.DrawRectangle(

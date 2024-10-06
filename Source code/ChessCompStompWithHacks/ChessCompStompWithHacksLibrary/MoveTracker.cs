@@ -66,7 +66,8 @@ namespace ChessCompStompWithHacksLibrary
 				isHoverOverNuke: null,
 				turnCount: newGameState.TurnCount,
 				timer: timer,
-				colorTheme: this.colorTheme);
+				colorTheme: this.colorTheme,
+				isClickingOnNuke: false);
 
 			newTracker.moves.Add(new MoveInfo(originalGameState: originalGameState, newGameState: newGameState, newGameStateChessPiecesRenderer: newGameStateChessPiecesRenderer, newGameStateNukeRenderer: newGameStateNukeRenderer, move: move));
 

@@ -17,6 +17,8 @@ namespace ChessCompStompWithHacksLibrary
 		private int textYOffset;
 		private GameFont font;
 
+		private bool isMobileDisplayType;
+
 		private bool isPlayerWhite;
 		private DTImmutableList<Hack> researchedHacks;
 
@@ -35,7 +37,8 @@ namespace ChessCompStompWithHacksLibrary
 			int textYOffset,
 			GameFont font,
 			bool isPlayerWhite,
-			DTImmutableList<Hack> researchedHacks)
+			DTImmutableList<Hack> researchedHacks,
+			bool isMobileDisplayType)
 		{
 			this.x = x;
 			this.y = y;
@@ -46,6 +49,8 @@ namespace ChessCompStompWithHacksLibrary
 			this.textYOffset = textYOffset;
 			this.font = font;
 
+			this.isMobileDisplayType = isMobileDisplayType;
+
 			this.isPlayerWhite = isPlayerWhite;
 			this.researchedHacks = researchedHacks;
 
@@ -53,6 +58,16 @@ namespace ChessCompStompWithHacksLibrary
 			this.clickedHackLevel = null;
 
 			this.previousMouseInput = null;
+		}
+
+		public void SetX(int x)
+		{
+			this.x = x;
+		}
+
+		public void SetY(int y)
+		{
+			this.y = y;
 		}
 
 		private SessionState.AIHackLevel? IsHover(IMouse mouseInput)
@@ -93,6 +108,12 @@ namespace ChessCompStompWithHacksLibrary
 				if (hoveredAIHackLevel.HasValue)
 					this.clickedHackLevel = hoveredHackLevel.Value;
 			}
+
+			if (this.isMobileDisplayType)
+			{
+				if (mouseInput.IsLeftMouseButtonPressed() && hoveredAIHackLevel.HasValue && this.clickedHackLevel.HasValue)
+					this.clickedHackLevel = hoveredAIHackLevel.Value;
+			}
 			
 			if (this.clickedHackLevel.HasValue && !mouseInput.IsLeftMouseButtonPressed() && previousMouseInput.IsLeftMouseButtonPressed())
 			{			
@@ -118,7 +139,7 @@ namespace ChessCompStompWithHacksLibrary
 				color: new DTColor(200, 200, 200),
 				fill: true);
 
-			if (this.hoveredHackLevel.HasValue)
+			if (this.hoveredHackLevel.HasValue && !this.isMobileDisplayType)
 			{
 				int offset;
 				ColorTheme colorTheme;
@@ -214,7 +235,7 @@ namespace ChessCompStompWithHacksLibrary
 
 			if (this.clickedHackLevel.HasValue)
 				previewAIHackLevel = this.clickedHackLevel.Value;
-			else if (this.hoveredHackLevel.HasValue)
+			else if (this.hoveredHackLevel.HasValue && !this.isMobileDisplayType)
 				previewAIHackLevel = this.hoveredHackLevel.Value;
 			else
 				previewAIHackLevel = null;

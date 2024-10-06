@@ -52,7 +52,10 @@ namespace ChessCompStompWithHacksLibrary
 
 	public static class GameImageUtil
 	{
-		public const int ChessPieceScalingFactor = 128 / 8;
+		public const int DesktopChessPieceScalingFactor = 128 / 8;
+		public const int MobileChessPieceScalingFactor = 22;
+
+		public const int HackExplanationChessPieceScalingFactor = 128 / 8;
 
 		public static GameImage GetImage(ChessSquarePiece piece)
 		{

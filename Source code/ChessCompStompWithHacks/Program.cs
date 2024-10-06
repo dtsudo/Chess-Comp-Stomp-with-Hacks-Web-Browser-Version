@@ -14,7 +14,7 @@ namespace ChessCompStompWithHacks
 		
 		private static void AddFpsDisplayJavascript()
 		{
-			Script.Eval(@"
+			Script.Write(@"
 				window.FpsDisplayJavascript = ((function () {
 					'use strict';
 					
@@ -61,18 +61,30 @@ namespace ChessCompStompWithHacks
 
 		private static void Initialize()
 		{
-			Script.Eval(@"
+			Script.Write(@"
 				((function () {
 					'use strict';
 					
 					var isEmbeddedVersion = false;
+					
+					var stopWaitingEvenIfMusicHasNotLoaded = false;
+
+					var canvasScalingFactor = 2;
 										
 					var isElectronVersion = !isEmbeddedVersion
 						&& (window.navigator.userAgent.indexOf('Electron') >= 0 || window.navigator.userAgent.indexOf('electron') >= 0);
 					
-					var defaultFps = window.navigator.userAgent.indexOf('Gecko/') >= 0
-						? 30
-						: 60;
+					var isLibrem5 = window.navigator.userAgent.toLowerCase().includes('aarch64')
+						&& window.navigator.userAgent.toLowerCase().includes('linux')
+						&& !window.navigator.userAgent.toLowerCase().includes('android');
+					
+					var defaultFps;
+					if (isLibrem5)
+						defaultFps = 20;
+					else if (window.navigator.userAgent.indexOf('Gecko/') >= 0)
+						defaultFps = 30;
+					else
+						defaultFps = 60;
 					
 					var urlParams = (new URL(document.location)).searchParams;
 					
@@ -86,7 +98,7 @@ namespace ChessCompStompWithHacks
 						? (urlParams.get('debugmode') === 'true')
 						: false;
 					
-					window.ChessCompStompWithHacks.GameInitializer.Start(fps, isEmbeddedVersion, isElectronVersion, debugMode);
+					window.ChessCompStompWithHacks.GameInitializer.Start(fps, isEmbeddedVersion, isElectronVersion, canvasScalingFactor, stopWaitingEvenIfMusicHasNotLoaded, debugMode);
 					
 					var computeAndRenderNextFrame;
 					

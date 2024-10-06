@@ -9,9 +9,13 @@ namespace ChessCompStompWithHacks
 	
 	public class BridgeDisplayRectangle
 	{
-		public BridgeDisplayRectangle()
+		private BridgeDisplay.ICanvasWidthAndHeightInfo canvasWidthAndHeightInfo; 
+
+		public BridgeDisplayRectangle(BridgeDisplay.ICanvasWidthAndHeightInfo canvasWidthAndHeightInfo)
 		{
-			Script.Eval(@"
+			this.canvasWidthAndHeightInfo = canvasWidthAndHeightInfo;
+
+			Script.Write(@"
 				window.BridgeDisplayRectangleJavascript = ((function () {
 					'use strict';
 					
@@ -45,7 +49,7 @@ namespace ChessCompStompWithHacks
 		
 		public void DrawRectangle(int x, int y, int width, int height, DTColor color, bool fill)
 		{
-			y = GlobalConstants.WINDOW_HEIGHT - y - height;
+			y = this.canvasWidthAndHeightInfo.GetCurrentCanvasHeight() - y - height;
 			
 			int red = color.R;
 			int green = color.G;

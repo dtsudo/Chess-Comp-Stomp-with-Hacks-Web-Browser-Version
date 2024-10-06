@@ -10,10 +10,14 @@ namespace ChessCompStompWithHacksLibrary
 		private bool isHover;
 		private bool isClicked;
 
-		public SettingsIcon()
+		private bool isMobileDisplayType;
+
+		public SettingsIcon(bool isMobileDisplayType)
 		{
 			this.isHover = false;
 			this.isClicked = false;
+
+			this.isMobileDisplayType = isMobileDisplayType;
 		}
 
 		public class SettingsIconStatus
@@ -37,13 +41,18 @@ namespace ChessCompStompWithHacksLibrary
 			int mouseX = mouseInput.GetX();
 			int mouseY = mouseInput.GetY();
 
-			int settingsIconWidth = displayProcessing.GetWidth(GameImage.Gear);
-			int settingsIconHeight = displayProcessing.GetHeight(GameImage.Gear);
+			int scalingFactor = this.isMobileDisplayType ? 2 : 1;
 
-			bool isHover = GlobalConstants.WINDOW_WIDTH - settingsIconWidth <= mouseX
-				&& mouseX <= GlobalConstants.WINDOW_WIDTH
-				&& GlobalConstants.WINDOW_HEIGHT - settingsIconHeight <= mouseY
-				&& mouseY <= GlobalConstants.WINDOW_HEIGHT;
+			int settingsIconWidth = displayProcessing.GetWidth(GameImage.Gear) / 2 * scalingFactor;
+			int settingsIconHeight = displayProcessing.GetHeight(GameImage.Gear) / 2 * scalingFactor;
+
+			int windowWidth = this.isMobileDisplayType ? displayProcessing.GetMobileScreenWidth() : GlobalConstants.DESKTOP_WINDOW_WIDTH;
+			int windowHeight = this.isMobileDisplayType ? displayProcessing.GetMobileScreenHeight() : GlobalConstants.DESKTOP_WINDOW_HEIGHT;
+
+			bool isHover = windowWidth - settingsIconWidth <= mouseX
+				&& mouseX <= windowWidth
+				&& windowHeight - settingsIconHeight <= mouseY
+				&& mouseY <= windowHeight;
 
 			this.isHover = isHover && !ignoreMouse;
 
@@ -66,10 +75,17 @@ namespace ChessCompStompWithHacksLibrary
 
 		public void Render(IDisplayOutput<GameImage, GameFont> displayOutput)
 		{
-			displayOutput.DrawImage(
-				image: this.isClicked ? GameImage.GearSelected : (this.isHover ? GameImage.GearHover : GameImage.Gear),
-				x: GlobalConstants.WINDOW_WIDTH - displayOutput.GetWidth(GameImage.Gear),
-				y: GlobalConstants.WINDOW_HEIGHT - displayOutput.GetHeight(GameImage.Gear));
+			int scalingFactor = this.isMobileDisplayType ? 2 : 1;
+
+			int windowWidth = this.isMobileDisplayType ? displayOutput.GetMobileScreenWidth() : GlobalConstants.DESKTOP_WINDOW_WIDTH;
+			int windowHeight = this.isMobileDisplayType ? displayOutput.GetMobileScreenHeight() : GlobalConstants.DESKTOP_WINDOW_HEIGHT;
+
+			displayOutput.DrawImageRotatedClockwise(
+				image: this.isClicked ? GameImage.GearSelected : (this.isHover && !this.isMobileDisplayType ? GameImage.GearHover : GameImage.Gear),
+				x: windowWidth - displayOutput.GetWidth(GameImage.Gear) * scalingFactor / 2,
+				y: windowHeight - displayOutput.GetHeight(GameImage.Gear) * scalingFactor / 2,
+				degreesScaled: 0,
+				scalingFactorScaled: scalingFactor * 128 / 2);
 		}
 	}
 }

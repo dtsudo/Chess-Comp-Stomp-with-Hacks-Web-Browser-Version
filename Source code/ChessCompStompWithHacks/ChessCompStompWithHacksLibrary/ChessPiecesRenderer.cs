@@ -89,7 +89,7 @@ namespace ChessCompStompWithHacksLibrary
 			this.nukedSquares = nukedSquares;
 			this.colorTheme = colorTheme;
 		}
-
+		
 		public static ChessPiecesRenderer GetChessPiecesRenderer(
 			ChessSquarePieceArray pieces,
 			ChessSquare kingInDangerSquare,
@@ -178,14 +178,15 @@ namespace ChessCompStompWithHacksLibrary
 		{
 			return this.nukeAnimationMicroseconds.HasValue && this.nukeAnimationMicroseconds.Value >= NUKE_ANIMATION_COMPLETED_MICROSECONDS;
 		}
-		
+
 		public static ChessSquare GetHoverSquare(
 			IMouse mouseInput, 
 			bool renderFromWhitePerspective,
+			int chessPieceScalingFactor,
 			IDisplayProcessing<GameImage> displayProcessing)
 		{
-			int width = displayProcessing.GetWidth(GameImage.WhitePawn) * GameImageUtil.ChessPieceScalingFactor / 128;
-			int height = displayProcessing.GetHeight(GameImage.WhitePawn) * GameImageUtil.ChessPieceScalingFactor / 128;
+			int width = displayProcessing.GetWidth(GameImage.WhitePawn) * chessPieceScalingFactor / 128;
+			int height = displayProcessing.GetHeight(GameImage.WhitePawn) * chessPieceScalingFactor / 128;
 
 			int mouseX = mouseInput.GetX();
 			int mouseY = mouseInput.GetY();
@@ -259,10 +260,14 @@ namespace ChessCompStompWithHacksLibrary
 			}
 		}
 
-		public void Render(IDisplayOutput<GameImage, GameFont> displayOutput, ChessPiecesRendererPieceAnimation chessPiecesRendererPieceAnimation)
+		public void Render(
+			IDisplayOutput<GameImage, GameFont> displayOutput,
+			ChessPiecesRendererPieceAnimation chessPiecesRendererPieceAnimation,
+			int chessPieceScalingFactor,
+			bool isMobileDisplayType)
 		{
-			int width = displayOutput.GetWidth(GameImage.WhitePawn) * GameImageUtil.ChessPieceScalingFactor / 128;
-			int height = displayOutput.GetHeight(GameImage.WhitePawn) * GameImageUtil.ChessPieceScalingFactor / 128;
+			int width = displayOutput.GetWidth(GameImage.WhitePawn) * chessPieceScalingFactor / 128;
+			int height = displayOutput.GetHeight(GameImage.WhitePawn) * chessPieceScalingFactor / 128;
 
 			DTColor darkSquareColor = GetDarkSquareColor(colorTheme: this.colorTheme);
 			DTColor lightSquareColor = GetLightSquareColor(colorTheme: this.colorTheme);
@@ -331,7 +336,7 @@ namespace ChessCompStompWithHacksLibrary
 						x: renderSquare.File * width,
 						y: renderSquare.Rank * height,
 						degreesScaled: 0,
-						scalingFactorScaled: GameImageUtil.ChessPieceScalingFactor);
+						scalingFactorScaled: chessPieceScalingFactor);
 				}
 			}
 
@@ -361,7 +366,7 @@ namespace ChessCompStompWithHacksLibrary
 						x: renderX,
 						y: renderY,
 						degreesScaled: 0,
-						scalingFactorScaled: GameImageUtil.ChessPieceScalingFactor);
+						scalingFactorScaled: chessPieceScalingFactor);
 				}
 			}
 
@@ -433,19 +438,26 @@ namespace ChessCompStompWithHacksLibrary
 					x: this.hoverPieceInfo.X - width / 2,
 					y: this.hoverPieceInfo.Y - height / 2,
 					degreesScaled: 0,
-					scalingFactorScaled: GameImageUtil.ChessPieceScalingFactor);
+					scalingFactorScaled: chessPieceScalingFactor);
 			}
-			
-			this.RenderNukeAnimation(displayOutput: displayOutput);
+
+			int windowHeight = isMobileDisplayType
+				? displayOutput.GetMobileScreenHeight()
+				: GlobalConstants.DESKTOP_WINDOW_HEIGHT;
+
+			this.RenderNukeAnimation(displayOutput: displayOutput, chessPieceScalingFactor: chessPieceScalingFactor, windowHeight: windowHeight);
 		}
 		
-		private void RenderNukeAnimation(IDisplayOutput<GameImage, GameFont> displayOutput)
+		private void RenderNukeAnimation(
+			IDisplayOutput<GameImage, GameFont> displayOutput,
+			int chessPieceScalingFactor,
+			int windowHeight)
 		{
 			if (this.nukeAnimationMicroseconds == null)
 				return;
 			
-			int width = displayOutput.GetWidth(GameImage.WhitePawn) * GameImageUtil.ChessPieceScalingFactor / 128;
-			int height = displayOutput.GetHeight(GameImage.WhitePawn) * GameImageUtil.ChessPieceScalingFactor / 128;
+			int width = displayOutput.GetWidth(GameImage.WhitePawn) * chessPieceScalingFactor / 128;
+			int height = displayOutput.GetHeight(GameImage.WhitePawn) * chessPieceScalingFactor / 128;
 
 			if (this.nukeAnimationMicroseconds.Value <= NUKE_IMPACT_MICROSECONDS)
 			{
@@ -461,7 +473,7 @@ namespace ChessCompStompWithHacksLibrary
 					int rocketFireWidthScaled = rocketFireWidthOriginal * rocketFireScalingFactor / 128;
 					int rocketFireHeightScaled = rocketFireHeightOriginal * rocketFireScalingFactor / 128;
 					int endingY = nukeRenderCenter.Rank * height + height / 2;
-					int startingY = endingY + GlobalConstants.WINDOW_HEIGHT;
+					int startingY = endingY + windowHeight;
 					int totalDistanceY = startingY - endingY;
 					int y = (int)((((long)NUKE_IMPACT_MICROSECONDS) - ((long)this.nukeAnimationMicroseconds.Value)) * ((long)totalDistanceY) / (((long)NUKE_IMPACT_MICROSECONDS) - ((long)NUKE_BEGIN_LANDING_MICROSECONDS)) + ((long)endingY));
 

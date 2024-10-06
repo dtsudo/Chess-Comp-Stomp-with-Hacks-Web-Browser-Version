@@ -17,6 +17,16 @@ namespace DTLibrary
 			return true;
 		}
 
+		public int GetNumElementsLoaded()
+		{
+			return 0;
+		}
+
+		public int? GetNumTotalElementsToLoad()
+		{
+			return 0;
+		}
+
 		public void SetSoundVolume(int volume)
 		{
 			this.soundVolume = volume;

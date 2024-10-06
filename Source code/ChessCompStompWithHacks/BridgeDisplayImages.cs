@@ -9,11 +9,15 @@ namespace ChessCompStompWithHacks
 
 	public class BridgeDisplayImages
 	{
+		private BridgeDisplay.ICanvasWidthAndHeightInfo canvasWidthAndHeightInfo;
+
 		private Dictionary<GameImage, int> widthDictionary;
 		private Dictionary<GameImage, int> heightDictionary;
 		
-		public BridgeDisplayImages()
+		public BridgeDisplayImages(BridgeDisplay.ICanvasWidthAndHeightInfo canvasWidthAndHeightInfo, int canvasScalingFactor)
 		{
+			this.canvasWidthAndHeightInfo = canvasWidthAndHeightInfo;
+
 			this.widthDictionary = new Dictionary<GameImage, int>();
 			this.heightDictionary = new Dictionary<GameImage, int>();
 			Script.Eval(@"
@@ -26,14 +30,17 @@ namespace ChessCompStompWithHacks
 					var canvas = null;
 					var context = null;
 					var radianConversion = 1.0 / 128.0 * (2.0 * Math.PI / 360.0);
-					
+					var canvasScalingFactor = " + canvasScalingFactor.ToStringCultureInvariant() + @";
+
 					var numberOfImagesLoaded = 0;
+					var totalNumberOfImages = null;
 					
 					var loadImages = function (imageNames) {
 						var imageNamesArray = imageNames.split(',');
 						
 						var count = 0;
-						
+						totalNumberOfImages = imageNamesArray.length;						
+
 						for (var i = 0; i < imageNamesArray.length; i++) {
 							var imageName = imageNamesArray[i];
 							
@@ -59,6 +66,14 @@ namespace ChessCompStompWithHacks
 						}
 						
 						return numberOfImagesLoaded === imageNamesArray.length;
+					};
+
+					var getNumElementsLoaded = function () {
+						return numberOfImagesLoaded;
+					};
+
+					var getNumTotalElementsToLoad = function () {
+						return totalNumberOfImages;
 					};
 					
 					var drawImageRotatedClockwise = function (imageName, x, y, degreesScaled, scalingFactorScaled) {
@@ -90,7 +105,7 @@ namespace ChessCompStompWithHacks
 						
 						context.drawImage(img, 0, 0);
 									
-						context.setTransform(1, 0, 0, 1, 0, 0);
+						context.setTransform(canvasScalingFactor, 0, 0, canvasScalingFactor, 0, 0);
 					};
 					
 					var drawImageRotatedClockwise2 = function (imageName, imageX, imageY, imageWidth, imageHeight, x, y, degreesScaled, scalingFactorScaled) {
@@ -117,7 +132,7 @@ namespace ChessCompStompWithHacks
 						
 						context.drawImage(img, imageX, imageY, imageWidth, imageHeight, 0, 0, imageWidth, imageHeight);
 									
-						context.setTransform(1, 0, 0, 1, 0, 0);
+						context.setTransform(canvasScalingFactor, 0, 0, canvasScalingFactor, 0, 0);
 					};
 					
 					var getWidth = function (imageName) {
@@ -130,6 +145,8 @@ namespace ChessCompStompWithHacks
 					
 					return {
 						loadImages: loadImages,
+						getNumElementsLoaded: getNumElementsLoaded,
+						getNumTotalElementsToLoad: getNumTotalElementsToLoad,
 						drawImageRotatedClockwise: drawImageRotatedClockwise,
 						drawImageRotatedClockwise2: drawImageRotatedClockwise2,
 						getWidth: getWidth,
@@ -162,12 +179,22 @@ namespace ChessCompStompWithHacks
 				return true;
 			return false;
 		}
-		
+
+		public int GetNumElementsLoaded()
+		{
+			return Script.Call<int>("window.BridgeDisplayImagesJavascript.getNumElementsLoaded");
+		}
+
+		public int? GetNumTotalElementsToLoad()
+		{
+			return Script.Call<int?>("window.BridgeDisplayImagesJavascript.getNumTotalElementsToLoad");
+		}
+
 		public void DrawImageRotatedClockwise(GameImage image, int x, int y, int degreesScaled, int scalingFactorScaled)
 		{
 			int height = this.GetHeight(image: image);
 			int scaledHeight = height * scalingFactorScaled / 128;
-			y = GlobalConstants.WINDOW_HEIGHT - y - scaledHeight;
+			y = this.canvasWidthAndHeightInfo.GetCurrentCanvasHeight() - y - scaledHeight;
 			
 			Script.Call(
 				"window.BridgeDisplayImagesJavascript.drawImageRotatedClockwise",
@@ -182,7 +209,7 @@ namespace ChessCompStompWithHacks
 		{
 			int height = imageHeight;
 			int scaledHeight = height * scalingFactorScaled / 128;
-			y = GlobalConstants.WINDOW_HEIGHT - y - scaledHeight;
+			y = this.canvasWidthAndHeightInfo.GetCurrentCanvasHeight() - y - scaledHeight;
 			
 			Script.Call(
 				"window.BridgeDisplayImagesJavascript.drawImageRotatedClockwise2",

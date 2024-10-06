@@ -19,6 +19,8 @@ namespace ChessCompStompWithHacksLibrary
 		private Button continueButton;
 
 		private IMouse previousMouseInput;
+		private int previousScreenWidth;
+		private int previousScreenHeight;
 
 		private List<Objective> newlyCompletedObjectives;
 		private ObjectiveDisplayUtil objectiveDisplayUtil;
@@ -32,7 +34,9 @@ namespace ChessCompStompWithHacksLibrary
 			bool isPlayerWhite,
 			HashSet<Objective> completedObjectives,
 			HashSet<Objective> objectivesThatWereAlreadyCompletedPriorToThisGame,
-			ColorTheme colorTheme)
+			ColorTheme colorTheme,
+			IDisplayProcessing<GameImage> display,
+			bool isMobileDisplayType)
 		{
 			List<Objective> newlyCompletedObjectives = new List<Objective>();
 			foreach (Objective completedObjective in completedObjectives)
@@ -42,12 +46,20 @@ namespace ChessCompStompWithHacksLibrary
 			}
 			newlyCompletedObjectives.Sort(comparer: new ObjectiveUtil.ObjectiveComparer());
 			this.newlyCompletedObjectives = newlyCompletedObjectives;
-
+			
 			int width = GetWidth(newlyCompletedObjectives: newlyCompletedObjectives);
 			int height = GetHeight(newlyCompletedObjectives: newlyCompletedObjectives);
 
-			this.x = GlobalConstants.WINDOW_WIDTH / 2 - width / 2;
-			this.y = GlobalConstants.WINDOW_HEIGHT / 2 - height / 2;
+			int screenWidth = isMobileDisplayType
+				? display.GetMobileScreenWidth()
+				: GlobalConstants.DESKTOP_WINDOW_WIDTH;
+
+			int screenHeight = isMobileDisplayType
+				? display.GetMobileScreenHeight()
+				: GlobalConstants.DESKTOP_WINDOW_HEIGHT;
+
+			this.x = screenWidth / 2 - width / 2;
+			this.y = screenHeight / 2 - height / 2;
 			this.gameStatus = gameStatus;
 			this.isPlayerWhite = isPlayerWhite;
 			
@@ -55,6 +67,8 @@ namespace ChessCompStompWithHacksLibrary
 			this.mouseDragYStart = null;
 
 			this.previousMouseInput = null;
+			this.previousScreenWidth = screenWidth;
+			this.previousScreenHeight = screenHeight;
 
 			this.continueButton = new Button(
 				x: (width - 150) / 2,
@@ -67,7 +81,8 @@ namespace ChessCompStompWithHacksLibrary
 				text: "Continue",
 				textXOffset: 14,
 				textYOffset: 8,
-				font: GameFont.GameFont20Pt);
+				font: GameFont.GameFont20Pt,
+				isMobileDisplayType: isMobileDisplayType);
 
 			this.objectiveDisplayUtil = new ObjectiveDisplayUtil();
 
@@ -77,7 +92,7 @@ namespace ChessCompStompWithHacksLibrary
 		private static int GetWidth(List<Objective> newlyCompletedObjectives)
 		{
 			if (newlyCompletedObjectives.Count > 0)
-				return 743;
+				return 693;
 			return 300;
 		}
 
@@ -109,7 +124,12 @@ namespace ChessCompStompWithHacksLibrary
 			public bool IsHoverOverPanel { get; private set; }
 		}
 
-		public Result ProcessFrame(IMouse mouseInput, IMouse previousMouseInput, int elapsedMicrosPerFrame)
+		public Result ProcessFrame(
+			IMouse mouseInput,
+			IMouse previousMouseInput,
+			int elapsedMicrosPerFrame,
+			IDisplayProcessing<GameImage> display,
+			bool isMobileDisplayType)
 		{
 			this.elapsedTimeMicros += elapsedMicrosPerFrame;
 			if (this.elapsedTimeMicros > TOTAL_TIME_TO_DISPLAY_COMPLETED_OBJECTIVES)
@@ -120,11 +140,21 @@ namespace ChessCompStompWithHacksLibrary
 			
 			this.previousMouseInput = new CopiedMouse(mouse: mouseInput);
 
+			this.continueButton.SetIsMobileDisplayType(isMobileDisplayType: isMobileDisplayType);
+
 			int mouseX = mouseInput.GetX();
 			int mouseY = mouseInput.GetY();
 
 			int width = GetWidth(newlyCompletedObjectives: this.newlyCompletedObjectives);
 			int height = GetHeight(newlyCompletedObjectives: this.newlyCompletedObjectives);
+
+			int screenWidth = isMobileDisplayType
+				? display.GetMobileScreenWidth()
+				: GlobalConstants.DESKTOP_WINDOW_WIDTH;
+
+			int screenHeight = isMobileDisplayType
+				? display.GetMobileScreenHeight()
+				: GlobalConstants.DESKTOP_WINDOW_HEIGHT;
 
 			IMouse translatedMouse = new TranslatedMouse(mouse: mouseInput, xOffset: -this.x, yOffset: -this.y);
 
@@ -156,11 +186,38 @@ namespace ChessCompStompWithHacksLibrary
 				if (this.y < 0)
 					this.y = 0;
 
-				if (this.x > GlobalConstants.WINDOW_WIDTH - width)
-					this.x = GlobalConstants.WINDOW_WIDTH - width;
+				if (this.x > screenWidth - width)
+					this.x = screenWidth - width;
 
-				if (this.y > GlobalConstants.WINDOW_HEIGHT - height)
-					this.y = GlobalConstants.WINDOW_HEIGHT - height;
+				if (this.y > screenHeight - height)
+					this.y = screenHeight - height;
+			}
+
+			if (screenWidth != this.previousScreenWidth || screenHeight != this.previousScreenHeight)
+			{
+				int panelCenterX = this.x + width / 2;
+				int panelCenterY = this.y + height / 2;
+
+				int newPanelCenterX = panelCenterX * screenWidth / this.previousScreenWidth;
+				int newPanelCenterY = panelCenterY * screenHeight / this.previousScreenHeight;
+
+				this.x = newPanelCenterX - width / 2;
+				this.y = newPanelCenterY - height / 2;
+
+				this.previousScreenWidth = screenWidth;
+				this.previousScreenHeight = screenHeight;
+
+				if (this.x < 0)
+					this.x = 0;
+
+				if (this.y < 0)
+					this.y = 0;
+
+				if (this.x > screenWidth - width)
+					this.x = screenWidth - width;
+
+				if (this.y > screenHeight - height)
+					this.y = screenHeight - height;
 			}
 
 			bool isClicked = this.continueButton.ProcessFrame(
@@ -180,8 +237,8 @@ namespace ChessCompStompWithHacksLibrary
 			displayOutput.DrawRectangle(
 				x: this.x,
 				y: this.y,
-				width: width - 1,
-				height: height - 1,
+				width: width,
+				height: height,
 				color: DTColor.White(),
 				fill: true);
 
@@ -236,7 +293,7 @@ namespace ChessCompStompWithHacksLibrary
 					index = (int)(((long)this.elapsedTimeMicros) * ((long)objectivesText.Length) / ((long)TOTAL_TIME_TO_DISPLAY_COMPLETED_OBJECTIVES));
 
 				displayOutput.DrawText(
-					x: this.x + 40,
+					x: this.x + 15,
 					y: this.y + height - 95,
 					text: index >= objectivesText.Length ? objectivesText : objectivesText.Substring(0, index),
 					font: GameFont.GameFont18Pt,

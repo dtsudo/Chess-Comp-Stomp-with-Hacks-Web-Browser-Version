@@ -9,9 +9,13 @@ namespace ChessCompStompWithHacks
 
 	public class BridgeDisplayFont
 	{
-		public BridgeDisplayFont()
+		private BridgeDisplay.ICanvasWidthAndHeightInfo canvasWidthAndHeightInfo;
+
+		public BridgeDisplayFont(BridgeDisplay.ICanvasWidthAndHeightInfo canvasWidthAndHeightInfo)
 		{
-			Script.Eval(@"
+			this.canvasWidthAndHeightInfo = canvasWidthAndHeightInfo;
+
+			Script.Write(@"
 				window.BridgeDisplayFontJavascript = ((function () {
 					'use strict';
 					
@@ -21,13 +25,14 @@ namespace ChessCompStompWithHacks
 					
 					var fontFamilyCount = 0;
 					var numberOfFontObjectsLoaded = 0;
+					var numberOfFontObjects = null;					
 					
 					var finishedLoading = false;
 					
 					var loadFonts = function (fontNames) {
 						var fontNamesArray = fontNames.split(',');
 						
-						var numberOfFontObjects = fontNamesArray.length;
+						numberOfFontObjects = fontNamesArray.length;
 						
 						for (var i = 0; i < fontNamesArray.length; i++) {
 							var fontName = fontNamesArray[i];
@@ -55,6 +60,14 @@ namespace ChessCompStompWithHacks
 						
 						finishedLoading = numberOfFontObjects === numberOfFontObjectsLoaded;
 						return finishedLoading;
+					};
+
+					var getNumElementsLoaded = function () {
+						return numberOfFontObjectsLoaded;
+					};
+
+					var getNumTotalElementsToLoad = function () {
+						return numberOfFontObjects;
 					};
 						
 					var drawText = function (x, y, str, fontName, javascriptFontSize, lineHeight, red, green, blue, alpha) {
@@ -92,6 +105,8 @@ namespace ChessCompStompWithHacks
 						
 					return {
 						loadFonts: loadFonts,
+						getNumElementsLoaded: getNumElementsLoaded,
+						getNumTotalElementsToLoad: getNumTotalElementsToLoad,
 						drawText: drawText,
 						tryDrawText: tryDrawText
 					};
@@ -123,10 +138,20 @@ namespace ChessCompStompWithHacks
 			
 			return Script.Eval<bool>("window.BridgeDisplayFontJavascript.loadFonts('" + woffFontFilenamesAsString + "')");
 		}
-		
+
+		public int GetNumElementsLoaded()
+		{
+			return Script.Call<int>("window.BridgeDisplayFontJavascript.getNumElementsLoaded");
+		}
+
+		public int? GetNumTotalElementsToLoad()
+		{
+			return Script.Call<int?>("window.BridgeDisplayFontJavascript.getNumTotalElementsToLoad");
+		}
+
 		public void DrawText(int x, int y, string text, GameFont font, DTColor color)
 		{
-			y = GlobalConstants.WINDOW_HEIGHT - y - 1;
+			y = this.canvasWidthAndHeightInfo.GetCurrentCanvasHeight() - y - 1;
 
 			int red = color.R;
 			int green = color.G;
@@ -151,7 +176,7 @@ namespace ChessCompStompWithHacks
 		
 		public void TryDrawText(int x, int y, string text, GameFont font, DTColor color)
 		{
-			y = GlobalConstants.WINDOW_HEIGHT - y - 1;
+			y = this.canvasWidthAndHeightInfo.GetCurrentCanvasHeight() - y - 1;
 
 			int red = color.R;
 			int green = color.G;

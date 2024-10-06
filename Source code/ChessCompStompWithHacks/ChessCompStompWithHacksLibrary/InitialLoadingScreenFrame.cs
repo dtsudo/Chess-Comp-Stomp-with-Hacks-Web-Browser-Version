@@ -7,10 +7,15 @@ namespace ChessCompStompWithHacksLibrary
 	public class InitialLoadingScreenFrame : IFrame<GameImage, GameFont, GameSound, GameMusic>
 	{
 		private GlobalState globalState;
+		private DisplayType displayType;
+
+		private string loadingText;
 
 		public InitialLoadingScreenFrame(GlobalState globalState)
 		{
 			this.globalState = globalState;
+			this.displayType = DisplayType.Desktop;
+			this.loadingText = "";
 		}
 
 		public void ProcessExtraTime(int milliseconds)
@@ -25,6 +30,13 @@ namespace ChessCompStompWithHacksLibrary
 		public HashSet<string> GetCompletedAchievements()
 		{
 			return new HashSet<string>();
+		}
+
+		public IFrame<GameImage, GameFont, GameSound, GameMusic> ProcessDisplayType(DisplayType displayType, IDisplayProcessing<GameImage> displayProcessing)
+		{
+			this.displayType = displayType;
+
+			return this;
 		}
 
 		public IFrame<GameImage, GameFont, GameSound, GameMusic> GetNextFrame(
@@ -45,6 +57,30 @@ namespace ChessCompStompWithHacksLibrary
 
 			if (returnValue != null)
 				return returnValue;
+			
+			this.loadingText = "Loading...";
+
+			if (this.globalState.DebugMode)
+			{
+				this.loadingText += "\n";
+				int? numImageElementsToLoad = displayProcessing.GetNumTotalElementsToLoad();
+				if (numImageElementsToLoad.HasValue)
+					this.loadingText += "Images: " + displayProcessing.GetNumElementsLoaded().ToStringCultureInvariant() + " / " + numImageElementsToLoad.Value.ToStringCultureInvariant() + "\n";
+				else
+					this.loadingText += "Images: pending \n";
+
+				int? numSoundElementsToLoad = soundOutput.GetNumTotalElementsToLoad();
+				if (numSoundElementsToLoad.HasValue)
+					this.loadingText += "Sound: " + soundOutput.GetNumElementsLoaded().ToStringCultureInvariant() + " / " + numSoundElementsToLoad.Value.ToStringCultureInvariant() + "\n";
+				else
+					this.loadingText += "Sound: pending \n";
+
+				int? numMusicElementsToLoad = musicProcessing.GetNumTotalElementsToLoad();
+				if (numMusicElementsToLoad.HasValue)
+					this.loadingText += "Music: " + musicProcessing.GetNumElementsLoaded().ToStringCultureInvariant() + " / " + numMusicElementsToLoad.Value.ToStringCultureInvariant();
+				else
+					this.loadingText += "Music: pending";
+			}
 
 			return this;
 		}
@@ -78,8 +114,12 @@ namespace ChessCompStompWithHacksLibrary
 			
 			GameMusic music = GameMusic.TitleScreen;
 			this.globalState.MusicPlayer.SetMusic(music: music, volume: 100);
-
-			return new TitleScreenFrame(globalState: this.globalState, sessionState: sessionState);
+			
+			return TitleScreenFrame.GetTitleScreenFrame(
+				globalState: this.globalState,
+				sessionState: sessionState,
+				displayType: this.displayType,
+				display: displayProcessing);
 		}
 
 		public void ProcessMusic()
@@ -91,17 +131,25 @@ namespace ChessCompStompWithHacksLibrary
 			displayOutput.DrawRectangle(
 				x: 0,
 				y: 0,
-				width: GlobalConstants.WINDOW_WIDTH,
-				height: GlobalConstants.WINDOW_HEIGHT,
+				width: this.displayType == DisplayType.Desktop ? GlobalConstants.DESKTOP_WINDOW_WIDTH : displayOutput.GetMobileScreenWidth(),
+				height: this.displayType == DisplayType.Desktop ? GlobalConstants.DESKTOP_WINDOW_HEIGHT : displayOutput.GetMobileScreenHeight(),
 				color: new DTColor(223, 220, 217),
 				fill: true);
-
-			displayOutput.TryDrawText(
-				x: 440,
-				y: 400,
-				text: "Loading...",
-				font: GameFont.GameFont20Pt,
-				color: DTColor.Black());
+			
+			if (this.displayType == DisplayType.Desktop)
+				displayOutput.TryDrawText(
+					x: 440,
+					y: 400,
+					text: this.loadingText,
+					font: GameFont.GameFont20Pt,
+					color: DTColor.Black());
+			else
+				displayOutput.TryDrawText(
+					x: displayOutput.GetMobileScreenWidth() / 2 - 78,
+					y: displayOutput.GetMobileScreenHeight() / 2 + 100,
+					text: this.loadingText,
+					font: GameFont.GameFont32Pt,
+					color: DTColor.Black());
 		}
 
 		public void RenderMusic(IMusicOutput<GameMusic> musicOutput)

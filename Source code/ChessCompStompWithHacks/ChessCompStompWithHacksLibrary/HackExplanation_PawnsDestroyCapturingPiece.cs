@@ -212,26 +212,38 @@ namespace ChessCompStompWithHacksLibrary
 				elapsedMicrosPerFrame: elapsedMicrosPerFrame);
 		}
 
-		public void Render(IDisplayOutput<GameImage, GameFont> displayOutput)
+		public void Render(IDisplayOutput<GameImage, GameFont> displayOutput, bool isMobileDisplayType)
 		{
+			bool isMobilePortrait = isMobileDisplayType && !displayOutput.IsMobileInLandscapeOrientation();
+
 			displayOutput.DrawText(
-				x: 331,
-				y: HackExplanationFrameUtil.TITLE_TEXT_Y_OFFSET,
+				x: isMobilePortrait ? 181 : 331,
+				y: isMobilePortrait ? HackExplanationFrameUtil.TITLE_TEXT_Y_OFFSET_MOBILE_PORTRAIT : HackExplanationFrameUtil.TITLE_TEXT_Y_OFFSET_DESKTOP_AND_MOBILE_LANDSCAPE,
 				text: Hack.PawnsDestroyCapturingPiece.GetHackNameForHackExplanationPanel(),
 				font: GameFont.GameFont20Pt,
 				color: DTColor.Black());
 
-			string explanation = "When any of your pawns are" + "\n"
-				+ "captured, the capturing piece" + "\n"
-				+ "is also removed from the" + "\n"
-				+ "board." + "\n"
-				+ "\n"
-				+ "Your opponent's king cannot" + "\n"
-				+ "capture your pawns.";
+			string explanation;
+
+			if (isMobilePortrait)
+				explanation = "When any of your pawns are captured, the" + "\n"
+					+ "capturing piece is also removed from the" + "\n"
+					+ "board." + "\n"
+					+ "\n"
+					+ "Your opponent's king cannot capture your" + "\n"
+					+ "pawns.";
+			else
+				explanation = "When any of your pawns are" + "\n"
+					+ "captured, the capturing piece" + "\n"
+					+ "is also removed from the" + "\n"
+					+ "board." + "\n"
+					+ "\n"
+					+ "Your opponent's king cannot" + "\n"
+					+ "capture your pawns.";
 
 			displayOutput.DrawText(
-				x: HackExplanationFrameUtil.EXPLANATION_TEXT_X_OFFSET,
-				y: HackExplanationFrameUtil.EXPLANATION_TEXT_Y_OFFSET,
+				x: isMobilePortrait ? HackExplanationFrameUtil.EXPLANATION_TEXT_X_OFFSET_MOBILE_PORTRAIT : HackExplanationFrameUtil.EXPLANATION_TEXT_X_OFFSET_DESKTOP_AND_MOBILE_LANDSCAPE,
+				y: isMobilePortrait ? HackExplanationFrameUtil.EXPLANATION_TEXT_Y_OFFSET_MOBILE_PORTRAIT : HackExplanationFrameUtil.EXPLANATION_TEXT_Y_OFFSET_DESKTOP_AND_MOBILE_LANDSCAPE,
 				text: explanation,
 				font: GameFont.GameFont16Pt,
 				color: DTColor.Black());
@@ -239,15 +251,19 @@ namespace ChessCompStompWithHacksLibrary
 			this.chessPiecesRenderer.Render(
 				displayOutput: new TranslatedDisplayOutput<GameImage, GameFont>(
 					display: displayOutput,
-					xOffsetInPixels: HackExplanationFrameUtil.CHESS_PIECES_RENDERER_X_OFFSET,
-					yOffsetInPixels: HackExplanationFrameUtil.CHESS_PIECES_RENDERER_Y_OFFSET),
-				chessPiecesRendererPieceAnimation: this.chessPiecesRendererPieceAnimation);
+					xOffsetInPixels: isMobilePortrait ? HackExplanationFrameUtil.CHESS_PIECES_RENDERER_X_OFFSET_MOBILE_PORTRAIT : HackExplanationFrameUtil.CHESS_PIECES_RENDERER_X_OFFSET_DESKTOP_AND_MOBILE_LANDSCAPE,
+					yOffsetInPixels: isMobilePortrait ? HackExplanationFrameUtil.CHESS_PIECES_RENDERER_Y_OFFSET_MOBILE_PORTRAIT : HackExplanationFrameUtil.CHESS_PIECES_RENDERER_Y_OFFSET_DESKTOP_AND_MOBILE_LANDSCAPE),
+				chessPiecesRendererPieceAnimation: this.chessPiecesRendererPieceAnimation,
+				chessPieceScalingFactor: GameImageUtil.HackExplanationChessPieceScalingFactor,
+				isMobileDisplayType: isMobileDisplayType);
 
 			if (this.chessPiecesRendererFadeOutFadeIn != null)
-				this.chessPiecesRendererFadeOutFadeIn.Render(displayOutput: new TranslatedDisplayOutput<GameImage, GameFont>(
-					display: displayOutput,
-					xOffsetInPixels: HackExplanationFrameUtil.CHESS_PIECES_RENDERER_X_OFFSET,
-					yOffsetInPixels: HackExplanationFrameUtil.CHESS_PIECES_RENDERER_Y_OFFSET));
+				this.chessPiecesRendererFadeOutFadeIn.Render(
+					displayOutput: new TranslatedDisplayOutput<GameImage, GameFont>(
+						display: displayOutput,
+						xOffsetInPixels: isMobilePortrait ? HackExplanationFrameUtil.CHESS_PIECES_RENDERER_X_OFFSET_MOBILE_PORTRAIT : HackExplanationFrameUtil.CHESS_PIECES_RENDERER_X_OFFSET_DESKTOP_AND_MOBILE_LANDSCAPE,
+						yOffsetInPixels: isMobilePortrait ? HackExplanationFrameUtil.CHESS_PIECES_RENDERER_Y_OFFSET_MOBILE_PORTRAIT : HackExplanationFrameUtil.CHESS_PIECES_RENDERER_Y_OFFSET_DESKTOP_AND_MOBILE_LANDSCAPE),
+					chessPieceScalingFactor: GameImageUtil.HackExplanationChessPieceScalingFactor);
 		}
 	}
 }

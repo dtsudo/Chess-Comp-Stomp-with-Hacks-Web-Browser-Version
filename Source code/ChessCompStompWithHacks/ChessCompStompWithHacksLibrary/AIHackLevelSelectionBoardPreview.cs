@@ -39,7 +39,7 @@ namespace ChessCompStompWithHacksLibrary
 				width: width * 8 + 20,
 				height: height * 8 + 20,
 				color: DTColor.White(),
-				fill:true );
+				fill: true);
 
 			DTColor darkSquareColor = ChessPiecesRenderer.GetDarkSquareColor(colorTheme: ColorTheme.Final);
 			DTColor lightSquareColor = ChessPiecesRenderer.GetLightSquareColor(colorTheme: ColorTheme.Final);

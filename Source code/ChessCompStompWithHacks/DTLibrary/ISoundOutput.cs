@@ -10,6 +10,10 @@ namespace DTLibrary
 		/// </summary>
 		bool LoadSounds();
 
+		int GetNumElementsLoaded();
+
+		int? GetNumTotalElementsToLoad();
+
 		/// <summary>
 		/// Volume ranges from 0 to 100 (both inclusive)
 		/// </summary>

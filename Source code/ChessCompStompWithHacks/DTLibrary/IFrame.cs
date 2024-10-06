@@ -11,6 +11,8 @@ namespace DTLibrary
 		void RenderMusic(IMusicOutput<MusicEnum> musicOutput);
 		void ProcessExtraTime(int milliseconds);
 
+		IFrame<ImageEnum, FontEnum, SoundEnum, MusicEnum> ProcessDisplayType(DisplayType displayType, IDisplayProcessing<ImageEnum> displayProcessing);
+
 		string GetClickUrl();
 		HashSet<string> GetCompletedAchievements();
 	}

@@ -10,8 +10,8 @@ namespace ChessCompStompWithHacksLibrary
 		{
 			VersionInfo versionInfo = VersionHistory.GetVersionInfo();
 
-			if (versionInfo.Version == "1.02")
-				SavedDataMigration_ToV1_02.MigrateAllDataFromOlderVersionsToV1_02IfNeeded(fileIO: globalState.FileIO);
+			if (versionInfo.Version == "1.03")
+				SavedDataMigration_ToV1_03.MigrateAllDataFromOlderVersionsToV1_03IfNeeded(fileIO: globalState.FileIO);
 			else
 				throw new Exception();
 

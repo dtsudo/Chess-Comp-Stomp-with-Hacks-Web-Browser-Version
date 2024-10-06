@@ -20,6 +20,7 @@ namespace ChessCompStompWithHacksLibrary
 			list.Add(new VersionInfo(version: "1.00", alphanumericVersionGuid: "9958487281526502"));
 			list.Add(new VersionInfo(version: "1.01", alphanumericVersionGuid: "4655654740627213"));
 			list.Add(new VersionInfo(version: "1.02", alphanumericVersionGuid: "5737942911566923"));
+			list.Add(new VersionInfo(version: "1.03", alphanumericVersionGuid: "6315541360892856"));
 
 			return list;
 		}

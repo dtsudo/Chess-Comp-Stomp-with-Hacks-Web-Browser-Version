@@ -1,20 +1,31 @@
 
 namespace ChessCompStompWithHacks
 {
+	using Bridge;
 	using ChessCompStompWithHacksLibrary;
 	using DTLibrary;
 
 	public class BridgeDisplay : DTDisplay<GameImage, GameFont>
 	{
+		public interface ICanvasWidthAndHeightInfo
+		{
+			int GetCurrentCanvasWidth();
+			int GetCurrentCanvasHeight();
+		}
+
+		private ICanvasWidthAndHeightInfo canvasWidthAndHeightInfo;
+
 		private BridgeDisplayRectangle bridgeDisplayRectangle;
 		private BridgeDisplayImages bridgeDisplayImages;
 		private BridgeDisplayFont bridgeDisplayFont;
-		
-		public BridgeDisplay()
+
+		public BridgeDisplay(ICanvasWidthAndHeightInfo canvasWidthAndHeightInfo, int canvasScalingFactor)
 		{
-			this.bridgeDisplayRectangle = new BridgeDisplayRectangle();
-			this.bridgeDisplayImages = new BridgeDisplayImages();
-			this.bridgeDisplayFont = new BridgeDisplayFont();
+			this.canvasWidthAndHeightInfo = canvasWidthAndHeightInfo;
+
+			this.bridgeDisplayRectangle = new BridgeDisplayRectangle(canvasWidthAndHeightInfo: canvasWidthAndHeightInfo);
+			this.bridgeDisplayImages = new BridgeDisplayImages(canvasWidthAndHeightInfo: canvasWidthAndHeightInfo, canvasScalingFactor: canvasScalingFactor);
+			this.bridgeDisplayFont = new BridgeDisplayFont(canvasWidthAndHeightInfo: canvasWidthAndHeightInfo);
 		}
 		
 		public override void DrawInitialLoadingScreen()
@@ -34,14 +45,30 @@ namespace ChessCompStompWithHacks
 		
 		public override bool LoadImages()
 		{
+			bool finishedLoadingFonts = this.bridgeDisplayFont.LoadFonts();
 			bool finishedLoadingImages = this.bridgeDisplayImages.LoadImages();
 			
-			if (!finishedLoadingImages)
-				return false;
-			
-			return this.bridgeDisplayFont.LoadFonts();
+			return finishedLoadingImages && finishedLoadingFonts;
 		}
-		
+
+		public override int GetNumElementsLoaded()
+		{
+			return this.bridgeDisplayImages.GetNumElementsLoaded() + this.bridgeDisplayFont.GetNumElementsLoaded();
+		}
+
+		public override int? GetNumTotalElementsToLoad()
+		{
+			int? numImageElements = this.bridgeDisplayImages.GetNumTotalElementsToLoad();
+			int? numFontElements = this.bridgeDisplayFont.GetNumTotalElementsToLoad();
+
+			if (!numImageElements.HasValue)
+				return null;
+			if (!numFontElements.HasValue)
+				return null;
+
+			return numImageElements.Value + numFontElements.Value;
+		}
+
 		public override void DrawImageRotatedClockwise(GameImage image, int x, int y, int degreesScaled, int scalingFactorScaled)
 		{
 			this.bridgeDisplayImages.DrawImageRotatedClockwise(
@@ -98,6 +125,23 @@ namespace ChessCompStompWithHacks
 		
 		public override void DisposeImages()
 		{
+		}
+
+		public override int GetMobileScreenWidth()
+		{
+			return this.canvasWidthAndHeightInfo.GetCurrentCanvasWidth();
+		}
+
+		public override int GetMobileScreenHeight()
+		{
+			return this.canvasWidthAndHeightInfo.GetCurrentCanvasHeight();
+		}
+
+		public override string Debug_GetBrowserInfo(string stringToEval)
+		{
+			string result = Script.Eval<string>(stringToEval);
+
+			return result + "";
 		}
 	}
 }

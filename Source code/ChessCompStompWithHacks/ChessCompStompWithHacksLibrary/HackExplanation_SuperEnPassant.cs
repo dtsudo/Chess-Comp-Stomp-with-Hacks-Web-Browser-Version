@@ -175,31 +175,45 @@ namespace ChessCompStompWithHacksLibrary
 				elapsedMicrosPerFrame: elapsedMicrosPerFrame);
 		}
 
-		public void Render(IDisplayOutput<GameImage, GameFont> displayOutput)
+		public void Render(IDisplayOutput<GameImage, GameFont> displayOutput, bool isMobileDisplayType)
 		{
+			bool isMobilePortrait = isMobileDisplayType && !displayOutput.IsMobileInLandscapeOrientation();
+
 			displayOutput.DrawText(
-				x: 333,
-				y: HackExplanationFrameUtil.TITLE_TEXT_Y_OFFSET,
+				x: isMobilePortrait ? 183 : 333,
+				y: isMobilePortrait ? HackExplanationFrameUtil.TITLE_TEXT_Y_OFFSET_MOBILE_PORTRAIT : HackExplanationFrameUtil.TITLE_TEXT_Y_OFFSET_DESKTOP_AND_MOBILE_LANDSCAPE,
 				text: Hack.SuperEnPassant.GetHackNameForHackExplanationPanel(),
 				font: GameFont.GameFont20Pt,
 				color: DTColor.Black());
 
-			string explanation = "Your pawns may capture" + "\n"
-				+ "enemy pieces that are" + "\n"
-				+ "horizontally adjacent to the" + "\n"
-				+ "pawn." + "\n"
-				+ "\n"
-				+ "Super en passant is allowed" + "\n"
-				+ "regardless of when or how" + "\n"
-				+ "the enemy piece moved." + "\n"
-				+ "\n"
-				+ "The pawn may capture super" + "\n"
-				+ "en passant regardless of" + "\n"
-				+ "which rank the pawn is on.";
+			string explanation;
+
+			if (isMobilePortrait)
+				explanation = "Your pawns may capture enemy pieces that" + "\n"
+					+ "are horizontally adjacent to the pawn." + "\n"
+					+ "\n"
+					+ "Super en passant is allowed regardless of" + "\n"
+					+ "when or how the enemy piece moved." + "\n"
+					+ "\n"
+					+ "The pawn may capture super en passant" + "\n"
+					+ "regardless of which rank the pawn is on.";
+			else
+				explanation = "Your pawns may capture" + "\n"
+					+ "enemy pieces that are" + "\n"
+					+ "horizontally adjacent to the" + "\n"
+					+ "pawn." + "\n"
+					+ "\n"
+					+ "Super en passant is allowed" + "\n"
+					+ "regardless of when or how" + "\n"
+					+ "the enemy piece moved." + "\n"
+					+ "\n"
+					+ "The pawn may capture super" + "\n"
+					+ "en passant regardless of" + "\n"
+					+ "which rank the pawn is on.";
 
 			displayOutput.DrawText(
-				x: HackExplanationFrameUtil.EXPLANATION_TEXT_X_OFFSET,
-				y: HackExplanationFrameUtil.EXPLANATION_TEXT_Y_OFFSET,
+				x: isMobilePortrait ? HackExplanationFrameUtil.EXPLANATION_TEXT_X_OFFSET_MOBILE_PORTRAIT : HackExplanationFrameUtil.EXPLANATION_TEXT_X_OFFSET_DESKTOP_AND_MOBILE_LANDSCAPE,
+				y: isMobilePortrait ? HackExplanationFrameUtil.EXPLANATION_TEXT_Y_OFFSET_MOBILE_PORTRAIT : HackExplanationFrameUtil.EXPLANATION_TEXT_Y_OFFSET_DESKTOP_AND_MOBILE_LANDSCAPE,
 				text: explanation,
 				font: GameFont.GameFont16Pt,
 				color: DTColor.Black());
@@ -207,15 +221,19 @@ namespace ChessCompStompWithHacksLibrary
 			this.chessPiecesRenderer.Render(
 				displayOutput: new TranslatedDisplayOutput<GameImage, GameFont>(
 					display: displayOutput,
-					xOffsetInPixels: HackExplanationFrameUtil.CHESS_PIECES_RENDERER_X_OFFSET,
-					yOffsetInPixels: HackExplanationFrameUtil.CHESS_PIECES_RENDERER_Y_OFFSET),
-				chessPiecesRendererPieceAnimation: this.chessPiecesRendererPieceAnimation);
+					xOffsetInPixels: isMobilePortrait ? HackExplanationFrameUtil.CHESS_PIECES_RENDERER_X_OFFSET_MOBILE_PORTRAIT : HackExplanationFrameUtil.CHESS_PIECES_RENDERER_X_OFFSET_DESKTOP_AND_MOBILE_LANDSCAPE,
+					yOffsetInPixels: isMobilePortrait ? HackExplanationFrameUtil.CHESS_PIECES_RENDERER_Y_OFFSET_MOBILE_PORTRAIT : HackExplanationFrameUtil.CHESS_PIECES_RENDERER_Y_OFFSET_DESKTOP_AND_MOBILE_LANDSCAPE),
+				chessPiecesRendererPieceAnimation: this.chessPiecesRendererPieceAnimation,
+				chessPieceScalingFactor: GameImageUtil.HackExplanationChessPieceScalingFactor,
+				isMobileDisplayType: isMobileDisplayType);
 
 			if (this.chessPiecesRendererFadeOutFadeIn != null)
-				this.chessPiecesRendererFadeOutFadeIn.Render(displayOutput: new TranslatedDisplayOutput<GameImage, GameFont>(
-					display: displayOutput,
-					xOffsetInPixels: HackExplanationFrameUtil.CHESS_PIECES_RENDERER_X_OFFSET,
-					yOffsetInPixels: HackExplanationFrameUtil.CHESS_PIECES_RENDERER_Y_OFFSET));
+				this.chessPiecesRendererFadeOutFadeIn.Render(
+					displayOutput: new TranslatedDisplayOutput<GameImage, GameFont>(
+						display: displayOutput,
+						xOffsetInPixels: isMobilePortrait ? HackExplanationFrameUtil.CHESS_PIECES_RENDERER_X_OFFSET_MOBILE_PORTRAIT : HackExplanationFrameUtil.CHESS_PIECES_RENDERER_X_OFFSET_DESKTOP_AND_MOBILE_LANDSCAPE,
+						yOffsetInPixels: isMobilePortrait ? HackExplanationFrameUtil.CHESS_PIECES_RENDERER_Y_OFFSET_MOBILE_PORTRAIT : HackExplanationFrameUtil.CHESS_PIECES_RENDERER_Y_OFFSET_DESKTOP_AND_MOBILE_LANDSCAPE),
+					chessPieceScalingFactor: GameImageUtil.HackExplanationChessPieceScalingFactor);
 		}
 	}
 }

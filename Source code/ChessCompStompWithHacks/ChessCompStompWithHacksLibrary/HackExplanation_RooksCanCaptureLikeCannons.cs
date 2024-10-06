@@ -264,23 +264,32 @@ namespace ChessCompStompWithHacksLibrary
 				elapsedMicrosPerFrame: elapsedMicrosPerFrame);
 		}
 
-		public void Render(IDisplayOutput<GameImage, GameFont> displayOutput)
+		public void Render(IDisplayOutput<GameImage, GameFont> displayOutput, bool isMobileDisplayType)
 		{
+			bool isMobilePortrait = isMobileDisplayType && !displayOutput.IsMobileInLandscapeOrientation();
+
 			displayOutput.DrawText(
-				x: 382,
-				y: HackExplanationFrameUtil.TITLE_TEXT_Y_OFFSET,
+				x: isMobilePortrait ? 232 : 382,
+				y: isMobilePortrait ? HackExplanationFrameUtil.TITLE_TEXT_Y_OFFSET_MOBILE_PORTRAIT : HackExplanationFrameUtil.TITLE_TEXT_Y_OFFSET_DESKTOP_AND_MOBILE_LANDSCAPE,
 				text: Hack.RooksCanCaptureLikeCannons.GetHackNameForHackExplanationPanel(),
 				font: GameFont.GameFont20Pt,
 				color: DTColor.Black());
 
-			string explanation = "Your rooks may capture" + "\n"
-				+ "enemy pieces even if there is" + "\n"
-				+ "a piece between your rook" + "\n"
-				+ "and the piece being captured.";
+			string explanation;
+
+			if (isMobilePortrait)
+				explanation = "Your rooks may capture enemy pieces even if" + "\n"
+					+ "there is a piece between your rook and the" + "\n"
+					+ "piece being captured.";
+			else
+				explanation = "Your rooks may capture" + "\n"
+					+ "enemy pieces even if there is" + "\n"
+					+ "a piece between your rook" + "\n"
+					+ "and the piece being captured.";
 
 			displayOutput.DrawText(
-				x: HackExplanationFrameUtil.EXPLANATION_TEXT_X_OFFSET,
-				y: HackExplanationFrameUtil.EXPLANATION_TEXT_Y_OFFSET,
+				x: isMobilePortrait ? HackExplanationFrameUtil.EXPLANATION_TEXT_X_OFFSET_MOBILE_PORTRAIT : HackExplanationFrameUtil.EXPLANATION_TEXT_X_OFFSET_DESKTOP_AND_MOBILE_LANDSCAPE,
+				y: isMobilePortrait ? HackExplanationFrameUtil.EXPLANATION_TEXT_Y_OFFSET_MOBILE_PORTRAIT : HackExplanationFrameUtil.EXPLANATION_TEXT_Y_OFFSET_DESKTOP_AND_MOBILE_LANDSCAPE,
 				text: explanation,
 				font: GameFont.GameFont16Pt,
 				color: DTColor.Black());
@@ -288,15 +297,19 @@ namespace ChessCompStompWithHacksLibrary
 			this.chessPiecesRenderer.Render(
 				displayOutput: new TranslatedDisplayOutput<GameImage, GameFont>(
 					display: displayOutput,
-					xOffsetInPixels: HackExplanationFrameUtil.CHESS_PIECES_RENDERER_X_OFFSET,
-					yOffsetInPixels: HackExplanationFrameUtil.CHESS_PIECES_RENDERER_Y_OFFSET),
-				chessPiecesRendererPieceAnimation: this.chessPiecesRendererPieceAnimation);
+					xOffsetInPixels: isMobilePortrait ? HackExplanationFrameUtil.CHESS_PIECES_RENDERER_X_OFFSET_MOBILE_PORTRAIT : HackExplanationFrameUtil.CHESS_PIECES_RENDERER_X_OFFSET_DESKTOP_AND_MOBILE_LANDSCAPE,
+					yOffsetInPixels: isMobilePortrait ? HackExplanationFrameUtil.CHESS_PIECES_RENDERER_Y_OFFSET_MOBILE_PORTRAIT : HackExplanationFrameUtil.CHESS_PIECES_RENDERER_Y_OFFSET_DESKTOP_AND_MOBILE_LANDSCAPE),
+				chessPiecesRendererPieceAnimation: this.chessPiecesRendererPieceAnimation,
+				chessPieceScalingFactor: GameImageUtil.HackExplanationChessPieceScalingFactor,
+				isMobileDisplayType: isMobileDisplayType);
 
 			if (this.chessPiecesRendererFadeOutFadeIn != null)
-				this.chessPiecesRendererFadeOutFadeIn.Render(displayOutput: new TranslatedDisplayOutput<GameImage, GameFont>(
-					display: displayOutput,
-					xOffsetInPixels: HackExplanationFrameUtil.CHESS_PIECES_RENDERER_X_OFFSET,
-					yOffsetInPixels: HackExplanationFrameUtil.CHESS_PIECES_RENDERER_Y_OFFSET));
+				this.chessPiecesRendererFadeOutFadeIn.Render(
+					displayOutput: new TranslatedDisplayOutput<GameImage, GameFont>(
+						display: displayOutput,
+						xOffsetInPixels: isMobilePortrait ? HackExplanationFrameUtil.CHESS_PIECES_RENDERER_X_OFFSET_MOBILE_PORTRAIT : HackExplanationFrameUtil.CHESS_PIECES_RENDERER_X_OFFSET_DESKTOP_AND_MOBILE_LANDSCAPE,
+						yOffsetInPixels: isMobilePortrait ? HackExplanationFrameUtil.CHESS_PIECES_RENDERER_Y_OFFSET_MOBILE_PORTRAIT : HackExplanationFrameUtil.CHESS_PIECES_RENDERER_Y_OFFSET_DESKTOP_AND_MOBILE_LANDSCAPE),
+					chessPieceScalingFactor: GameImageUtil.HackExplanationChessPieceScalingFactor);
 		}
 	}
 }

@@ -30,14 +30,14 @@ namespace ChessCompStompWithHacksLibrary
 		
 		public class MusicFilenameInfo
 		{
-			public MusicFilenameInfo(string defaultFilename, string wavFilename)
+			public MusicFilenameInfo(string oggFilename, string flacFilename)
 			{
-				this.DefaultFilename = defaultFilename;
-				this.WavFilename = wavFilename;
+				this.OggFilename = oggFilename;
+				this.FlacFilename = flacFilename;
 			}
 
-			public string DefaultFilename { get; private set; }
-			public string WavFilename { get; private set; }
+			public string OggFilename { get; private set; }
+			public string FlacFilename { get; private set; }
 		}
 
 		public static MusicFilenameInfo GetMusicFilename(this GameMusic music)
@@ -46,24 +46,24 @@ namespace ChessCompStompWithHacksLibrary
 			{
 				case GameMusic.TitleScreen:
 					return new MusicFilenameInfo(
-						defaultFilename: "JuhaniJunkala/TitleScreen.ogg",
-						wavFilename: "JuhaniJunkala/TitleScreen.wav");
+						oggFilename: "JuhaniJunkala/TitleScreen.ogg",
+						flacFilename: "JuhaniJunkala/TitleScreen.flac");
 				case GameMusic.Level1:
 					return new MusicFilenameInfo(
-						defaultFilename: "JuhaniJunkala/Level1.ogg",
-						wavFilename: "JuhaniJunkala/Level1.wav");
+						oggFilename: "JuhaniJunkala/Level1.ogg",
+						flacFilename: "JuhaniJunkala/Level1.flac");
 				case GameMusic.Level2:
 					return new MusicFilenameInfo(
-						defaultFilename: "JuhaniJunkala/Level2.ogg",
-						wavFilename: "JuhaniJunkala/Level2.wav");
+						oggFilename: "JuhaniJunkala/Level2.ogg",
+						flacFilename: "JuhaniJunkala/Level2.flac");
 				case GameMusic.Level3: 
 					return new MusicFilenameInfo(
-						defaultFilename: "JuhaniJunkala/Level3.ogg",
-						wavFilename: "JuhaniJunkala/Level3.wav");
+						oggFilename: "JuhaniJunkala/Level3.ogg",
+						flacFilename: "JuhaniJunkala/Level3.flac");
 				case GameMusic.Ending: 
 					return new MusicFilenameInfo(
-						defaultFilename: "JuhaniJunkala/Ending.ogg",
-						wavFilename: "JuhaniJunkala/Ending.wav");
+						oggFilename: "JuhaniJunkala/Ending.ogg",
+						flacFilename: "JuhaniJunkala/Ending.flac");
 				default: throw new Exception();
 			}
 		}

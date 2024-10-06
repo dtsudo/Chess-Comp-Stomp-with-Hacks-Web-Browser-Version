@@ -9,13 +9,67 @@ namespace ChessCompStompWithHacksLibrary
 
 	public class GameLogic
 	{
+		private class Coordinates
+		{
+			public int ChessPiecesRendererX { get; private set; }
+			public int ChessPiecesRendererY { get; private set; }
+			public int ChessPieceScalingFactor { get; private set; }
+
+			public int NukeRendererX { get; private set; }
+			public int NukeRendererY { get; private set; }
+			
+			public int MoveTrackerRendererX { get; private set; }
+			public int MoveTrackerRendererY { get; private set; }
+
+			public int NukeRendererScalingFactorScaled { get; private set; }
+
+			public Coordinates(DisplayType displayType)
+			{
+				switch (displayType)
+				{
+					case DisplayType.Desktop:
+						this.ChessPiecesRendererX = 25 + 136 + 25;
+						this.ChessPiecesRendererY = 50;
+						this.ChessPieceScalingFactor = GameImageUtil.DesktopChessPieceScalingFactor;
+						this.NukeRendererX = 25;
+						this.NukeRendererY = 50;
+						this.MoveTrackerRendererX = 720;
+						this.MoveTrackerRendererY = 208;
+						this.NukeRendererScalingFactorScaled = 128;
+						break;
+					case DisplayType.MobileLandscape:
+						this.ChessPiecesRendererX = 160;
+						this.ChessPiecesRendererY = 10;
+						this.ChessPieceScalingFactor = GameImageUtil.MobileChessPieceScalingFactor;
+						this.NukeRendererX = 10;
+						this.NukeRendererY = 10;
+						this.MoveTrackerRendererX = 850;
+						this.MoveTrackerRendererY = 383;
+						this.NukeRendererScalingFactorScaled = 128;
+						break;
+					case DisplayType.MobilePortrait:
+						this.ChessPiecesRendererX = 10;
+						this.ChessPiecesRendererY = 210;
+						this.ChessPieceScalingFactor = GameImageUtil.MobileChessPieceScalingFactor;
+						this.NukeRendererX = 160;
+						this.NukeRendererY = 10;
+						this.MoveTrackerRendererX = 10;
+						this.MoveTrackerRendererY = 10;
+						this.NukeRendererScalingFactorScaled = 64;
+						break;
+					default:
+						throw new Exception();
+				}
+			}
+		}
+
 		private class ChessPiecesRendererMouse : IMouse
 		{
 			private TranslatedMouse mouse;
 
-			public ChessPiecesRendererMouse(IMouse mouse)
+			public ChessPiecesRendererMouse(IMouse mouse, Coordinates coordinates)
 			{
-				this.mouse = new TranslatedMouse(mouse: mouse, xOffset: -CHESS_PIECES_RENDERER_X, yOffset: -CHESS_PIECES_RENDERER_Y);
+				this.mouse = new TranslatedMouse(mouse: mouse, xOffset: -coordinates.ChessPiecesRendererX, yOffset: -coordinates.ChessPiecesRendererY);
 			}
 
 			public int GetX()
@@ -43,9 +97,9 @@ namespace ChessCompStompWithHacksLibrary
 		{
 			private TranslatedMouse mouse;
 
-			public NukeRendererMouse(IMouse mouse)
+			public NukeRendererMouse(IMouse mouse, Coordinates coordinates)
 			{
-				this.mouse = new TranslatedMouse(mouse: mouse, xOffset: -NUKE_RENDERER_X, yOffset: -NUKE_RENDERER_Y);
+				this.mouse = new TranslatedMouse(mouse: mouse, xOffset: -coordinates.NukeRendererX, yOffset: -coordinates.NukeRendererY);
 			}
 
 			public int GetX()
@@ -73,9 +127,9 @@ namespace ChessCompStompWithHacksLibrary
 		{
 			private TranslatedMouse mouse;
 
-			public MoveTrackerRendererMouse(IMouse mouse)
+			public MoveTrackerRendererMouse(IMouse mouse, Coordinates coordinates)
 			{
-				this.mouse = new TranslatedMouse(mouse: mouse, xOffset: -MOVE_TRACKER_RENDERER_X, yOffset: -MOVE_TRACKER_RENDERER_Y);
+				this.mouse = new TranslatedMouse(mouse: mouse, xOffset: -coordinates.MoveTrackerRendererX, yOffset: -coordinates.MoveTrackerRendererY);
 			}
 
 			public int GetX()
@@ -98,16 +152,7 @@ namespace ChessCompStompWithHacksLibrary
 				return this.mouse.IsRightMouseButtonPressed();
 			}
 		}
-
-		private const int CHESS_PIECES_RENDERER_X = 25 + 136 + 25;
-		private const int CHESS_PIECES_RENDERER_Y = 50;
-
-		private const int NUKE_RENDERER_X = 25;
-		private const int NUKE_RENDERER_Y = 50;
-
-		private const int MOVE_TRACKER_RENDERER_X = 720;
-		private const int MOVE_TRACKER_RENDERER_Y = 208;
-
+		
 		private GlobalState globalState;
 		private GameState gameState;
 		private MoveTracker moveTracker;
@@ -158,13 +203,19 @@ namespace ChessCompStompWithHacksLibrary
 
 		private IMouse previousMouseInput;
 
+		private Coordinates previousCoordinates;
+
 		public GameLogic(
 			GlobalState globalState,
 			bool isPlayerWhite,
 			DTImmutableList<Hack> researchedHacks,
 			SessionState.AIHackLevel aiHackLevel,
-			ColorTheme colorTheme)
+			ColorTheme colorTheme,
+			DisplayType displayType)
 		{
+			Coordinates coordinates = new Coordinates(displayType: displayType);
+			this.previousCoordinates = coordinates;
+
 			this.globalState = globalState;
 			this.gameState = NewGameCreation.CreateNewGame(
 				isPlayerWhite: isPlayerWhite,
@@ -191,7 +242,8 @@ namespace ChessCompStompWithHacksLibrary
 				isHoverOverNuke: null,
 				turnCount: this.gameState.TurnCount,
 				timer: globalState.Timer,
-				colorTheme: colorTheme);
+				colorTheme: colorTheme,
+				isClickingOnNuke: false);
 			this.promotionMoves = null;
 
 			this.clickedSquare = null;
@@ -282,11 +334,14 @@ namespace ChessCompStompWithHacksLibrary
 			ChessSquare clickedAndHeldSquare,
 			bool hasClickedOnNuke,
 			bool hasClickedAndHeldOnNuke,
-			IDisplayProcessing<GameImage> displayProcessing)
+			IDisplayProcessing<GameImage> displayProcessing,
+			bool isMobileDisplayType,
+			Coordinates coordinates)
 		{
 			ChessSquare hoverSquare = ChessPiecesRenderer.GetHoverSquare(
-				mouseInput: new ChessPiecesRendererMouse(mouse: mouseInput), 
-				renderFromWhitePerspective: isPlayerWhite, 
+				mouseInput: new ChessPiecesRendererMouse(mouse: mouseInput, coordinates: coordinates), 
+				renderFromWhitePerspective: isPlayerWhite,
+				chessPieceScalingFactor: coordinates.ChessPieceScalingFactor,
 				displayProcessing: displayProcessing);
 
 			if (isNukeInFlight)
@@ -302,7 +357,8 @@ namespace ChessCompStompWithHacksLibrary
 							promotionPanelX: promotionPanelX,
 							promotionPanelY: promotionPanelY,
 							mouse: mouseInput,
-							displayProcessing: displayProcessing);
+							displayProcessing: displayProcessing,
+							isMobileDisplayType: isMobileDisplayType);
 
 						if (hoverOverSquare != null && clickedPromotionPiece.Value == hoverOverSquare.Value)
 							return new PlayerMoveInfo(displayMove: promotionMoves.Single(x => x.Promotion.Value == hoverOverSquare.Value), shouldMoveBeInstant: false);
@@ -349,7 +405,7 @@ namespace ChessCompStompWithHacksLibrary
 						return new PlayerMoveInfo(displayMove: moves[0], shouldMoveBeInstant: true);
 				}
 
-				if (hasClickedOnNuke && clickedAndHeldSquare != null && hoverSquare != null && hoverSquare.Equals(clickedAndHeldSquare))
+				if (hasClickedOnNuke && clickedAndHeldSquare != null && hoverSquare != null && (hoverSquare.Equals(clickedAndHeldSquare) || isMobileDisplayType))
 				{
 					List<DisplayMove> moves = possibleMoves.Where(x => x.IsNuke && x.EndingFile == hoverSquare.File && x.EndingRank == hoverSquare.Rank).ToList();
 					if (moves.Count == 1)
@@ -378,11 +434,13 @@ namespace ChessCompStompWithHacksLibrary
 			ChessSquare clickedAndHeldSquare,
 			bool hasNukeAbility,
 			bool hasUsedNuke,
-			bool isNukeInFlight)
+			bool isNukeInFlight,
+			Coordinates coordinates)
 		{
 			ChessSquare hoverSquare = ChessPiecesRenderer.GetHoverSquare(
-				mouseInput: new ChessPiecesRendererMouse(mouse: mouseInput),
+				mouseInput: new ChessPiecesRendererMouse(mouse: mouseInput, coordinates: coordinates),
 				renderFromWhitePerspective: isPlayerWhite,
+				chessPieceScalingFactor: coordinates.ChessPieceScalingFactor,
 				displayProcessing: displayProcessing);
 
 			if (mouseInput.IsLeftMouseButtonPressed() && !previousMouseInput.IsLeftMouseButtonPressed())
@@ -408,7 +466,7 @@ namespace ChessCompStompWithHacksLibrary
 
 				if (hasNukeAbility && !hasUsedNuke && !isNukeInFlight)
 				{
-					if (NukeRenderer.IsHoverOverNuke(mouse: new NukeRendererMouse(mouse: mouseInput)))
+					if (NukeRenderer.IsHoverOverNuke(mouse: new NukeRendererMouse(mouse: mouseInput, coordinates: coordinates), scalingFactorScaled: coordinates.NukeRendererScalingFactorScaled))
 						return null;
 				}
 			}
@@ -453,11 +511,14 @@ namespace ChessCompStompWithHacksLibrary
 			ChessSquare clickedAndHeldSquare,
 			bool isPromotionPanelOpen,
 			int promotionPanelX,
-			int promotionPanelY)
+			int promotionPanelY,
+			Coordinates coordinates,
+			bool isMobileDisplayType)
 		{
 			ChessSquare hoverSquare = ChessPiecesRenderer.GetHoverSquare(
-				mouseInput: new ChessPiecesRendererMouse(mouseInput),
+				mouseInput: new ChessPiecesRendererMouse(mouse: mouseInput, coordinates: coordinates),
 				renderFromWhitePerspective: isPlayerWhite,
+				chessPieceScalingFactor: coordinates.ChessPieceScalingFactor,
 				displayProcessing: displayProcessing);
 
 			if (mouseInput.IsLeftMouseButtonPressed() && !previousMouseInput.IsLeftMouseButtonPressed())
@@ -467,7 +528,8 @@ namespace ChessCompStompWithHacksLibrary
 					bool isHoverOverPanel = PromotionPanel.IsHoverOverPanel(
 						promotionPanelX: promotionPanelX,
 						promotionPanelY: promotionPanelY,
-						mouse: mouseInput);
+						mouse: mouseInput,
+						isMobileDisplayType: isMobileDisplayType);
 					if (!isPromotionPanelOpen || !isHoverOverPanel)
 						return hoverSquare;
 				}
@@ -499,14 +561,24 @@ namespace ChessCompStompWithHacksLibrary
 			public List<DisplayMove> PromotionMoves { get; private set; }
 		}
 
-		private static int GetPromotionPanelX(int mouseX)
+		private static int GetPromotionPanelX(int mouseX, Coordinates coordinates, IDisplayProcessing<GameImage> displayProcessing, bool isMobileDisplayType)
 		{
-			int renderOnRightSideOfMouse = mouseX;
-			int renderOnLeftSideOfMouse = mouseX - PromotionPanel.PROMOTION_PANEL_WIDTH;
+			int panelWidth = isMobileDisplayType ? PromotionPanel.PROMOTION_PANEL_WIDTH_MOBILE : PromotionPanel.PROMOTION_PANEL_WIDTH_DESKTOP;
+			int imageWidth = displayProcessing.GetWidth(GameImage.WhitePawn) * coordinates.ChessPieceScalingFactor / 128;
 
-			if (mouseX + PromotionPanel.PROMOTION_PANEL_WIDTH >= MOVE_TRACKER_RENDERER_X && renderOnLeftSideOfMouse >= 0)
-				return renderOnLeftSideOfMouse;
-			return renderOnRightSideOfMouse;
+			int returnValue = mouseX;
+
+			int panelRightEdge = returnValue + panelWidth;
+
+			int chessboardRightEdge = coordinates.ChessPiecesRendererX + 8 * imageWidth;
+
+			if (panelRightEdge + 5 > chessboardRightEdge)
+			{
+				int offset = panelRightEdge + 5 - chessboardRightEdge;
+				returnValue = returnValue - offset;
+			}
+
+			return returnValue;
 		}
 
 		private static PromotionPanelInfo GetPromotionPanelInfo(
@@ -522,21 +594,24 @@ namespace ChessCompStompWithHacksLibrary
 			IDisplayProcessing<GameImage> displayProcessing,
 			List<DisplayMove> possibleMoves,
 			bool isNukeInFlight,
-			bool hasClickedOnNuke)
+			bool hasClickedOnNuke,
+			Coordinates coordinates,
+			bool isMobileDisplayType)
 		{
 			if (isNukeInFlight || hasClickedOnNuke)
 				return new PromotionPanelInfo(isPromotionPanelOpen: false, promotionPanelX: 0, promotionPanelY: 0, promotionMoves: null);
 
 			ChessSquare hoverSquare = ChessPiecesRenderer.GetHoverSquare(
-				mouseInput: new ChessPiecesRendererMouse(mouse: mouseInput),
+				mouseInput: new ChessPiecesRendererMouse(mouse: mouseInput, coordinates: coordinates),
 				renderFromWhitePerspective: isPlayerWhite,
+				chessPieceScalingFactor: coordinates.ChessPieceScalingFactor,
 				displayProcessing: displayProcessing);
 
 			if (isPromotionPanelOpen)
 			{
 				if (mouseInput.IsLeftMouseButtonPressed() && !previousMouseInput.IsLeftMouseButtonPressed())
 				{
-					bool isHoverOverPanel = PromotionPanel.IsHoverOverPanel(promotionPanelX: promotionPanelX, promotionPanelY: promotionPanelY, mouse: mouseInput);
+					bool isHoverOverPanel = PromotionPanel.IsHoverOverPanel(promotionPanelX: promotionPanelX, promotionPanelY: promotionPanelY, mouse: mouseInput, isMobileDisplayType: isMobileDisplayType);
 					if (!isHoverOverPanel)
 						return new PromotionPanelInfo(isPromotionPanelOpen: false, promotionPanelX: 0, promotionPanelY: 0, promotionMoves: null);
 				}
@@ -553,7 +628,7 @@ namespace ChessCompStompWithHacksLibrary
 						&& x.EndingRank == hoverSquare.Rank).ToList();
 
 					if (moves.Count > 0 && moves[0].Promotion != null)
-						return new PromotionPanelInfo(isPromotionPanelOpen: true, promotionPanelX: GetPromotionPanelX(mouseInput.GetX()), promotionPanelY: mouseInput.GetY(), promotionMoves: moves);
+						return new PromotionPanelInfo(isPromotionPanelOpen: true, promotionPanelX: GetPromotionPanelX(mouseInput.GetX(), coordinates: coordinates, displayProcessing: displayProcessing, isMobileDisplayType: isMobileDisplayType), promotionPanelY: mouseInput.GetY(), promotionMoves: moves);
 				}
 				else if (clickedSquare != null && clickedAndHeldSquare != null && hoverSquare != null && hoverSquare.Equals(clickedAndHeldSquare)
 					&& !clickedSquare.Equals(hoverSquare))
@@ -565,7 +640,7 @@ namespace ChessCompStompWithHacksLibrary
 						&& x.EndingRank == hoverSquare.Rank).ToList();
 
 					if (moves.Count > 0 && moves[0].Promotion != null)
-						return new PromotionPanelInfo(isPromotionPanelOpen: true, promotionPanelX: GetPromotionPanelX(mouseInput.GetX()), promotionPanelY: mouseInput.GetY(), promotionMoves: moves);
+						return new PromotionPanelInfo(isPromotionPanelOpen: true, promotionPanelX: GetPromotionPanelX(mouseInput.GetX(), coordinates: coordinates, displayProcessing: displayProcessing, isMobileDisplayType: isMobileDisplayType), promotionPanelY: mouseInput.GetY(), promotionMoves: moves);
 				}
 				else if (clickedSquare != null && clickedAndHeldSquare != null && hoverSquare != null && clickedSquare.Equals(clickedAndHeldSquare))
 				{
@@ -576,7 +651,7 @@ namespace ChessCompStompWithHacksLibrary
 						&& x.EndingRank == hoverSquare.Rank).ToList();
 
 					if (moves.Count > 0 && moves[0].Promotion != null)
-						return new PromotionPanelInfo(isPromotionPanelOpen: true, promotionPanelX: GetPromotionPanelX(mouseInput.GetX()), promotionPanelY: mouseInput.GetY(), promotionMoves: moves);
+						return new PromotionPanelInfo(isPromotionPanelOpen: true, promotionPanelX: GetPromotionPanelX(mouseInput.GetX(), coordinates: coordinates, displayProcessing: displayProcessing, isMobileDisplayType: isMobileDisplayType), promotionPanelY: mouseInput.GetY(), promotionMoves: moves);
 				}
 			}
 
@@ -590,6 +665,7 @@ namespace ChessCompStompWithHacksLibrary
 			IMouse mouseInput,
 			IMouse previousMouseInput,
 			Move.PromotionType? clickedPromotionPiece,
+			bool isMobileDisplayType,
 			IDisplayProcessing<GameImage> displayProcessing)
 		{
 			if (isPromotionPanelOpen)
@@ -600,7 +676,8 @@ namespace ChessCompStompWithHacksLibrary
 						promotionPanelX: promotionPanelX,
 						promotionPanelY: promotionPanelY,
 						mouse: mouseInput,
-						displayProcessing: displayProcessing);
+						displayProcessing: displayProcessing,
+						isMobileDisplayType: isMobileDisplayType);
 
 					return hoverOverSquare;
 				}
@@ -628,7 +705,9 @@ namespace ChessCompStompWithHacksLibrary
 			int promotionPanelX,
 			int promotionPanelY,
 			bool isPlayerWhite,
-			IDisplayProcessing<GameImage> displayProcessing)
+			IDisplayProcessing<GameImage> displayProcessing,
+			Coordinates coordinates,
+			bool isMobileDisplayType)
 		{
 			if (!hasNukeAbility)
 				return false;
@@ -641,10 +720,10 @@ namespace ChessCompStompWithHacksLibrary
 
 			if (!mouseInput.IsLeftMouseButtonPressed() && previousMouseInput.IsLeftMouseButtonPressed())
 			{
-				if (isPromotionPanelOpen && PromotionPanel.IsHoverOverPanel(promotionPanelX: promotionPanelX, promotionPanelY: promotionPanelY, mouse: mouseInput))
+				if (isPromotionPanelOpen && PromotionPanel.IsHoverOverPanel(promotionPanelX: promotionPanelX, promotionPanelY: promotionPanelY, mouse: mouseInput, isMobileDisplayType: isMobileDisplayType))
 					return false;
 
-				if (!hasClickedOnNuke && hasClickedAndHeldOnNuke && NukeRenderer.IsHoverOverNuke(mouse: new NukeRendererMouse(mouse: mouseInput)))
+				if (!hasClickedOnNuke && hasClickedAndHeldOnNuke && NukeRenderer.IsHoverOverNuke(mouse: new NukeRendererMouse(mouse: mouseInput, coordinates: coordinates), scalingFactorScaled: coordinates.NukeRendererScalingFactorScaled))
 					return true;
 
 				return false;
@@ -653,8 +732,9 @@ namespace ChessCompStompWithHacksLibrary
 			if (hasClickedOnNuke && mouseInput.IsLeftMouseButtonPressed() && !previousMouseInput.IsLeftMouseButtonPressed())
 			{
 				ChessSquare hoverSquare = ChessPiecesRenderer.GetHoverSquare(
-					mouseInput: new ChessPiecesRendererMouse(mouseInput),
+					mouseInput: new ChessPiecesRendererMouse(mouse: mouseInput, coordinates: coordinates),
 					renderFromWhitePerspective: isPlayerWhite,
+					chessPieceScalingFactor: coordinates.ChessPieceScalingFactor,
 					displayProcessing: displayProcessing);
 
 				if (hoverSquare != null && !possibleMoves.Any(x => x.IsNuke && x.EndingFile == hoverSquare.File && x.EndingRank == hoverSquare.Rank))
@@ -677,7 +757,9 @@ namespace ChessCompStompWithHacksLibrary
 			bool hasClickedAndHeldOnNuke,
 			bool hasNukeAbility,
 			bool hasUsedNuke,
-			bool isNukeInFlight)
+			bool isNukeInFlight,
+			Coordinates coordinates,
+			bool isMobileDisplayType)
 		{
 			if (!hasNukeAbility)
 				return false;
@@ -690,12 +772,13 @@ namespace ChessCompStompWithHacksLibrary
 
 			if (mouseInput.IsLeftMouseButtonPressed() && !previousMouseInput.IsLeftMouseButtonPressed())
 			{
-				if (NukeRenderer.IsHoverOverNuke(mouse: new NukeRendererMouse(mouse: mouseInput)))
+				if (NukeRenderer.IsHoverOverNuke(mouse: new NukeRendererMouse(mouse: mouseInput, coordinates: coordinates), scalingFactorScaled: coordinates.NukeRendererScalingFactorScaled))
 				{
 					bool isHoverOverPanel = PromotionPanel.IsHoverOverPanel(
 						promotionPanelX: promotionPanelX,
 						promotionPanelY: promotionPanelY,
-						mouse: mouseInput);
+						mouse: mouseInput,
+						isMobileDisplayType: isMobileDisplayType);
 					if (!isPromotionPanelOpen || !isHoverOverPanel)
 						return true;
 				}
@@ -711,10 +794,51 @@ namespace ChessCompStompWithHacksLibrary
 			IMouse mouseInput,
 			IDisplayProcessing<GameImage> displayProcessing,
 			ISoundOutput<GameSound> soundOutput,
-			int elapsedMicrosPerFrame)
+			int elapsedMicrosPerFrame,
+			bool isMobileDisplayType)
 		{
 			IMouse previousMouseInput = this.previousMouseInput;
 			this.previousMouseInput = new CopiedMouse(mouse: mouseInput);
+
+			DisplayType displayType;
+
+			if (!isMobileDisplayType)
+				displayType = DisplayType.Desktop;
+			else if (displayProcessing.IsMobileInLandscapeOrientation())
+				displayType = DisplayType.MobileLandscape;
+			else
+				displayType = DisplayType.MobilePortrait;
+
+			Coordinates coordinates = new Coordinates(displayType: displayType);
+
+			if (this.isPromotionPanelOpen)
+			{
+				if (coordinates.ChessPiecesRendererX != this.previousCoordinates.ChessPiecesRendererX
+					|| coordinates.ChessPiecesRendererY != this.previousCoordinates.ChessPiecesRendererY
+					|| coordinates.ChessPieceScalingFactor != this.previousCoordinates.ChessPieceScalingFactor)
+				{
+					int xOffset = this.promotionPanelX - this.previousCoordinates.ChessPiecesRendererX;
+					int yOffset = this.promotionPanelY - this.previousCoordinates.ChessPiecesRendererY;
+
+					this.promotionPanelX = coordinates.ChessPiecesRendererX + xOffset * coordinates.ChessPieceScalingFactor / this.previousCoordinates.ChessPieceScalingFactor;
+					this.promotionPanelY = coordinates.ChessPiecesRendererY + yOffset * coordinates.ChessPieceScalingFactor / this.previousCoordinates.ChessPieceScalingFactor;
+
+					int promotionPanelWidth = isMobileDisplayType ? PromotionPanel.PROMOTION_PANEL_WIDTH_MOBILE : PromotionPanel.PROMOTION_PANEL_WIDTH_DESKTOP;
+					int imageWidth = displayProcessing.GetWidth(GameImage.WhitePawn) * coordinates.ChessPieceScalingFactor / 128;
+
+					int promotionPanelRightEdge = this.promotionPanelX + promotionPanelWidth;
+
+					int chessboardRightEdge = coordinates.ChessPiecesRendererX + 8 * imageWidth;
+
+					if (promotionPanelRightEdge + 5 > chessboardRightEdge)
+					{
+						int offset = promotionPanelRightEdge + 5 - chessboardRightEdge;
+						this.promotionPanelX = this.promotionPanelX - offset;
+					}
+				}
+			}
+
+			this.previousCoordinates = coordinates;
 
 			if (this.gameStatus != ComputeMoves.GameStatus.InProgress)
 			{				
@@ -736,7 +860,9 @@ namespace ChessCompStompWithHacksLibrary
 					hasClickedOnNuke: false,
 					hasClickedAndHeldOnNuke: false,
 					isNukeInFlight: this.isNukeInFlight,
-					turnCount: this.gameState.TurnCount);
+					turnCount: this.gameState.TurnCount,
+					coordinates: coordinates,
+					displayType: displayType);
 
 				this.chessPiecesRendererPieceAnimation = this.chessPiecesRendererPieceAnimation.ProcessFrame(elapsedMicrosPerFrame: elapsedMicrosPerFrame);
 
@@ -745,18 +871,19 @@ namespace ChessCompStompWithHacksLibrary
 					isNukeSelected: false,
 					isHoverOverNuke: null,
 					turnCount: this.gameState.TurnCount,
-					elapsedMicrosPerFrame: elapsedMicrosPerFrame);
+					elapsedMicrosPerFrame: elapsedMicrosPerFrame,
+					mouseInput: new EmptyMouse());
 
 				int? originalMoveTrackerRendererPositionIndex = this.moveTrackerRendererPositionIndex;
 
-				this.moveTrackerRendererPositionIndex = MoveTrackerRenderer.GetHoverOverMove(mouseInput: new MoveTrackerRendererMouse(mouseInput));
+				this.moveTrackerRendererPositionIndex = MoveTrackerRenderer.GetHoverOverMove(mouseInput: new MoveTrackerRendererMouse(mouse: mouseInput, coordinates: coordinates), isMobileDisplayType: isMobileDisplayType);
 				this.moveTrackerRenderer = this.moveTrackerRenderer.ProcessFrame(moveTracker: this.moveTracker, hoverPositionIndex: this.moveTrackerRendererPositionIndex, elapsedMicrosPerFrame: elapsedMicrosPerFrame);
 				
 				if (this.moveTrackerRendererPositionIndex.HasValue)
 				{
 					if (originalMoveTrackerRendererPositionIndex == null || this.moveTrackerRendererPositionIndex.Value != originalMoveTrackerRendererPositionIndex.Value)
 					{
-						MoveTracker.MoveInfo moveTrackerMoveInfo = MoveTrackerRenderer.GetMoveInfoForHover(positionIndex: this.moveTrackerRendererPositionIndex.Value, moveTracker: this.moveTracker);
+						MoveTracker.MoveInfo moveTrackerMoveInfo = MoveTrackerRenderer.GetMoveInfoForHover(positionIndex: this.moveTrackerRendererPositionIndex.Value, moveTracker: this.moveTracker, isMobileDisplayType: isMobileDisplayType);
 						if (moveTrackerMoveInfo != null)
 							soundOutput.PlaySound(sound: GameSound.Woosh);
 					}
@@ -901,7 +1028,9 @@ namespace ChessCompStompWithHacksLibrary
 					clickedAndHeldSquare: this.clickedAndHeldSquare,
 					hasClickedOnNuke: this.hasClickedOnNuke,
 					hasClickedAndHeldOnNuke: this.hasClickedAndHeldOnNuke,
-					displayProcessing: displayProcessing);
+					displayProcessing: displayProcessing,
+					isMobileDisplayType: isMobileDisplayType,
+					coordinates: coordinates);
 
 				DisplayMove playerMove = playerMoveInfo.DisplayMove;
 
@@ -958,7 +1087,8 @@ namespace ChessCompStompWithHacksLibrary
 					clickedAndHeldSquare: this.clickedAndHeldSquare,
 					hasNukeAbility: this.gameState.Abilities.HasTacticalNuke,
 					hasUsedNuke: this.gameState.HasUsedNuke,
-					isNukeInFlight: this.isNukeInFlight);
+					isNukeInFlight: this.isNukeInFlight,
+					coordinates: coordinates);
 
 				ChessSquare newClickedAndHeldSquare = GetClickedAndHeldSquare(
 					mouseInput: mouseInput,
@@ -968,7 +1098,9 @@ namespace ChessCompStompWithHacksLibrary
 					clickedAndHeldSquare: this.clickedAndHeldSquare,
 					isPromotionPanelOpen: this.isPromotionPanelOpen,
 					promotionPanelX: this.promotionPanelX,
-					promotionPanelY: this.promotionPanelY);
+					promotionPanelY: this.promotionPanelY,
+					coordinates: coordinates,
+					isMobileDisplayType: isMobileDisplayType);
 
 				PromotionPanelInfo promotionPanelInfo = GetPromotionPanelInfo(
 					isPromotionPanelOpen: this.isPromotionPanelOpen,
@@ -983,7 +1115,9 @@ namespace ChessCompStompWithHacksLibrary
 					displayProcessing: displayProcessing,
 					possibleMoves: this.possibleMoves,
 					isNukeInFlight: this.isNukeInFlight,
-					hasClickedOnNuke: this.hasClickedOnNuke);
+					hasClickedOnNuke: this.hasClickedOnNuke,
+					coordinates: coordinates,
+					isMobileDisplayType: isMobileDisplayType);
 
 				Move.PromotionType? newClickedPromotionPiece = GetClickedPromotionPiece(
 					isPromotionPanelOpen: this.isPromotionPanelOpen,
@@ -992,6 +1126,7 @@ namespace ChessCompStompWithHacksLibrary
 					mouseInput: mouseInput,
 					previousMouseInput: previousMouseInput,
 					clickedPromotionPiece: this.clickedPromotionPiece,
+					isMobileDisplayType: isMobileDisplayType,
 					displayProcessing: displayProcessing);
 
 				bool newHasClickedOnNuke = GetHasClickedOnNuke(
@@ -1008,7 +1143,9 @@ namespace ChessCompStompWithHacksLibrary
 					promotionPanelX: this.promotionPanelX,
 					promotionPanelY: this.promotionPanelY,
 					isPlayerWhite: this.gameState.IsPlayerWhite,
-					displayProcessing: displayProcessing);
+					displayProcessing: displayProcessing,
+					coordinates: coordinates,
+					isMobileDisplayType: isMobileDisplayType);
 
 				bool newHasClickedAndHeldOnNuke = GetHasClickedAndHeldOnNuke(
 					mouseInput: mouseInput,
@@ -1019,7 +1156,9 @@ namespace ChessCompStompWithHacksLibrary
 					hasClickedAndHeldOnNuke: this.hasClickedAndHeldOnNuke,
 					hasNukeAbility: this.gameState.Abilities.HasTacticalNuke,
 					hasUsedNuke: this.gameState.HasUsedNuke,
-					isNukeInFlight: this.isNukeInFlight);
+					isNukeInFlight: this.isNukeInFlight,
+					coordinates: coordinates,
+					isMobileDisplayType: isMobileDisplayType);
 
 				this.clickedSquare = newClickedSquare;
 				this.clickedAndHeldSquare = newClickedAndHeldSquare;
@@ -1050,7 +1189,9 @@ namespace ChessCompStompWithHacksLibrary
 				hasClickedOnNuke: this.hasClickedOnNuke,
 				hasClickedAndHeldOnNuke: this.hasClickedAndHeldOnNuke,
 				isNukeInFlight: this.isNukeInFlight,
-				turnCount: this.gameState.TurnCount);
+				turnCount: this.gameState.TurnCount,
+				coordinates: coordinates,
+				displayType: displayType);
 
 			this.chessPiecesRendererPieceAnimation = this.chessPiecesRendererPieceAnimation.ProcessFrame(elapsedMicrosPerFrame: elapsedMicrosPerFrame);
 
@@ -1058,7 +1199,8 @@ namespace ChessCompStompWithHacksLibrary
 				promotionPanelX: this.promotionPanelX,
 				promotionPanelY: this.promotionPanelY,
 				mouse: mouseInput,
-				displayProcessing: displayProcessing);
+				displayProcessing: displayProcessing,
+				isMobileDisplayType: isMobileDisplayType);
 			this.promotionPanel = this.promotionPanel.ProcessFrame(
 				isOpen: this.isPromotionPanelOpen,
 				x: this.promotionPanelX,
@@ -1069,27 +1211,29 @@ namespace ChessCompStompWithHacksLibrary
 			this.nukeRenderer = this.nukeRenderer.ProcessFrame(
 				hasUsedNuke: this.gameState.HasUsedNuke,
 				isNukeSelected: this.hasClickedOnNuke || this.hasClickedAndHeldOnNuke,
-				isHoverOverNuke: NukeRenderer.IsHoverOverNuke(mouse: new NukeRendererMouse(mouse: mouseInput))
-					? new Tuple<int, int>((new NukeRendererMouse(mouse: mouseInput)).GetX(), (new NukeRendererMouse(mouse: mouseInput)).GetY())
+				isHoverOverNuke: NukeRenderer.IsHoverOverNuke(mouse: new NukeRendererMouse(mouse: mouseInput, coordinates: coordinates), scalingFactorScaled: coordinates.NukeRendererScalingFactorScaled)
+					? new Tuple<int, int>((new NukeRendererMouse(mouse: mouseInput, coordinates: coordinates)).GetX(), (new NukeRendererMouse(mouse: mouseInput, coordinates: coordinates)).GetY())
 					: null,
 				turnCount: this.gameState.TurnCount,
-				elapsedMicrosPerFrame: elapsedMicrosPerFrame);
+				elapsedMicrosPerFrame: elapsedMicrosPerFrame,
+				mouseInput: new NukeRendererMouse(mouse: mouseInput, coordinates: coordinates));
 
 			bool isHoverOverPromotionPanel = this.isPromotionPanelOpen && PromotionPanel.IsHoverOverPanel(
 				promotionPanelX: this.promotionPanelX,
 				promotionPanelY: this.promotionPanelY,
-				mouse: mouseInput);
+				mouse: mouseInput,
+				isMobileDisplayType: isMobileDisplayType);
 
 			int? oldMoveTrackerRendererPositionIndex = this.moveTrackerRendererPositionIndex;
 
-			this.moveTrackerRendererPositionIndex = isHoverOverPromotionPanel ? null : MoveTrackerRenderer.GetHoverOverMove(mouseInput: new MoveTrackerRendererMouse(mouse: mouseInput));
+			this.moveTrackerRendererPositionIndex = isHoverOverPromotionPanel ? null : MoveTrackerRenderer.GetHoverOverMove(mouseInput: new MoveTrackerRendererMouse(mouse: mouseInput, coordinates: coordinates), isMobileDisplayType: isMobileDisplayType);
 			this.moveTrackerRenderer = this.moveTrackerRenderer.ProcessFrame(moveTracker: this.moveTracker, hoverPositionIndex: this.moveTrackerRendererPositionIndex, elapsedMicrosPerFrame: elapsedMicrosPerFrame);
 
 			if (this.moveTrackerRendererPositionIndex.HasValue)
 			{
 				if (oldMoveTrackerRendererPositionIndex == null || this.moveTrackerRendererPositionIndex.Value != oldMoveTrackerRendererPositionIndex.Value)
 				{
-					MoveTracker.MoveInfo moveTrackerMoveInfo = MoveTrackerRenderer.GetMoveInfoForHover(positionIndex: this.moveTrackerRendererPositionIndex.Value, moveTracker: this.moveTracker);
+					MoveTracker.MoveInfo moveTrackerMoveInfo = MoveTrackerRenderer.GetMoveInfoForHover(positionIndex: this.moveTrackerRendererPositionIndex.Value, moveTracker: this.moveTracker, isMobileDisplayType: isMobileDisplayType);
 					if (moveTrackerMoveInfo != null)
 						soundOutput.PlaySound(sound: GameSound.Woosh);
 				}
@@ -1120,7 +1264,9 @@ namespace ChessCompStompWithHacksLibrary
 			int elapsedMicrosPerFrame,
 			bool hasClickedOnNuke,
 			bool hasClickedAndHeldOnNuke,
-			bool isNukeInFlight)
+			bool isNukeInFlight,
+			Coordinates coordinates,
+			DisplayType displayType)
 		{
 			ChessSquare selectedPiece;
 			if (clickedSquare != null)
@@ -1160,10 +1306,11 @@ namespace ChessCompStompWithHacksLibrary
 			}
 
 			ChessSquare hoverSquare = ChessPiecesRenderer.GetHoverSquare(
-				mouseInput: new ChessPiecesRendererMouse(mouseInput),
+				mouseInput: new ChessPiecesRendererMouse(mouse: mouseInput, coordinates: coordinates),
 				renderFromWhitePerspective: isPlayerWhite,
+				chessPieceScalingFactor: coordinates.ChessPieceScalingFactor,
 				displayProcessing: displayProcessing);
-			bool isHoverOverPanel = PromotionPanel.IsHoverOverPanel(promotionPanelX: promotionPanelX, promotionPanelY: promotionPanelY, mouse: mouseInput);
+			bool isHoverOverPanel = PromotionPanel.IsHoverOverPanel(promotionPanelX: promotionPanelX, promotionPanelY: promotionPanelY, mouse: mouseInput, isMobileDisplayType: displayType != DisplayType.Desktop);
 
 			ChessPiecesRenderer.HoverPieceInfo hoverPiece = null;
 			if (!hasClickedOnNuke)
@@ -1174,8 +1321,8 @@ namespace ChessCompStompWithHacksLibrary
 					if (piece != ChessSquarePiece.Empty && piece.IsWhite() == isPlayerWhite)
 						hoverPiece = new ChessPiecesRenderer.HoverPieceInfo(
 							chessSquarePiece: piece,
-							x: (new ChessPiecesRendererMouse(mouseInput)).GetX(),
-							y: (new ChessPiecesRendererMouse(mouseInput)).GetY());
+							x: (new ChessPiecesRendererMouse(mouse: mouseInput, coordinates: coordinates)).GetX(),
+							y: (new ChessPiecesRendererMouse(mouse: mouseInput, coordinates: coordinates)).GetY());
 				}
 				else if (clickedSquare != null && clickedAndHeldSquare != null && clickedSquare.Equals(clickedAndHeldSquare))
 				{
@@ -1183,16 +1330,19 @@ namespace ChessCompStompWithHacksLibrary
 					if (piece != ChessSquarePiece.Empty && piece.IsWhite() == isPlayerWhite)
 						hoverPiece = new ChessPiecesRenderer.HoverPieceInfo(
 							chessSquarePiece: piece,
-							x: (new ChessPiecesRendererMouse(mouseInput)).GetX(),
-							y: (new ChessPiecesRendererMouse(mouseInput)).GetY());
+							x: (new ChessPiecesRendererMouse(mouse: mouseInput, coordinates: coordinates)).GetX(),
+							y: (new ChessPiecesRendererMouse(mouse: mouseInput, coordinates: coordinates)).GetY());
 				}
 			}
 
 			ChessPiecesRenderer.PotentialNukeSquaresInfo potentialNukeSquaresInfo = null;
 			if ((hasClickedOnNuke || hasClickedAndHeldOnNuke) && hoverSquare != null && turnCount > TacticalNukeUtil.NumberOfMovesPlayedBeforeNukeIsAvailable && isPlayerTurn)
 			{
-				bool isValidSquare = moves.Any(x => x.IsNuke && x.EndingFile == hoverSquare.File && x.EndingRank == hoverSquare.Rank);
-				potentialNukeSquaresInfo = new ChessPiecesRenderer.PotentialNukeSquaresInfo(nukeCenter: hoverSquare, isNukeLocationValid: isValidSquare);
+				if (displayType == DisplayType.Desktop || mouseInput.IsLeftMouseButtonPressed())
+				{
+					bool isValidSquare = moves.Any(x => x.IsNuke && x.EndingFile == hoverSquare.File && x.EndingRank == hoverSquare.Rank);
+					potentialNukeSquaresInfo = new ChessPiecesRenderer.PotentialNukeSquaresInfo(nukeCenter: hoverSquare, isNukeLocationValid: isValidSquare);
+				}
 			}
 
 			return chessPiecesRenderer.ProcessFrame(
@@ -1204,32 +1354,84 @@ namespace ChessCompStompWithHacksLibrary
 				selectedPieceSquare: selectedPiece,
 				possibleMoveSquares: new DTImmutableList<ChessSquare>(possibleMoves),
 				potentialNukeSquaresInfo: potentialNukeSquaresInfo,
-				hoverSquare: !isPromotionPanelOpen || !isHoverOverPanel ? hoverSquare : null,
+				hoverSquare: (!isPromotionPanelOpen || !isHoverOverPanel) && (displayType == DisplayType.Desktop || mouseInput.IsLeftMouseButtonPressed()) ? hoverSquare : null,
 				hoverPieceInfo: hoverPiece,
 				elapsedMicrosPerFrame: elapsedMicrosPerFrame);
 		}
 
-		public void Render(IDisplayOutput<GameImage, GameFont> displayOutput)
+		public void Render(
+			IDisplayOutput<GameImage, GameFont> displayOutput,
+			bool isMobileDisplayType)
 		{
-			this.moveTrackerRenderer.Render(displayOutput: new TranslatedDisplayOutput<GameImage, GameFont>(displayOutput, MOVE_TRACKER_RENDERER_X, MOVE_TRACKER_RENDERER_Y));
+			DisplayType displayType;
+
+			if (!isMobileDisplayType)
+				displayType = DisplayType.Desktop;
+			else if (displayOutput.IsMobileInLandscapeOrientation())
+				displayType = DisplayType.MobileLandscape;
+			else
+				displayType = DisplayType.MobilePortrait;
+
+			Coordinates coordinates = new Coordinates(displayType: displayType);
+
+			this.moveTrackerRenderer.Render(
+				displayOutput: new TranslatedDisplayOutput<GameImage, GameFont>(displayOutput, coordinates.MoveTrackerRendererX, coordinates.MoveTrackerRendererY),
+				isMobileDisplayType: isMobileDisplayType);
 
 			MoveTracker.MoveInfo moveInfo;
 
 			if (this.moveTrackerRendererPositionIndex.HasValue)
-				moveInfo = MoveTrackerRenderer.GetMoveInfoForHover(positionIndex: this.moveTrackerRendererPositionIndex.Value, moveTracker: this.moveTracker);
+				moveInfo = MoveTrackerRenderer.GetMoveInfoForHover(positionIndex: this.moveTrackerRendererPositionIndex.Value, moveTracker: this.moveTracker, isMobileDisplayType: isMobileDisplayType);
 			else
 				moveInfo = null;
 
+			int nukeRendererEndingY;
+			int nukeRendererScalingFactorScaled;
+
+			switch (displayType)
+			{
+				case DisplayType.Desktop:
+					nukeRendererEndingY = GlobalConstants.DESKTOP_WINDOW_HEIGHT + displayOutput.GetHeight(GameImage.Nuke_RocketFire) * 2 * coordinates.NukeRendererScalingFactorScaled / 128;
+					nukeRendererScalingFactorScaled = coordinates.NukeRendererScalingFactorScaled;
+					break;
+				case DisplayType.MobileLandscape:
+					nukeRendererEndingY = displayOutput.GetMobileScreenHeight() + displayOutput.GetHeight(GameImage.Nuke_RocketFire) * 2 * coordinates.NukeRendererScalingFactorScaled / 128;
+					nukeRendererScalingFactorScaled = coordinates.NukeRendererScalingFactorScaled;
+					break;
+				case DisplayType.MobilePortrait:
+					nukeRendererEndingY = displayOutput.GetMobileScreenHeight() + displayOutput.GetHeight(GameImage.Nuke_RocketFire) * 2 * coordinates.NukeRendererScalingFactorScaled / 128;
+					nukeRendererScalingFactorScaled = coordinates.NukeRendererScalingFactorScaled;
+					break;
+				default:
+					throw new Exception();
+			}
+
 			if (moveInfo == null || moveInfo.NewGameState.TurnCount == this.gameState.TurnCount)
 			{
-				this.chessPiecesRenderer.Render(displayOutput: new TranslatedDisplayOutput<GameImage, GameFont>(displayOutput, CHESS_PIECES_RENDERER_X, CHESS_PIECES_RENDERER_Y), chessPiecesRendererPieceAnimation: this.chessPiecesRendererPieceAnimation);
-				this.nukeRenderer.Render(displayOutput: new TranslatedDisplayOutput<GameImage, GameFont>(displayOutput, NUKE_RENDERER_X, NUKE_RENDERER_Y));
-				this.promotionPanel.Render(displayOutput: displayOutput); // must render after moveTrackerRenderer to ensure panel is on top
+				this.chessPiecesRenderer.Render(
+					displayOutput: new TranslatedDisplayOutput<GameImage, GameFont>(displayOutput, coordinates.ChessPiecesRendererX, coordinates.ChessPiecesRendererY),
+					chessPiecesRendererPieceAnimation: this.chessPiecesRendererPieceAnimation,
+					chessPieceScalingFactor: coordinates.ChessPieceScalingFactor,
+					isMobileDisplayType: isMobileDisplayType);
+				this.nukeRenderer.Render(
+					endingY: nukeRendererEndingY,
+					scalingFactorScaled: nukeRendererScalingFactorScaled,
+					displayOutput: new TranslatedDisplayOutput<GameImage, GameFont>(displayOutput, coordinates.NukeRendererX, coordinates.NukeRendererY),
+					isMobileDisplayType: isMobileDisplayType);
+				this.promotionPanel.Render(displayOutput: displayOutput, isMobileDisplayType: isMobileDisplayType); // must render after moveTrackerRenderer to ensure panel is on top
 			}
 			else
 			{
-				moveInfo.NewStateChessPiecesRenderer.Render(displayOutput: new TranslatedDisplayOutput<GameImage, GameFont>(displayOutput, CHESS_PIECES_RENDERER_X, CHESS_PIECES_RENDERER_Y), chessPiecesRendererPieceAnimation: ChessPiecesRendererPieceAnimation.EmptyChessPiecesRendererPieceAnimation());
-				moveInfo.NewStateNukeRenderer.Render(displayOutput: new TranslatedDisplayOutput<GameImage, GameFont>(displayOutput, NUKE_RENDERER_X, NUKE_RENDERER_Y));
+				moveInfo.NewStateChessPiecesRenderer.Render(
+					displayOutput: new TranslatedDisplayOutput<GameImage, GameFont>(displayOutput, coordinates.ChessPiecesRendererX, coordinates.ChessPiecesRendererY), 
+					chessPiecesRendererPieceAnimation: ChessPiecesRendererPieceAnimation.EmptyChessPiecesRendererPieceAnimation(),
+					chessPieceScalingFactor: coordinates.ChessPieceScalingFactor,
+					isMobileDisplayType: isMobileDisplayType);
+				moveInfo.NewStateNukeRenderer.Render(
+					endingY: nukeRendererEndingY,
+					scalingFactorScaled: nukeRendererScalingFactorScaled,
+					displayOutput: new TranslatedDisplayOutput<GameImage, GameFont>(displayOutput, coordinates.NukeRendererX, coordinates.NukeRendererY),
+					isMobileDisplayType: isMobileDisplayType);
 			}
 		}
 	}
